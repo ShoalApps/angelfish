@@ -1,5 +1,5 @@
 {
-  "name": "Swordfish",
+  "name": "Angelfish",
   "description": "A YouTube client for Android with Material You, offline playback and SponsorBlock.",
   "icon": "app/src/main/res/drawable/ic_launcher_foreground.xml",
   "colours": "app/src/main/res/values/icon_colors.xml"

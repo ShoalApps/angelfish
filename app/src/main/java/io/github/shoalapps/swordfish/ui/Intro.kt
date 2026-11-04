@@ -93,7 +93,7 @@ fun IntroOverlay() {
                     Icon(Icons.Rounded.PlayArrow, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onPrimary)
                 }
                 Text(
-                    "Swordfish",
+                    "Angelfish",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Black,

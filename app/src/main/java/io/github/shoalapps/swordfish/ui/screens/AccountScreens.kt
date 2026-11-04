@@ -194,7 +194,7 @@ fun ChannelPickerScreen(onDone: () -> Unit, onBack: () -> Unit, vm: ChannelPicke
                 else -> {
                     item {
                         Text(
-                            "Pick which of your channels Swordfish uses for your feed, subscriptions and likes.",
+                            "Pick which of your channels Angelfish uses for your feed, subscriptions and likes.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),

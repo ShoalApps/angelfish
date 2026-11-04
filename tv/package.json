@@ -1,7 +1,7 @@
 {
   "name": "swordfish-tv",
   "private": true,
-  "description": "Builds VacuumTube's preload modules for Swordfish's TV mode",
+  "description": "Builds VacuumTube's preload modules for Angelfish's TV mode",
   "license": "GPL-3.0-or-later",
   "scripts": { "build": "node build.mjs" },
   "devDependencies": {

@@ -123,7 +123,7 @@
             </intent-filter>
         </service>
         <!-- Home-screen widget. -->
-        <receiver android:name=".widget.SwordfishWidgetReceiver" android:exported="false" android:label="Swordfish">
+        <receiver android:name=".widget.SwordfishWidgetReceiver" android:exported="false" android:label="Angelfish">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

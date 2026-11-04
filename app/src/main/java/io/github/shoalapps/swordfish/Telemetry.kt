@@ -68,7 +68,7 @@ object Telemetry {
         if (!available || prefs(activity).getBoolean("asked", false)) return
         android.app.AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert)
             .setTitle(io.github.shoalapps.swordfish.AppLanguage.translate("Help fix bugs?"))
-            .setMessage(io.github.shoalapps.swordfish.AppLanguage.translate("Swordfish can send anonymous crash and error reports to Shoal (through Sentry) so problems get fixed. They include the error, the app and Android version and the phone model, never your accounts, history or anything you've looked at. You can change this in Settings."))
+            .setMessage(io.github.shoalapps.swordfish.AppLanguage.translate("Angelfish can send anonymous crash and error reports to Shoal (through Sentry) so problems get fixed. They include the error, the app and Android version and the phone model, never your accounts, history or anything you've looked at. You can change this in Settings."))
             .setPositiveButton(io.github.shoalapps.swordfish.AppLanguage.translate("Send reports")) { _, _ -> setEnabled(activity, true) }
             .setNegativeButton(io.github.shoalapps.swordfish.AppLanguage.translate("No thanks")) { _, _ -> setEnabled(activity, false) }
             .setNeutralButton(io.github.shoalapps.swordfish.AppLanguage.translate("Privacy policy")) { _, _ ->

@@ -31,7 +31,7 @@ object WhatsNew {
             runCatching {
                 val entries = JSONArray(context.assets.open("whats-new.json").bufferedReader().use { it.readText() })
                 (0 until entries.length()).map { entries.getJSONObject(it).let { note -> note.getString("title") to note.getString("body") } }
-            }.getOrDefault(listOf("A fresh catch" to "Thanks for using Swordfish. This build includes the latest improvements from the Shoal community."))
+            }.getOrDefault(listOf("A fresh catch" to "Thanks for using Angelfish. This build includes the latest improvements from the Shoal community."))
         }
         if (!pending && !requested) return
         fun dismiss() {
@@ -41,7 +41,7 @@ object WhatsNew {
         }
         AlertDialog(
             onDismissRequest = ::dismiss,
-            title = { Column { Text("What's new in Swordfish"); Text(version, style = MaterialTheme.typography.labelLarge) } },
+            title = { Column { Text("What's new in Angelfish"); Text(version, style = MaterialTheme.typography.labelLarge) } },
             text = {
                 Column(Modifier.fillMaxWidth().heightIn(max = 440.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     highlights.forEach { (title, body) ->

@@ -126,8 +126,8 @@ class TvActivity : ComponentActivity() {
                     web.loadUrl("about:blank")
                     android.app.AlertDialog.Builder(this@TvActivity)
                         .setTitle(io.github.shoalapps.swordfish.AppLanguage.translate("Data Saver is on"))
-                        .setMessage(io.github.shoalapps.swordfish.AppLanguage.translate("Connect to unmetered Wi-Fi for TV mode, or use Swordfish's video player to keep watching with data limits."))
-                        .setPositiveButton(io.github.shoalapps.swordfish.AppLanguage.translate("Back to Swordfish")) { _, _ -> finish() }
+                        .setMessage(io.github.shoalapps.swordfish.AppLanguage.translate("Connect to unmetered Wi-Fi for TV mode, or use Angelfish's video player to keep watching with data limits."))
+                        .setPositiveButton(io.github.shoalapps.swordfish.AppLanguage.translate("Back to Angelfish")) { _, _ -> finish() }
                         .setOnCancelListener { finish() }
                         .show()
                 }
@@ -255,7 +255,7 @@ object TvIdentity {
     private const val COBALT = "27.lts.3.1040976-gold"
     private const val V8 = "13.8.258.54"
     private const val STARBOARD = 18
-    private const val BRAND = "Swordfish"
+    private const val BRAND = "Angelfish"
 
     private fun chipset(): String = when (Build.SUPPORTED_ABIS.firstOrNull()) {
         "arm64-v8a" -> "arm64"

@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import io.github.shoalapps.swordfish.data.Settings
 
-// Fallback palette: Swordfish's colour, generated with Material's colour utilities.
+// Fallback palette: Angelfish's colour, generated with Material's colour utilities.
 // Used on Android 11 and below, or with dynamic colour turned off.
 private val Light = lightColorScheme(
     primary = Color(0xFFAB3336), onPrimary = Color(0xFFFFFFFF),

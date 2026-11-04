@@ -82,7 +82,7 @@ await esbuild.build({
     target: 'chrome100',
     outfile: out,
     legalComments: 'inline',
-    banner: { js: `/* Swordfish TV mode. Includes VacuumTube ${version} (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */` },
+    banner: { js: `/* Angelfish TV mode. Includes VacuumTube ${version} (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */` },
     define: { VT_VERSION: JSON.stringify(version), 'process.platform': '"android"', 'process.arch': '"arm64"', 'process.env.NODE_ENV': '"production"' },
     alias: {
         electron: shim('electron.js'),

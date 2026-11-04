@@ -20,7 +20,7 @@ object CrashReporter {
                 val trace = StringWriter().also { error.printStackTrace(PrintWriter(it)) }.toString()
                 val version = runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull()
                 file(context).writeText(
-                    "Swordfish $version on Android ${Build.VERSION.RELEASE} (${Build.MANUFACTURER} ${Build.MODEL})\n" +
+                    "Angelfish $version on Android ${Build.VERSION.RELEASE} (${Build.MANUFACTURER} ${Build.MODEL})\n" +
                         "Thread: ${thread.name}\n\n$trace",
                 )
             }

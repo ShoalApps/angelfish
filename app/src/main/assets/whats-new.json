@@ -1,5 +1,9 @@
 [
   {
+    "title": "Swordfish is now Angelfish",
+    "body": "Same app, same settings, new name and icon. An angelfish's body is a natural play button, so it suits this app better."
+  },
+  {
     "title": "Keep watching offline",
     "body": "Downloaded videos now work in Home, search, subscriptions, channels and saved playlists. Account actions wait safely on your phone and sync after reconnection. Check saved actions in You; comments with an uncertain send status require review. Automatic copies stay available while offline."
   },
@@ -9,7 +13,7 @@
   },
   {
     "title": "Downloads with a clearer view",
-    "body": "Downloads now show thumbnails and short, readable errors. Swordfish refreshes yt-dlp before first use and checks for updates daily on an allowed connection."
+    "body": "Downloads now show thumbnails and short, readable errors. Angelfish refreshes yt-dlp before first use and checks for updates daily on an allowed connection."
   },
   {
     "title": "TV mode, under your fingertips",

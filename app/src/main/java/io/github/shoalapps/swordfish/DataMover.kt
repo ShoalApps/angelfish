@@ -47,7 +47,7 @@ object DataMover {
         if (!marker.getBoolean("done", false) || marker.getBoolean("offered", false) || !oldInstalled(activity)) return
         marker.edit().putBoolean("offered", true).apply()
         android.app.AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-            .setTitle(io.github.shoalapps.swordfish.AppLanguage.translate("Welcome to Swordfish"))
+            .setTitle(io.github.shoalapps.swordfish.AppLanguage.translate("Welcome to Angelfish"))
             .setMessage(if (justMoved) "Your settings, history and sign-ins came across from the Tintloom version. You can uninstall it now; it won't get updates any more."
                 else "The Tintloom version of this app is still installed. It won't get updates any more, so you can uninstall it.")
             .setPositiveButton(io.github.shoalapps.swordfish.AppLanguage.translate("Uninstall it")) { _, _ ->

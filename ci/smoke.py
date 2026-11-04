@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Walks through Swordfish on an Android emulator, taking screenshots and
+Walks through Angelfish on an Android emulator, taking screenshots and
 collecting crashes, so the app can be checked without a phone.
-Usage: python3 ci/smoke.py Swordfish.apk
+Usage: python3 ci/smoke.py Angelfish.apk
 """
 import os
 import re
@@ -146,7 +146,7 @@ def main():
     time.sleep(20)
     tap("Let's dive in", exact=True)
     shot("home_light")
-    check_text("home", "Swordfish", "Home", "Shorts", "Subscriptions", "You")
+    check_text("home", "Angelfish", "Home", "Shorts", "Subscriptions", "You")
 
     # 2. Scroll down and back up: thumbnails should still be there
     swipe_up(5)
@@ -223,7 +223,7 @@ def main():
     shot("you")
 
     # 7. About + unlock developer settings
-    if tap("About Swordfish", wait=5):
+    if tap("About Angelfish", wait=5):
         shot("about")
         time.sleep(2)
         shot("about_morph_2s_later")

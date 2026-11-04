@@ -29,8 +29,8 @@ class NavigationTest : TubeTest() {
         tab("You").performClick()
         waitForText("Sign in")
         compose.onNodeWithText("Sign in").assertExists()
-        compose.onNodeWithTag("you-list").performScrollToNode(hasText("About Swordfish"))
-        compose.onNodeWithText("About Swordfish").assertExists()
+        compose.onNodeWithTag("you-list").performScrollToNode(hasText("About Angelfish"))
+        compose.onNodeWithText("About Angelfish").assertExists()
 
         tab("Shorts").performClick()
         tab("Shorts").assertIsSelected()
@@ -60,12 +60,12 @@ class NavigationTest : TubeTest() {
 
     @Test fun aboutPageOpens() {
         tab("You").performClick()
-        compose.onNodeWithTag("you-list").performScrollToNode(hasText("About Swordfish"))
-        compose.onNodeWithText("About Swordfish").performClick()
+        compose.onNodeWithTag("you-list").performScrollToNode(hasText("About Angelfish"))
+        compose.onNodeWithText("About Angelfish").performClick()
         waitForDescription("Back")
         compose.onNodeWithContentDescription("Back").performClick()
-        compose.onNodeWithTag("you-list").performScrollToNode(hasText("About Swordfish"))
-        compose.onNodeWithText("About Swordfish").assertExists()
+        compose.onNodeWithTag("you-list").performScrollToNode(hasText("About Angelfish"))
+        compose.onNodeWithText("About Angelfish").assertExists()
     }
 
     @Test fun survivesRotationOnEveryTab() {

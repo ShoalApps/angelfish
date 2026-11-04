@@ -1,4 +1,4 @@
-// Swordfish's TV mode: VacuumTube's preload modules (MIT, see vacuumtube/LICENSE), run inside
+// Angelfish's TV mode: VacuumTube's preload modules (MIT, see vacuumtube/LICENSE), run inside
 // Android's WebView on YouTube's own TV app. Mirrors vacuumtube/preload/index.js, with the module
 // list fixed at build time instead of read from disk.
 require('./trusted-types')

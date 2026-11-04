@@ -61,20 +61,25 @@ jobs:
           git push -f origin ci-log
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk Swordfish.apk
+        # Swordfish.apk is the same file, for copies of Shoal and this app from before the rename.
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk Angelfish.apk
+          cp Angelfish.apk Swordfish.apk
 
       - uses: actions/upload-artifact@v7
         with:
-          name: Swordfish
-          path: Swordfish.apk
+          name: Angelfish
+          path: Angelfish.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: build-${{ github.run_number }}
-          name: Swordfish build ${{ github.run_number }}
-          body: Install Swordfish.apk below. Swordfish is free software under the GPL-3.0 and is not affiliated with Google or YouTube.
-          files: Swordfish.apk
+          name: Angelfish build ${{ github.run_number }}
+          body: Install Angelfish.apk below. Angelfish is free software under the GPL-3.0 and is not affiliated with Google or YouTube.
+          files: |
+            Angelfish.apk
+            Swordfish.apk
           make_latest: true
 
   emulator-test:
@@ -86,7 +91,7 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          name: Swordfish
+          name: Angelfish
 
       - uses: actions/setup-java@v6
         with:
@@ -116,7 +121,7 @@ jobs:
           # UI tests first (the ones that need YouTube itself are skipped here), then the screenshot tour.
           script: |
             ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notAnnotation=io.github.shoalapps.swordfish.NetworkTest
-            python3 ci/smoke.py Swordfish.apk
+            python3 ci/smoke.py Angelfish.apk
 
       - name: Upload UI test report
         if: always()

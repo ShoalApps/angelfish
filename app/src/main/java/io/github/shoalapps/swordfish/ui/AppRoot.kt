@@ -105,7 +105,7 @@ private fun UpdatePrompt(modifier: Modifier) {
     LaunchedEffect(available) {
         if (available == null) return@LaunchedEffect
         val result = host.showSnackbar(
-            "A new version of Swordfish is ready",
+            "A new version of Angelfish is ready",
             actionLabel = "Update",
             withDismissAction = true,
             duration = androidx.compose.material3.SnackbarDuration.Indefinite,

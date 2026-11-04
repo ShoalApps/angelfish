@@ -281,7 +281,7 @@ fun SettingsScreen(
                 }
             }
             if (s.developerMode) row { sh -> Link("Developer settings", "Advanced tweaks, filters and debugging", sh, onClick = onDeveloper) }
-            row { sh -> Link("About Swordfish", "Version, credits and licence", sh, onClick = onAbout) }
+            row { sh -> Link("About Angelfish", "Version, credits and licence", sh, onClick = onAbout) }
         }
     }
 
@@ -454,7 +454,7 @@ fun AboutScreen(onBack: () -> Unit) {
         item {
             Column(Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 MorphingAvatar("https://github.com/$GITHUB_USER.png?size=460", 200.dp)
-                Text("Swordfish", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 20.dp))
+                Text("Angelfish", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 20.dp))
                 Text(
                     "Made by @$GITHUB_USER",
                     style = MaterialTheme.typography.titleMedium,
@@ -485,9 +485,9 @@ fun AboutScreen(onBack: () -> Unit) {
             }
             row { sh -> Link("Check for updates", "Opens Shoal", sh) { io.github.shoalapps.swordfish.ShoalManager.checkForUpdates(context) } }
             if (io.github.shoalapps.swordfish.Telemetry.available) row { sh -> Toggle("Send error reports", "Anonymous crash and error reports help fix bugs. Never your accounts or history.", io.github.shoalapps.swordfish.Telemetry.enabled, sh) { v -> io.github.shoalapps.swordfish.Telemetry.setEnabled(context, v) } }
-            row { sh -> Link("Privacy policy", "What Swordfish sends, and to whom", sh) { openExternal(context, "https://shoalapps.github.io/privacy.html") } }
+            row { sh -> Link("Privacy policy", "What Angelfish sends, and to whom", sh) { openExternal(context, "https://shoalapps.github.io/privacy.html") } }
             row { sh -> Link("Legal", "Licences, trademarks and notices", sh) { openExternal(context, "https://shoalapps.github.io/legal.html") } }
-            row { sh -> Link("Source code", "github.com/ShoalApps/swordfish", sh) { openExternal(context, "https://github.com/ShoalApps/swordfish") } }
+            row { sh -> Link("Source code", "github.com/ShoalApps/angelfish", sh) { openExternal(context, "https://github.com/ShoalApps/angelfish") } }
             row { sh -> Link("Website", "shoalapps.github.io", sh) { openExternal(context, "https://shoalapps.github.io") } }
         }
         group("Licence") {

@@ -51,7 +51,7 @@ class SwordfishWidget : GlanceAppWidget() {
         provideContent {
             GlanceTheme {
                 WidgetSurface {
-                    WidgetHeader("Swordfish", actionStartActivity(Intent(context, io.github.shoalapps.swordfish.MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
+                    WidgetHeader("Angelfish", actionStartActivity(Intent(context, io.github.shoalapps.swordfish.MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
                     if (last != null) {
                         Row(GlanceModifier.fillMaxWidth().padding(top = 10.dp).clickable(open(context, last.url, main)), verticalAlignment = Alignment.CenterVertically) {
                             if (thumb != null) Image(ImageProvider(thumb), null, GlanceModifier.width(96.dp).height(54.dp).cornerRadius(12.dp), contentScale = ContentScale.Crop)

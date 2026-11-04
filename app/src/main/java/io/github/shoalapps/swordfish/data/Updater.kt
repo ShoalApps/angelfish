@@ -18,7 +18,7 @@ import java.io.File
  * `build-<number>`, whose number is also the app's version code, so comparing them is enough.
  */
 object Updater {
-    private const val REPO = "https://github.com/ShoalApps/swordfish"
+    private const val REPO = "https://github.com/ShoalApps/angelfish"
 
     data class Release(val build: Int, val apkUrl: String, val pageUrl: String)
 
@@ -44,7 +44,7 @@ object Updater {
             val page = resp.header("Location") ?: return@withContext null
             val tag = page.substringAfterLast("/tag/", "").ifEmpty { return@withContext null }
             val build = buildOf(tag) ?: return@withContext null
-            Release(build, "$REPO/releases/download/$tag/Swordfish.apk", page)
+            Release(build, "$REPO/releases/download/$tag/Angelfish.apk", page)
         }
     }
 

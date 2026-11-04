@@ -1,4 +1,6 @@
-<p align="center"><a href="https://shoalapps.github.io/"><img src="https://raw.githubusercontent.com/ShoalApps/shoalapps.github.io/main/assets/readme/swordfish.svg" alt="Swordfish - a Shoal app, with the rest of the Shoal family" width="100%"></a></p>
+<p align="center"><a href="https://shoalapps.github.io/"><img src="https://raw.githubusercontent.com/ShoalApps/shoalapps.github.io/main/assets/readme/angelfish.svg" alt="Angelfish - a Shoal app, with the rest of the Shoal family" width="100%"></a></p>
+
+*Formerly Swordfish.*
 
 A Material 3 Expressive client for watching YouTube videos on Android, part of the **Shoal** project:
 open-source apps that take on your wallpaper colours with Material You.
@@ -25,7 +27,7 @@ TV mode isn't available, since it needs network sockets a WebView can't open.
 ## Getting the APK
 
 Every push to `main` builds a new APK with GitHub Actions.
-Open the **Releases** page on your phone and install `Swordfish.apk` from the newest build.
+Open the **Releases** page on your phone and install `Angelfish.apk` from the newest build.
 
 Every build is also run on an Android emulator; screenshots and logs land on the `ci-shots` branch.
 
@@ -56,7 +58,7 @@ since YouTube blocks GitHub's servers. Run the full set on a home connection bef
 
 ## Licence
 
-Swordfish is free software under the **GNU General Public License v3.0 or later**
+Angelfish is free software under the **GNU General Public License v3.0 or later**
 (the same licence as NewPipeExtractor, which it is built on). You may use, study, share
 and change it, as long as anything you distribute that is based on it stays under the
 same licence with its source available. See [LICENSE](LICENSE).
@@ -64,7 +66,7 @@ same licence with its source available. See [LICENSE](LICENSE).
 TV mode includes VacuumTube, MIT License, Copyright (c) 2025-2026 shy; see
 [tv/vacuumtube/LICENSE](tv/vacuumtube/LICENSE).
 
-Swordfish is not affiliated with, endorsed by or sponsored by Google or YouTube.
+Angelfish is not affiliated with, endorsed by or sponsored by Google or YouTube.
 
 ## Privacy and legal
 
@@ -80,7 +82,7 @@ Update `app/src/main/assets/whats-new.json` with each release. Notes ship with t
 
 ## Offline videos and data use
 
-Swordfish uses on-device yt-dlp with FFmpeg. The current video and four recommendations are automatically downloaded on unmetered Wi-Fi by default. Settings can disable the current-video copy, choose 0-50 recommended copies, or explicitly allow mobile downloads. Saved videos are kept separately from automatic copies and can be played or removed in You. Only completed files are used offline; network playback switches to the complete file at the same position when it becomes available. Live streams are excluded.
+Angelfish uses on-device yt-dlp with FFmpeg. The current video and four recommendations are automatically downloaded on unmetered Wi-Fi by default. Settings can disable the current-video copy, choose 0-50 recommended copies, or explicitly allow mobile downloads. Saved videos are kept separately from automatic copies and can be played or removed in You. Only completed files are used offline; network playback switches to the complete file at the same position when it becomes available. Live streams are excluded.
 
 Mobile playback defaults to 720p in both the main player and Shorts. Android Data Saver pauses metered downloads and background prefetching, disables new thumbnail requests and optional community lookups, and caps native playback at 720p.
 

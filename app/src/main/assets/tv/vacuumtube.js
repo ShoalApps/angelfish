@@ -1,4 +1,4 @@
-/* Swordfish TV mode. Includes VacuumTube 2.0.1 (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */
+/* Angelfish TV mode. Includes VacuumTube 2.0.1 (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */
 (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __commonJS = (cb, mod) => function __require() {
@@ -557,9 +557,9 @@
         "check-for-updates": about,
         "install-update": () => {
         },
-        "open-update-download": () => open("https://github.com/ShoalApps/swordfish/releases/latest"),
+        "open-update-download": () => open("https://github.com/ShoalApps/angelfish/releases/latest"),
         "open-project-page": () => open("https://github.com/shy1132/VacuumTube"),
-        "open-release-page": () => open("https://github.com/ShoalApps/swordfish/releases/latest"),
+        "open-release-page": () => open("https://github.com/ShoalApps/angelfish/releases/latest"),
         "open-userstyles-folder": () => {
         },
         "request-microphone-permission": () => false
