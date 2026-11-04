@@ -62,9 +62,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -340,9 +338,8 @@ fun AppLogo() {
             Modifier.size(30.dp).clip(shape).background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
         ) {
-            // The launcher icon's fish, in one colour, swimming.
-            val swim by androidx.compose.animation.core.rememberInfiniteTransition(label = "swim").animateFloat(-5f, 5f, androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(1600), androidx.compose.animation.core.RepeatMode.Reverse), label = "swim")
-            Icon(androidx.compose.ui.res.painterResource(io.github.shoalapps.swordfish.R.drawable.ic_launcher_mono), null, Modifier.requiredSize(50.dp).graphicsLayer { rotationZ = swim }, tint = MaterialTheme.colorScheme.onPrimary)
+            // The launcher icon's fish, in one colour.
+            Icon(androidx.compose.ui.res.painterResource(io.github.shoalapps.swordfish.R.drawable.ic_launcher_mono), null, Modifier.requiredSize(50.dp), tint = MaterialTheme.colorScheme.onPrimary)
         }
         Text(
             "Angelfish",
