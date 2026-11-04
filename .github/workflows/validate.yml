@@ -15,7 +15,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 22
@@ -39,7 +39,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Build Android 16 foreground regression test
         run: ./gradlew assembleDebug assembleDebugAndroidTest
       - name: Enable KVM
