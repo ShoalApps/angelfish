@@ -35,8 +35,8 @@ data class Settings(
 
     // Offline videos. Automatic copies are disposable; explicit downloads are kept.
     val offlineMode: Boolean = false,
-    val cacheCurrentVideo: Boolean = true,
-    val autoDownloadCount: Int = 4,
+    val cacheCurrentVideo: Boolean = false,
+    val autoDownloadCount: Int = 0,
     val downloadWifiOnly: Boolean = true,
 
     // New subscriptions inherit this bell setting. Existing bells stay unchanged.
@@ -128,6 +128,14 @@ class Store(context: Context) {
 
     private val _settings = MutableStateFlow(load<Settings>("settings") ?: Settings())
     val settings: StateFlow<Settings> = _settings
+
+    init {
+        // Automatic downloads used to start out on, and slowed playback. Everyone starts over with them off once.
+        if (!prefs.getBoolean("automatic-downloads-reset", false)) {
+            _settings.value = _settings.value.copy(cacheCurrentVideo = false, autoDownloadCount = 0)
+            prefs.edit().putString("settings", json.encodeToString(_settings.value)).putBoolean("automatic-downloads-reset", true).apply()
+        }
+    }
 
     private val _subs = MutableStateFlow(load<List<Sub>>("subs") ?: emptyList())
     val subs: StateFlow<List<Sub>> = _subs

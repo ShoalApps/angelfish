@@ -204,7 +204,7 @@ fun SettingsScreen(
 
         group("Offline videos") {
             row { sh -> Toggle("Offline mode", "Show downloads and save account actions for later", s.offlineMode, sh) { v -> update { it.copy(offlineMode = v) } } }
-            row { sh -> Toggle("Keep the current video offline", "Download the whole video, then remove old automatic copies when you change videos", s.cacheCurrentVideo, sh) { v -> update { it.copy(cacheCurrentVideo = v) } } }
+            row { sh -> Toggle("Keep the current video offline", "Off by default. Downloads the whole video as you watch, when your connection has room, and removes it when you change videos", s.cacheCurrentVideo, sh) { v -> update { it.copy(cacheCurrentVideo = v) } } }
             row { sh ->
                 Tile(sh) {
                     var count by remember(s.autoDownloadCount) { mutableStateOf(s.autoDownloadCount.toString()) }
@@ -213,8 +213,8 @@ fun SettingsScreen(
                             count = value
                             value.toIntOrNull()?.let { n -> if (n in 0..50) update { it.copy(autoDownloadCount = n) } }
                         }
-                    }, label = { Text("Recommended videos to keep offline (0-50)") },
-                        supportingText = { Text("4 by default. Set 0 to turn off recommended downloads.") }, singleLine = true,
+                    }, label = { Text("Subscription videos to keep offline (0-50)") },
+                        supportingText = { Text("Off (0) by default. The newest from your subscriptions download quietly, when you're not watching anything.") }, singleLine = true,
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
                 }
             }

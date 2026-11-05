@@ -51,13 +51,21 @@ object SkipAware {
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
     /** The player's buffering rules, with SponsorBlock's gate added on top of the defaults. */
-    fun loadControl(): LoadControl = Gated(DefaultLoadControl())
+    fun loadControl(): LoadControl = Gated(
+        // The most it could ever hold. NetworkPace decides how much of that's worth having right now.
+        DefaultLoadControl.Builder().setBufferDurationsMs(NetworkPace.MIN_SECONDS * 1000, NetworkPace.MAX_SECONDS * 1000, 1000, 2500).build()
+    )
 
     // Kotlin's "by" doesn't forward Java's default methods, so each one ExoPlayer calls is passed on by hand.
     private class Gated(private val d: DefaultLoadControl) : LoadControl {
+        /** Enough is in hand, so nothing's fetched until it has run down a way. */
+        @Volatile private var resting = false
         override fun onPrepared(playerId: androidx.media3.exoplayer.analytics.PlayerId) = d.onPrepared(playerId)
         override fun onTracksSelected(parameters: LoadControl.Parameters, trackGroups: androidx.media3.exoplayer.source.TrackGroupArray, trackSelections: Array<out androidx.media3.exoplayer.trackselection.ExoTrackSelection?>) =
-            d.onTracksSelected(parameters, trackGroups, trackSelections)
+            d.onTracksSelected(parameters, trackGroups, trackSelections).also {
+                val total = trackSelections.filterNotNull().sumOf { it.selectedFormat.bitrate.coerceAtLeast(0).toLong() }
+                NetworkPace.mediaBps = if (total > 0) total else NetworkPace.TYPICAL_BPS
+            }
         override fun onStopped(playerId: androidx.media3.exoplayer.analytics.PlayerId) = d.onStopped(playerId)
         override fun onReleased(playerId: androidx.media3.exoplayer.analytics.PlayerId) = d.onReleased(playerId)
         override fun getAllocator(playerId: androidx.media3.exoplayer.analytics.PlayerId) = d.getAllocator(playerId)
@@ -71,6 +79,12 @@ object SkipAware {
             val gate = gateUs
             val loadedTo = parameters.playbackPositionUs + parameters.bufferedDurationUs
             if (parameters.playbackPositionUs < gate && loadedTo >= gate) return false
+            if (parameters.rebuffering) NetworkPace.stalled()
+            val target = NetworkPace.targetSeconds()
+            val held = parameters.bufferedDurationUs / 1_000_000
+            if (held >= target) resting = true
+            else if (held < NetworkPace.resumeSeconds(target)) resting = false
+            if (resting) return false
             return d.shouldContinueLoading(parameters)
         }
     }

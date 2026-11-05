@@ -52,6 +52,7 @@ object PlayerHolder {
             .setSeekForwardIncrementMs(10_000)
             // Doesn't download what SponsorBlock will skip (see SkipAware).
             .setLoadControl(SkipAware.loadControl())
+            .setBandwidthMeter(NetworkPace.meter)
             .build()
     }
 

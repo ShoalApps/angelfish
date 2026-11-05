@@ -237,7 +237,7 @@ object AppGraph {
             val more = if (fromAccount.size >= 20) emptyList() else runCatching { repo.shorts(store.subs.value) }.getOrDefault(emptyList())
             val list = (fromAccount + more).distinctBy { it.id }
             shortsCache = list
-            repo.prefetch(list.take(3).map { it.id })
+            repo.prefetch(list.take(io.github.shoalapps.swordfish.player.NetworkPace.preloadCount()).map { it.id })
         }
     }
 

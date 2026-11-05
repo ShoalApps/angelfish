@@ -1,5 +1,9 @@
 [
   {
+    "title": "Smoother watching",
+    "body": "Angelfish now watches your connection speed and only fetches as much video as it needs, holding less on fast connections and more on slow ones. Automatic downloads are off, including for existing installs, because they were slowing playback down. Turn them on in Settings to keep the newest videos from your subscriptions: they download out of sight and wait until you've stopped watching."
+  },
+  {
     "title": "Swordfish is now Angelfish",
     "body": "Same app, same settings, new name and icon. An angelfish's body is a natural play button, so it suits this app better."
   },

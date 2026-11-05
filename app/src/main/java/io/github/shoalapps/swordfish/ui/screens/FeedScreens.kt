@@ -215,9 +215,8 @@ class HomeViewModel : ViewModel() {
                 }
                 items = io.github.shoalapps.swordfish.data.FreshFeed.order(FeedFilter.apply(list), previous, seed)
                 previous = items
-                if (!learning && chip == "All") AppGraph.offline.recommendations(items)
                 // Preload the first few videos so tapping them starts instantly.
-                AppGraph.scope.launch { AppGraph.repo.prefetch(items.take(3).map { it.id }) }
+                AppGraph.scope.launch { AppGraph.repo.prefetch(items.take(io.github.shoalapps.swordfish.player.NetworkPace.preloadCount()).map { it.id }) }
                 shortsJob?.let { shorts = FeedFilter.apply(it.await()).take(12) }
                 if (!wantShorts) shorts = emptyList()
                 generation++
@@ -508,6 +507,7 @@ class SubsViewModel : ViewModel() {
                 } else emptyList()
                 val list = fromAccount.ifEmpty { if (subs.isEmpty()) emptyList() else AppGraph.repo.feed(subs) }
                 items = FeedFilter.apply(list)
+                AppGraph.offline.subscriptions(items)
                 // Every channel failing at once means the connection is the problem, not the channels.
                 if (items.isEmpty() && subs.isNotEmpty() && io.github.shoalapps.swordfish.player.NetworkInfo.offline()) {
                     error = io.github.shoalapps.swordfish.player.NetworkInfo.friendlyError(java.net.UnknownHostException())

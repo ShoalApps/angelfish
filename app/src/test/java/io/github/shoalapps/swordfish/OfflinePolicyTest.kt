@@ -17,6 +17,16 @@ class OfflinePolicyTest {
         assertEquals(listOf(first), OfflinePolicy.recommendations(feed, 1, current.id))
     }
 
+    @Test fun automaticDownloadsAreOffByDefaultAndWaitDuringPlayback() {
+        assertFalse(Settings().cacheCurrentVideo)
+        assertEquals(0, Settings().autoDownloadCount)
+        val current = video("current0001")
+        val next = video("next0000001")
+        assertEquals(listOf(next), OfflinePolicy.toDownload(null, listOf(next), watching = false))
+        assertTrue(OfflinePolicy.toDownload(null, listOf(next), watching = true).isEmpty())
+        assertEquals(listOf(current), OfflinePolicy.toDownload(current, listOf(next), watching = true))
+    }
+
     @Test fun cleanupKeepsManualDownloadsAndCurrentButDropsStaleAutomaticCopies() {
         val saved = OfflineVideo(video("saved000001"), kept = true)
         val playing = OfflineVideo(video("current0001"))

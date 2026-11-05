@@ -40,6 +40,10 @@ object OfflinePolicy {
         feed.filter { !it.isLive && !it.isShort && it.id != current }.distinctBy { it.id }
             .take(count.coerceIn(0, 50))
 
+    /** Subscription videos wait while anything's playing, so they never compete with it for the connection. */
+    fun toDownload(current: VideoItem?, suggestions: List<VideoItem>, watching: Boolean): List<VideoItem> =
+        listOfNotNull(current) + if (watching) emptyList() else suggestions
+
     fun retain(entry: OfflineVideo, current: String?, recommendations: Set<String>): Boolean =
         entry.kept || entry.video.id == current || entry.video.id in recommendations
 }
@@ -55,13 +59,17 @@ class OfflineVideos(private val context: Context) {
     private var current: VideoItem? = prefs.getString("current", null)?.let {
         runCatching { json.decodeFromString<VideoItem>(it) }.getOrNull()
     }
-    private var feed: List<VideoItem> = prefs.getString("feed", null)?.let {
+    // Only ever your subscriptions. Anything saved from the old home feed's list is left behind.
+    private var feed: List<VideoItem> = prefs.getString("subscription-feed", null)?.let {
         runCatching { json.decodeFromString<List<VideoItem>>(it) }.getOrNull()
     }.orEmpty()
     private var lastPlan: Set<String> = emptySet()
     private val dismissed = mutableSetOf<String>()
     private val deferredDeletes = mutableSetOf<String>()
     private var wifiOnly = AppGraph.store.settings.value.downloadWifiOnly
+    /** A video is open right now, as opposed to [current], which outlives the app for offline use. */
+    @Volatile var isWatching = false
+        private set
 
     private fun read(): List<OfflineVideo> = prefs.getString("videos", null)?.let {
         runCatching { json.decodeFromString<List<OfflineVideo>>(it) }.getOrNull()
@@ -82,11 +90,12 @@ class OfflineVideos(private val context: Context) {
 
     @Synchronized
     fun watching(video: VideoItem?) {
+        isWatching = video != null
         if (current?.id != video?.id && !NetworkInfo.offline()) {
             // Leaving a video removes its temporary copy, even if it was also in the old feed.
             val previousId = current?.id
             feed = feed.filterNot { it.id == previousId }
-            prefs.edit().putString("feed", json.encodeToString(feed)).apply()
+            prefs.edit().putString("subscription-feed", json.encodeToString(feed)).apply()
             deferredDeletes.filter { it != video?.id }.forEach { file(it).delete() }
             deferredDeletes.removeAll { it != video?.id }
             dismissed.remove(video?.id)
@@ -97,9 +106,9 @@ class OfflineVideos(private val context: Context) {
     }
 
     @Synchronized
-    fun recommendations(videos: List<VideoItem>) {
+    fun subscriptions(videos: List<VideoItem>) {
         feed = videos
-        prefs.edit().putString("feed", json.encodeToString(videos.take(100)) ).apply()
+        prefs.edit().putString("subscription-feed", json.encodeToString(videos.take(100)) ).apply()
         reconcile()
     }
 
@@ -120,7 +129,7 @@ class OfflineVideos(private val context: Context) {
     fun remove(id: String) {
         work.cancelUniqueWork(workName(id))
         feed = feed.filterNot { it.id == id }
-        prefs.edit().putString("feed", json.encodeToString(feed)).apply()
+        prefs.edit().putString("subscription-feed", json.encodeToString(feed)).apply()
         dismissed += id
         if (current?.id == id) deferredDeletes += id else file(id).delete()
         save(_videos.value.filterNot { it.video.id == id })
@@ -150,7 +159,12 @@ class OfflineVideos(private val context: Context) {
             keep
         }
         save(retained)
-        val automatic = (if (settings.cacheCurrentVideo && current?.id !in dismissed) listOfNotNull(current?.takeUnless { it.isLive }) else emptyList()) + suggestions
+        val speed = io.github.shoalapps.swordfish.player.NetworkPace
+        val roomForCopy = speed.hasRoomForDownload(speed.speedBps(), speed.mediaBps)
+        val automatic = OfflinePolicy.toDownload(
+            current?.takeIf { settings.cacheCurrentVideo && it.id !in dismissed && !it.isLive && roomForCopy },
+            suggestions, isWatching,
+        )
         val next = automatic.map { it.id }.toSet()
         (lastPlan - next).filter { id -> retained.none { it.video.id == id && it.kept } }
             .forEach { work.cancelUniqueWork(workName(it)) }
@@ -174,7 +188,7 @@ class OfflineVideos(private val context: Context) {
             .setInputData(workDataOf("video" to json.encodeToString(video), "automatic" to automatic))
             .setConstraints(Constraints.Builder().setRequiredNetworkType(
                 if (AppGraph.store.settings.value.downloadWifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
-            ).build())
+            ).setRequiresBatteryNotLow(automatic).build())
             .addTag(if (automatic) AUTO_TAG else "saved-download")
             .build()
         work.enqueueUniqueWork(workName(video.id), ExistingWorkPolicy.KEEP, request)
@@ -224,7 +238,9 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         if (!NetworkPolicy.downloadsAllowed()) return@withContext Result.retry()
         val dir = File(applicationContext.filesDir, "offline/tmp/$id").apply { mkdirs() }
         try {
-            setForeground(foreground(video))
+            // Only a video you asked to save shows anything, as Android requires for a long download.
+            // Automatic copies stay out of sight and simply pick up later if Android stops them.
+            if (!automatic) setForeground(foreground(video))
             // Both libraries initialise once. No shell interpolation or remote backend is involved.
             synchronized(YoutubeDL.getInstance()) {
                 YoutubeDL.getInstance().init(applicationContext)
@@ -244,6 +260,10 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
                 addOption("--socket-timeout", 20)
                 addOption("--retries", 3)
                 addOption("--max-filesize", "2G")
+                if (AppGraph.offline.isWatching) {
+                    val pace = io.github.shoalapps.swordfish.player.NetworkPace
+                    addOption("--limit-rate", "${pace.downloadLimitBps(pace.speedBps(), pace.mediaBps) / 8 / 1024}K")
+                }
                 addOption("-f", "bv*[height<=$quality][ext=mp4]+ba[ext=m4a]/b[height<=$quality][ext=mp4]")
                 addOption("--merge-output-format", "mp4")
                 addOption("-o", File(dir, "video.%(ext)s").absolutePath)
@@ -314,8 +334,11 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
 
     private fun foreground(video: VideoItem): ForegroundInfo {
         val nm = applicationContext.getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel("downloads", io.github.shoalapps.swordfish.AppLanguage.translate("Video downloads"), NotificationManager.IMPORTANCE_LOW))
-        val notification = NotificationCompat.Builder(applicationContext, "downloads")
+        // Android won't quieten a channel that already exists, so the old one makes way for a silent one.
+        nm.deleteNotificationChannel("downloads")
+        nm.createNotificationChannel(NotificationChannel("saved-downloads", io.github.shoalapps.swordfish.AppLanguage.translate("Saved video downloads"), NotificationManager.IMPORTANCE_MIN))
+        val notification = NotificationCompat.Builder(applicationContext, "saved-downloads")
+            .setSilent(true)
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setContentTitle(io.github.shoalapps.swordfish.AppLanguage.translate("Downloading video"))
             .setContentText(video.title)
