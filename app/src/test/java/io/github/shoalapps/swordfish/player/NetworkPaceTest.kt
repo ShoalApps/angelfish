@@ -52,6 +52,8 @@ class NetworkPaceTest {
         assertTrue(NetworkPace.hasRoomForDownload(hd * 3, hd))
         assertTrue(!NetworkPace.hasRoomForDownload(hd * 2, hd))
         assertEquals(hd * 8, NetworkPace.downloadLimitBps(hd * 10, hd))
-        assertEquals(2_000_000L, NetworkPace.downloadLimitBps(hd, hd))
+        // A slow line keeps most of itself for the video, and never goes to nothing.
+        assertEquals(hd / 4, NetworkPace.downloadLimitBps(hd, hd))
+        assertEquals(250_000L, NetworkPace.downloadLimitBps(500_000, hd))
     }
 }

@@ -34,7 +34,7 @@ class AudioDownloadTest {
         assertEquals(null, offline.local(id))
     }
 
-    @Test fun savingAudioGivesAPlayableFileAndNoVideo() {
+    @NetworkTest @Test fun savingAudioGivesAPlayableFileAndNoVideo() {
         val id = "aqz-KE-bpKQ"
         val video = VideoItem("https://www.youtube.com/watch?v=$id", id, "Big Buck Bunny", "Blender")
         AppGraph.store.updateSettings { it.copy(downloadWifiOnly = false) }

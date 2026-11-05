@@ -1311,7 +1311,6 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
                 ) {
                     item { LikePill(vm) }
                     item { io.github.shoalapps.swordfish.ui.components.DownloadButton(item) }
-                    item { io.github.shoalapps.swordfish.ui.components.SaveAudioButton(item) }
                     item { ActionChip(Icons.Rounded.Share, "Share") { shareVideo(context, io.github.shoalapps.swordfish.data.FeedFilter.shareUrl(item.id, item.url)) } }
                     if (AppGraph.store.signedIn) {
                         item {
@@ -1320,6 +1319,7 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
                             }
                         }
                     }
+                    item { io.github.shoalapps.swordfish.ui.components.SaveAudioButton(item) }
                 }
               }
             }

@@ -66,6 +66,6 @@ object NetworkPace {
     /** True when the connection can carry a whole extra copy of the video without troubling playback. */
     fun hasRoomForDownload(speedBps: Long, mediaBps: Long) = speedBps >= mediaBps * 3
 
-    /** The speed a download may use during playback, leaving the video well clear; never so low it can't finish. */
-    fun downloadLimitBps(speedBps: Long, mediaBps: Long): Long = (speedBps - mediaBps * 2).coerceAtLeast(2_000_000L)
+    /** The speed a download may use during playback: what the video leaves spare, and only a trickle on a slow line. */
+    fun downloadLimitBps(speedBps: Long, mediaBps: Long): Long = (speedBps - mediaBps * 2).coerceAtLeast(speedBps / 4).coerceAtLeast(250_000L)
 }

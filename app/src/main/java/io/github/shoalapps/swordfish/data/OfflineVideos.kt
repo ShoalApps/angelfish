@@ -248,7 +248,9 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         val automatic = inputData.getBoolean("automatic", true)
         val audioOnly = inputData.getBoolean("audio", false)
         if (!NetworkPolicy.downloadsAllowed()) return@withContext Result.retry()
-        val dir = File(applicationContext.filesDir, "offline/tmp/$id").apply { mkdirs() }
+        // Named after the video, so a download that stepped aside for playback carries on where it was.
+        val dir = File(applicationContext.filesDir, "offline/tmp/${video.id}").apply { mkdirs() }
+        var steppedAside = false
         try {
             // Only a video you asked to save shows anything, as Android requires for a long download.
             // Automatic copies stay out of sight and simply pick up later if Android stops them.
@@ -264,15 +266,16 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
             check(NetworkPolicy.downloadsAllowed()) { "Downloads are paused by your network settings" }
             check(dir.usableSpace > 256L * 1024 * 1024) { "Not enough free space to download this video" }
             val quality = NetworkPolicy.quality()
+            val limited = AppGraph.offline.isWatching
             val request = YoutubeDLRequest("https://www.youtube.com/watch?v=${video.id}").apply {
                 addOption("--no-playlist")
                 addOption("--match-filter", "!is_live & !is_upcoming")
                 addOption("--no-mtime")
-                addOption("--no-continue")
+                addOption("--continue")
                 addOption("--socket-timeout", 20)
                 addOption("--retries", 3)
                 addOption("--max-filesize", "2G")
-                if (AppGraph.offline.isWatching) {
+                if (limited) {
                     val pace = io.github.shoalapps.swordfish.player.NetworkPace
                     addOption("--limit-rate", "${pace.downloadLimitBps(pace.speedBps(), pace.mediaBps) / 8 / 1024}K")
                 }
@@ -283,6 +286,14 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
             suspend fun execute() = runInterruptible {
                 YoutubeDL.getInstance().execute(request, id.toString()) { value, _, _ ->
                     if (!NetworkPolicy.downloadsAllowed()) YoutubeDL.getInstance().destroyProcessById(id.toString())
+                    // A video started since this began, and it can't spare the room: restart with a limit.
+                    if (!limited && AppGraph.offline.isWatching && !steppedAside) {
+                        val pace = io.github.shoalapps.swordfish.player.NetworkPace
+                        if (!pace.hasRoomForDownload(pace.speedBps(), pace.mediaBps)) {
+                            steppedAside = true
+                            YoutubeDL.getInstance().destroyProcessById(id.toString())
+                        }
+                    }
                     AppGraph.offline.progress.value = AppGraph.offline.progress.value + (video.id to value.toInt().coerceIn(0, 100))
                 }
             }
@@ -301,6 +312,7 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
                 execute()
             }
             ensureActive()
+            if (steppedAside) return@withContext Result.retry()
             val completed = File(dir, if (audioOnly) "video.m4a" else "video.mp4")
             check(completed.isFile && completed.length() > 0) { "The download did not produce a complete video" }
             AppGraph.offline.finish(video, completed)
@@ -308,6 +320,7 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            if (steppedAside) return@withContext Result.retry()
             android.util.Log.w("VideoDownload", "attempt $runAttemptCount: ${e.message?.takeLast(400)}")
             if (runAttemptCount < 2) Result.retry() else {
                 AppGraph.offline.failed(video.id, DownloadErrors.message(e.message.orEmpty()))
@@ -316,7 +329,7 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         } finally {
             YoutubeDL.getInstance().destroyProcessById(id.toString())
             AppGraph.offline.progress.value = AppGraph.offline.progress.value - video.id
-            dir.deleteRecursively()
+            if (!steppedAside) dir.deleteRecursively()
         }
     }
 
