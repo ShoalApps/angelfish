@@ -1,6 +1,7 @@
 package io.github.shoalapps.swordfish.data
 
 import android.content.Context
+import io.github.shoalapps.swordfish.player.PlaybackQueue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -142,6 +143,35 @@ class Store(context: Context) {
 
     private val _history = MutableStateFlow(load<List<VideoItem>>("history") ?: emptyList())
     val history: StateFlow<List<VideoItem>> = _history
+
+    private val _queue = MutableStateFlow(PlaybackQueue(load<List<VideoItem>>("queue").orEmpty()).items)
+    val queue: StateFlow<List<VideoItem>> = _queue
+    private var queueCurrentId: String? = null
+
+    fun queueCurrent(id: String?) {
+        queueCurrentId = id
+        if (id != null) changeQueue { it.remove(id) }
+    }
+
+    fun addToQueue(item: VideoItem) = changeQueue { it.add(item, queueCurrentId) }
+    fun playNext(item: VideoItem) = changeQueue { it.playNext(item, queueCurrentId) }
+    fun removeFromQueue(id: String) = changeQueue { it.remove(id) }
+    fun moveInQueue(id: String, offset: Int) = changeQueue { it.move(id, offset) }
+    fun clearQueue() = changeQueue { it.clear() }
+
+    fun advanceQueue(): VideoItem? {
+        val (next, remaining) = PlaybackQueue(_queue.value).advance(queueCurrentId)
+        changeQueue { remaining }
+        return next
+    }
+
+    private fun changeQueue(change: (PlaybackQueue) -> PlaybackQueue): Boolean {
+        val items = change(PlaybackQueue(_queue.value)).items
+        if (items == _queue.value) return false
+        _queue.value = items
+        save("queue", items)
+        return true
+    }
 
     private val _searches = MutableStateFlow(load<List<String>>("searches") ?: emptyList())
     val searches: StateFlow<List<String>> = _searches

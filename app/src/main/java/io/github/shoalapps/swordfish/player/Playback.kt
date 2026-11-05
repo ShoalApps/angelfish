@@ -5,6 +5,10 @@ package io.github.shoalapps.swordfish.player
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.media3.common.ForwardingPlayer
+import androidx.media3.common.Player
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -37,6 +41,11 @@ import org.schabi.newpipe.extractor.stream.VideoStream
 
 /** One ExoPlayer for the whole app, shared by the UI and the background service. */
 object PlayerHolder {
+    private val models = ViewModelStore()
+    val viewModel: PlayerViewModel by lazy {
+        ViewModelProvider(models, ViewModelProvider.NewInstanceFactory())[PlayerViewModel::class.java]
+    }
+
     val player: ExoPlayer by lazy {
         ExoPlayer.Builder(AppGraph.app)
             .setAudioAttributes(
@@ -243,7 +252,12 @@ class PlaybackService : MediaSessionService() {
             Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        session = MediaSession.Builder(this, PlayerHolder.player)
+        // There is one actual MediaItem at a time. Route Next through the manual queue
+        // instead of asking ExoPlayer for a second timeline item.
+        val sessionPlayer = QueueAwarePlayer(PlayerHolder.player) { PlayerHolder.viewModel.next() }
+        // Install the playback listener even when only a media controller starts the service.
+        PlayerHolder.viewModel
+        session = MediaSession.Builder(this, sessionPlayer)
             .setSessionActivity(openApp)
             .build()
     }
@@ -260,4 +274,43 @@ class PlaybackService : MediaSessionService() {
         session = null
         super.onDestroy()
     }
+}
+
+/**
+ * What the notification and media controls talk to. There's one real item at a time, so Next goes
+ * through the manual queue instead of asking ExoPlayer for a second item in its timeline.
+ */
+class QueueAwarePlayer(player: Player, private val onNext: () -> Unit) : ForwardingPlayer(player) {
+    override fun getAvailableCommands(): Player.Commands =
+        super.getAvailableCommands().buildUpon()
+            .add(Player.COMMAND_SEEK_TO_NEXT)
+            .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+            .build()
+
+    override fun isCommandAvailable(command: Int): Boolean =
+        command == Player.COMMAND_SEEK_TO_NEXT || command == Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM || super.isCommandAvailable(command)
+
+    private val followers = mutableMapOf<Player.Listener, Player.Listener>()
+
+    override fun addListener(listener: Player.Listener) {
+        if (followers.containsKey(listener)) return
+        super.addListener(listener)
+        // Runs just after the real report, whose list lacks Next, and puts it right. Don't wrap the
+        // listener with Kotlin's "by": it doesn't forward Java's default methods, so nothing would arrive.
+        val follower = object : Player.Listener {
+            override fun onAvailableCommandsChanged(availableCommands: Player.Commands) {
+                listener.onAvailableCommandsChanged(this@QueueAwarePlayer.availableCommands)
+            }
+        }
+        followers[listener] = follower
+        wrappedPlayer.addListener(follower)
+    }
+
+    override fun removeListener(listener: Player.Listener) {
+        followers.remove(listener)?.let { wrappedPlayer.removeListener(it) }
+        super.removeListener(listener)
+    }
+
+    override fun seekToNext() = onNext()
+    override fun seekToNextMediaItem() = onNext()
 }

@@ -11,7 +11,6 @@ import android.util.Rational
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
@@ -30,7 +29,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun attachBaseContext(base: android.content.Context) { super.attachBaseContext(io.github.shoalapps.swordfish.AppLanguage.wrap(base)) }
-    private val playerVm: PlayerViewModel by viewModels()
+    private val playerVm: PlayerViewModel get() = io.github.shoalapps.swordfish.player.PlayerHolder.viewModel
     private val inPip = mutableStateOf(false)
     /** Screen to open from a launcher shortcut (search, subs, shorts). */
     private val pendingRoute = mutableStateOf<String?>(null)
@@ -135,6 +134,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        // A finished, idle activity leaves no watch page behind. Active background playback
+        // keeps the shared model and its queue listener until the video finishes.
+        if (isFinishing && (playerVm.player.playbackState == androidx.media3.common.Player.STATE_IDLE || !playerVm.player.playWhenReady)) {
+            playerVm.close()
+        }
         controller?.let { MediaController.releaseFuture(it) }
         super.onDestroy()
     }

@@ -330,6 +330,14 @@ fun VideoMenu(item: VideoItem, onChannel: ((String) -> Unit)?) {
                 leadingIcon = { Icon(Icons.Rounded.Share, null) },
                 onClick = { open = false; shareVideo(context, io.github.shoalapps.swordfish.data.FeedFilter.shareUrl(item.id, item.url)) },
             )
+            DropdownMenuItem(
+                text = { Text("Play next") },
+                onClick = { open = false; toast(context, if (AppGraph.store.playNext(item)) "Playing next" else "Already playing or next") },
+            )
+            DropdownMenuItem(
+                text = { Text("Add to queue") },
+                onClick = { open = false; toast(context, if (AppGraph.store.addToQueue(item)) "Added to queue" else "Already playing or queued") },
+            )
             if (onChannel != null && item.channelUrl != null) {
                 DropdownMenuItem(
                     text = { Text("Go to channel") },

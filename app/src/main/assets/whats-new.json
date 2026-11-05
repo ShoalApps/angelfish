@@ -1,5 +1,9 @@
 [
   {
+    "title": "Choose what plays next",
+    "body": "Play next and Add to queue put videos in a queue that plays before the suggestions and stays put if you leave the app. Open Queue in the player to reorder, remove or jump around."
+  },
+  {
     "title": "Smoother watching",
     "body": "Angelfish now watches your connection speed and only fetches as much video as it needs, holding less on fast connections and more on slow ones. Automatic downloads are off, including for existing installs, because they were slowing playback down. Turn them on in Settings to keep the newest videos from your subscriptions: they download out of sight and wait until you've stopped watching. There's also a new Save audio button, for talks and music you only want to hear."
   },

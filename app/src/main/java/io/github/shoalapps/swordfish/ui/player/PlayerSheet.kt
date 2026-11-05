@@ -1201,6 +1201,7 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
     val context = LocalContext.current
     var showDescription by remember { mutableStateOf(false) }
     var showComments by remember { mutableStateOf(false) }
+    var showQueue by remember { mutableStateOf(false) }
     val onLink: (String) -> Unit = { url ->
         Links.route(
             context = context,
@@ -1226,6 +1227,11 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
 
     val settings by AppGraph.store.settings.collectAsState()
     // Comments and the description open in place of the details, under the video, so it stays in view.
+    if (showQueue) {
+        BackHandler { showQueue = false }
+        QueuePanel(vm, modifier) { showQueue = false }
+        return
+    }
     if (showComments) {
         BackHandler { showComments = false }
         CommentsPanel(vm, onLink, modifier) { showComments = false }
@@ -1320,6 +1326,9 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
                         }
                     }
                     item { io.github.shoalapps.swordfish.ui.components.SaveAudioButton(item) }
+                    item { ActionChip(Icons.Rounded.PlayArrow, "Play next") { AppGraph.store.playNext(item); toast(context, "This video is already playing") } }
+                    item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Add to queue") { AppGraph.store.addToQueue(item); toast(context, "This video is already playing") } }
+                    item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Queue") { showQueue = true } }
                 }
               }
             }
@@ -1346,6 +1355,40 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
         }
     }
 
+}
+
+@Composable
+private fun QueuePanel(vm: PlayerViewModel, modifier: Modifier, onDismiss: () -> Unit) {
+    val queue by AppGraph.store.queue.collectAsState()
+    Column(modifier.fillMaxWidth()) {
+        PanelHeader("Queue", onDismiss)
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("Coming up (${queue.size})", modifier = Modifier.weight(1f))
+            TextButton(onClick = { vm.next() }, enabled = queue.isNotEmpty()) { Text("Next") }
+            TextButton(onClick = { AppGraph.store.clearQueue() }, enabled = queue.isNotEmpty()) { Text("Clear") }
+        }
+        vm.queueMessage?.let { Text(it, modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodySmall) }
+        LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = 24.dp)) {
+            if (queue.isEmpty()) item { Text("Your queue is empty", modifier = Modifier.padding(16.dp)) }
+            itemsIndexed(queue, key = { _, video -> video.id }) { index, video ->
+                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Column(Modifier.fillMaxWidth().clickable { vm.jumpToQueue(video) }.padding(vertical = 8.dp)) {
+                        Text(video.title.ifBlank { video.id }, localise = false, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(video.channelName, localise = false, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Row {
+                        IconButton(onClick = { AppGraph.store.moveInQueue(video.id, -1) }, enabled = index > 0) {
+                            Icon(Icons.Rounded.KeyboardArrowUp, "Move up")
+                        }
+                        IconButton(onClick = { AppGraph.store.moveInQueue(video.id, 1) }, enabled = index < queue.lastIndex) {
+                            Icon(Icons.Rounded.KeyboardArrowDown, "Move down")
+                        }
+                        TextButton(onClick = { AppGraph.store.removeFromQueue(video.id) }) { Text("Remove") }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /** Like and dislike as a Material 3 Expressive connected toggle-button group. */

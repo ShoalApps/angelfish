@@ -129,6 +129,47 @@ class PlayerViewModel : ViewModel() {
 
     private var loadJob: Job? = null
     private var usingLocal = false
+    private var nextJob: Job? = null
+    private var queuedPlayback = false
+    private var endHandled = false
+    var queueMessage by mutableStateOf<String?>(null)
+        private set
+
+    private fun queueNotice(message: String) {
+        queueMessage = message
+        android.widget.Toast.makeText(AppGraph.app, message, android.widget.Toast.LENGTH_LONG).show()
+    }
+
+    /** Shared by the player, playback end, and the media notification. */
+    fun next() {
+        nextJob?.cancel()
+        var skippedOffline = false
+        while (true) {
+            val item = store.advanceQueue() ?: break
+            if (NetworkInfo.offline() && AppGraph.offline.local(item.id) == null) {
+                skippedOffline = true
+                queueNotice("Skipped ${item.title.ifBlank { "video" }}: not saved for offline playback.")
+                continue
+            }
+            open(item, expandSheet = false, fromQueue = true)
+            return
+        }
+        if (skippedOffline) {
+            loadJob?.cancel()
+            loading = false
+            player.stop()
+            error = queueMessage
+        }
+        if (store.settings.value.autoplayNext && !NetworkInfo.offline()) autoplayNext(manual = true)
+    }
+
+    fun jumpToQueue(item: VideoItem) {
+        store.removeFromQueue(item.id)
+        if (NetworkInfo.offline() && AppGraph.offline.local(item.id) == null) {
+            queueNotice("Skipped ${item.title.ifBlank { "video" }}: not saved for offline playback.")
+            next()
+        } else open(item, expandSheet = false, fromQueue = true)
+    }
 
     private val listener = object : Player.Listener {
         override fun onTracksChanged(tracks: androidx.media3.common.Tracks) {
@@ -163,6 +204,7 @@ class PlayerViewModel : ViewModel() {
         override fun onRenderedFirstFrame() { firstFrame = true }
         override fun onPositionDiscontinuity(old: Player.PositionInfo, new: Player.PositionInfo, reason: Int) {
             if (reason != Player.DISCONTINUITY_REASON_SEEK) return
+            endHandled = false
             // Going back into a segment means you want to watch it: don't skip it, and load it.
             val pos = new.positionMs / 1000.0
             segments.firstOrNull { pos >= it.startSec && pos < it.endSec - 0.4 }?.let { skippedIds += it.uuid }
@@ -240,7 +282,9 @@ class PlayerViewModel : ViewModel() {
             // rather than jumping past the last frame (which YouTube has nothing to send for).
             player.pause()
             endedAtOutro = true
+            val finishedId = current?.id
             onEnded()
+            if (current?.id != finishedId) return
         } else player.seekTo((seg.endSec * 1000).toLong())
         planSkips()
         skipped = seg
@@ -251,13 +295,17 @@ class PlayerViewModel : ViewModel() {
     }
 
     private fun onEnded() {
+        if (endHandled || loading || current == null) return
+        endHandled = true
         val s = store.settings.value
         if (sleepMinutes == -1) {
+            player.pause()
             sleepMinutes = 0
             return
         }
         when {
-            s.loopVideo -> { player.seekTo(0); player.play() }
+            store.queue.value.isNotEmpty() -> next()
+            s.loopVideo -> { endHandled = false; player.seekTo(0); player.play() }
             s.autoplayNext && !fullscreen && sheetVisible && current != null -> autoplayNext()
         }
     }
@@ -270,16 +318,24 @@ class PlayerViewModel : ViewModel() {
      * YouTube's own apps; those are skipped quietly rather than ending the video on an error.
      * If none of the first few play, it stays on the finished video.
      */
-    private fun autoplayNext() {
-        if (io.github.shoalapps.swordfish.data.NetworkPolicy.savingData()) return
+    private fun autoplayNext(manual: Boolean = false) {
+        if (NetworkInfo.offline() || io.github.shoalapps.swordfish.data.NetworkPolicy.savingData()) return
         val candidates = related.take(5)
-        viewModelScope.launch {
+        nextJob?.cancel()
+        nextJob = viewModelScope.launch {
             for (c in candidates) {
-                val i = runCatching { streamWithRetry(c.url) }.getOrNull() ?: continue
+                val i = try {
+                    streamWithRetry(c.url)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    continue
+                }
                 // You picked something yourself (or pressed play again) while this was being chosen.
-                if (player.playbackState != Player.STATE_ENDED && !(endedAtOutro && !player.playWhenReady)) return@launch
+                if (!manual && player.playbackState != Player.STATE_ENDED && !(endedAtOutro && !player.playWhenReady)) return@launch
+                if (store.queue.value.isNotEmpty()) { next(); return@launch }
                 prefetched = c.url to i
-                open(c)
+                open(c, expandSheet = false)
                 return@launch
             }
         }
@@ -291,9 +347,14 @@ class PlayerViewModel : ViewModel() {
         skipped = null
     }
 
-    fun open(item: VideoItem) {
+    fun open(item: VideoItem) = open(item, expandSheet = true)
+
+    private fun open(item: VideoItem, expandSheet: Boolean, fromQueue: Boolean = false) {
+        nextJob?.cancel()
+        queuedPlayback = fromQueue
         current = item
-        showSheet(1f)
+        store.queueCurrent(item.id)
+        if (expandSheet) showSheet(1f)
         if ((info?.url == item.url || usingLocal && player.currentMediaItem?.mediaId == item.id) && error == null) return
         load(item.url)
     }
@@ -336,6 +397,13 @@ class PlayerViewModel : ViewModel() {
             error = null
             return
         }
+        if (queuedPlayback && (usingLocal || NetworkInfo.offline())) {
+            queueNotice("Skipped ${current?.title.orEmpty().ifBlank { "video" }}: couldn't play this copy.")
+            error = queueMessage
+            player.stop()
+            next()
+            return
+        }
         io.github.shoalapps.swordfish.Telemetry.report(e)
         val url = current?.url
         val http = e.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS ||
@@ -369,6 +437,7 @@ class PlayerViewModel : ViewModel() {
 
     private fun load(url: String, keepRecovered: Boolean = false) {
         loadJob?.cancel()
+        endHandled = false
         if (!keepRecovered) recovered = false
         info = null; error = null; onlyYouTubeCanPlay = false; segments = emptyList(); votes = null; rating = Rating.NONE
         related = emptyList(); skipped = null; skippedIds.clear(); firstFrame = false
@@ -393,7 +462,18 @@ class PlayerViewModel : ViewModel() {
             current?.let(store::addHistory)
             return
         }
+        if (NetworkInfo.offline()) {
+            pendingStartMs = 0
+            loading = false
+            error = "This video isn't saved for offline playback."
+            if (queuedPlayback) {
+                queueNotice("Skipped ${current?.title.orEmpty().ifBlank { "video" }}: not saved for offline playback.")
+                next()
+            }
+            return
+        }
         loadJob = viewModelScope.launch {
+            var skipFailed = false
             // These don't depend on the stream, so start them straight away.
             val s = store.settings.value
             if (!io.github.shoalapps.swordfish.data.NetworkPolicy.savingData()) {
@@ -420,6 +500,7 @@ class PlayerViewModel : ViewModel() {
                 store.addHistory(video)
                 if (AppGraph.offline.local(video.id) != null) playLocal(video.id, pendingStartMs, true)
                 else play(i, pendingStartMs)
+                skipFailed = queuedPlayback && error != null
                 pendingStartMs = 0
                 captionTracks = Captions.tracks(i)
                 chapters = Chapters.of(i)
@@ -430,8 +511,13 @@ class PlayerViewModel : ViewModel() {
                 io.github.shoalapps.swordfish.Telemetry.report(e)
                 error = NetworkInfo.friendlyError(e)
                 onlyYouTubeCanPlay = io.github.shoalapps.swordfish.data.KidsClient.shouldTry(e)
+                skipFailed = queuedPlayback
             } finally {
                 loading = false
+            }
+            if (skipFailed) {
+                queueNotice("Skipped ${current?.title.orEmpty().ifBlank { "video" }}: couldn't play this video.")
+                next()
             }
         }
     }
@@ -474,7 +560,11 @@ class PlayerViewModel : ViewModel() {
         SkipAware.clear()
         qualities = emptyList()
         player.setMediaItem(androidx.media3.common.MediaItem.Builder()
-            .setMediaId(id).setUri(android.net.Uri.fromFile(file)).build(), startMs)
+            .setMediaId(id).setUri(android.net.Uri.fromFile(file))
+            .setMediaMetadata(androidx.media3.common.MediaMetadata.Builder()
+                .setTitle(current?.title).setArtist(current?.channelName)
+                .setArtworkUri(current?.thumbnail?.let(android.net.Uri::parse)).build())
+            .build(), startMs)
         player.setPlaybackSpeed(speed)
         player.prepare()
         player.playWhenReady = playWhenReady
@@ -632,12 +722,13 @@ class PlayerViewModel : ViewModel() {
     }
 
     fun togglePlay() {
+        endHandled = false
         if (player.playbackState == Player.STATE_ENDED) player.seekTo(0)
         if (player.isPlaying) player.pause() else player.play()
     }
 
     fun seekBy(ms: Long) = player.seekTo((player.currentPosition + ms).coerceAtLeast(0))
-    fun seekTo(ms: Long) = player.seekTo(ms)
+    fun seekTo(ms: Long) { endHandled = false; player.seekTo(ms) }
 
     fun showSheet(target: Float) {
         sheetVisible = true
@@ -648,12 +739,14 @@ class PlayerViewModel : ViewModel() {
     fun collapse() = showSheet(0f)
 
     fun close() {
+        nextJob?.cancel()
         loadJob?.cancel()
         player.stop()
         player.clearMediaItems()
         sheetVisible = false
         fullscreen = false
         current = null
+        store.queueCurrent(null)
         AppGraph.offline.watching(null)
         info = null
         error = null

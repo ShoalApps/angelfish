@@ -805,7 +805,6 @@ private fun ShortPage(
                         PlainAction(Icons.Outlined.ChatBubbleOutline, "", Color.White, 28.dp, onClick = onComments)
                         PlainAction(Icons.AutoMirrored.Rounded.Send, "", Color.White, 28.dp, onClick = onShare)
                         PlainAction(Icons.Outlined.ThumbDown, dislikes?.let(::formatCount) ?: "", if (liked == false) MaterialTheme.colorScheme.primary else Color.White, 26.dp, onClick = onDislike)
-                        PlainAction(Icons.Rounded.MoreVert, "", Color.White, 26.dp) { onShare() }
                     }
                     else -> {
                         CircleAction(if (liked == true) Icons.Rounded.ThumbUp else Icons.Outlined.ThumbUp, likes?.let(::formatCount) ?: "Like", liked == true, onLike)
@@ -814,6 +813,7 @@ private fun ShortPage(
                         CircleAction(Icons.Rounded.Share, "Share", false, onShare)
                     }
                 }
+                io.github.shoalapps.swordfish.ui.components.VideoMenu(item, onChannel)
             }
         }
         if (isCurrent && player != null) {
