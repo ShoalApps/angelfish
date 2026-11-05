@@ -41,6 +41,14 @@ class NetworkInfoTest {
         assertEquals("This video is for channel members only.", d("Join this channel to get access to members-only content"))
     }
 
+    @Test fun unavailableVideoIsAnExpectedExtractorResponse() {
+        val message = """Got error UNPLAYABLE: "This video is not available" """
+        val unavailable = org.schabi.newpipe.extractor.exceptions.ContentNotAvailableException(message)
+        assertTrue(NetworkInfo.isUnavailableVideo(unavailable))
+        assertEquals("This video is unavailable. Try opening it on YouTube.", d(message, unavailable))
+        org.junit.Assert.assertFalse(NetworkInfo.isUnavailableVideo(IOException(message)))
+    }
+
     @Test fun fallbacks() {
         assertEquals("Something went wrong. Try again.", d(null))
         assertEquals("Some new message", d("Some new message"))

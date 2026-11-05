@@ -486,7 +486,6 @@ class PlayerViewModel : ViewModel() {
             next()
             return
         }
-        io.github.shoalapps.swordfish.Telemetry.report(e)
         val url = current?.url
         val http = e.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS ||
             e.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
@@ -499,6 +498,7 @@ class PlayerViewModel : ViewModel() {
             load(url, keepRecovered = true)
             return
         }
+        io.github.shoalapps.swordfish.Telemetry.report(e)
         error = when (e.errorCode) {
             PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
             PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ->
@@ -606,7 +606,8 @@ class PlayerViewModel : ViewModel() {
                 throw e
             } catch (e: Exception) {
                 pendingStartMs = 0
-                io.github.shoalapps.swordfish.Telemetry.report(e)
+                // A video that YouTube explicitly marks unavailable is a playback outcome.
+                if (!NetworkInfo.isUnavailableVideo(e)) io.github.shoalapps.swordfish.Telemetry.report(e)
                 error = NetworkInfo.friendlyError(e)
                 onlyYouTubeCanPlay = io.github.shoalapps.swordfish.data.KidsClient.shouldTry(e)
                 skipFailed = queuedPlayback
