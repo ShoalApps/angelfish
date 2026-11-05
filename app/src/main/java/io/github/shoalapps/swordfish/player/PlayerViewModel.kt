@@ -131,6 +131,7 @@ class PlayerViewModel : ViewModel() {
     private var usingLocal = false
     private var nextJob: Job? = null
     private var queuedPlayback = false
+    private var queueFailures = 0
     private var endHandled = false
     var queueMessage by mutableStateOf<String?>(null)
         private set
@@ -193,7 +194,7 @@ class PlayerViewModel : ViewModel() {
         override fun onIsPlayingChanged(playing: Boolean) { isPlaying = playing }
         override fun onPlaybackStateChanged(state: Int) {
             buffering = state == Player.STATE_BUFFERING
-            if (state == Player.STATE_READY) durationMs = player.duration.coerceAtLeast(0)
+            if (state == Player.STATE_READY) { durationMs = player.duration.coerceAtLeast(0); queueFailures = 0 }
             if (state == Player.STATE_ENDED) onEnded()
         }
         override fun onVideoSizeChanged(size: VideoSize) {
@@ -428,6 +429,14 @@ class PlayerViewModel : ViewModel() {
             PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED ->
                 "This phone can't play this video's format. Try a lower quality."
             else -> "Couldn't play this video (${e.errorCodeName}). Try again."
+        }
+        // One bad video shouldn't strand the queue, but if several fail in a row the problem is
+        // probably the connection, so stop instead of burning through everything that's left.
+        if (queuedPlayback && store.queue.value.isNotEmpty() && queueFailures < 2) {
+            queueFailures++
+            queueNotice("Skipped ${current?.title.orEmpty().ifBlank { "video" }}: ${error.orEmpty()}")
+            player.stop()
+            next()
         }
     }
 
