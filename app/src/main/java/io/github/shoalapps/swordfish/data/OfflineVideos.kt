@@ -32,6 +32,8 @@ data class OfflineVideo(
     val kept: Boolean = false,
     val complete: Boolean = false,
     val error: String? = null,
+    /** Just the sound: much smaller, and enough for talks and music. */
+    val audioOnly: Boolean = false,
 )
 
 /** Pure retention rules shared by scheduling and completion, including late worker results. */
@@ -44,6 +46,10 @@ object OfflinePolicy {
     fun toDownload(current: VideoItem?, suggestions: List<VideoItem>, watching: Boolean): List<VideoItem> =
         listOfNotNull(current) + if (watching) emptyList() else suggestions
 
+    /** What yt-dlp is asked for. Audio needs no merging, so it doesn't lean on FFmpeg. */
+    fun format(quality: Int, audioOnly: Boolean): String =
+        if (audioOnly) "ba[ext=m4a]/ba[acodec^=mp4a]" else "bv*[height<=$quality][ext=mp4]+ba[ext=m4a]/b[height<=$quality][ext=mp4]"
+
     fun retain(entry: OfflineVideo, current: String?, recommendations: Set<String>): Boolean =
         entry.kept || entry.video.id == current || entry.video.id in recommendations
 }
@@ -53,7 +59,7 @@ class OfflineVideos(private val context: Context) {
     private val prefs = context.getSharedPreferences("offline", Context.MODE_PRIVATE)
     private val work get() = WorkManager.getInstance(context)
     private val root = File(context.filesDir, "offline").apply { mkdirs() }
-    private val _videos = MutableStateFlow(read().map { it.copy(complete = it.complete && file(it.video.id).isFile) })
+    private val _videos = MutableStateFlow(read().map { it.copy(complete = it.complete && found(it.video.id) != null) })
     val videos: StateFlow<List<OfflineVideo>> = _videos
     val progress = MutableStateFlow<Map<String, Int>>(emptyMap())
     private var current: VideoItem? = prefs.getString("current", null)?.let {
@@ -76,11 +82,12 @@ class OfflineVideos(private val context: Context) {
     }.orEmpty()
 
     private fun file(id: String) = File(root, "$id.mp4")
+    private fun audioFile(id: String) = File(root, "$id.m4a")
+    private fun found(id: String) = listOf(file(id), audioFile(id)).firstOrNull { it.isFile && it.length() > 0 }
+    private fun deleteFiles(id: String) { file(id).delete(); audioFile(id).delete() }
 
     @Synchronized
-    fun local(id: String): File? = file(id).takeIf { f ->
-        _videos.value.any { it.video.id == id && it.complete } && f.isFile && f.length() > 0
-    }
+    fun local(id: String): File? = found(id)?.takeIf { _videos.value.any { it.video.id == id && it.complete } }
 
     @Synchronized
     private fun save(list: List<OfflineVideo>) {
@@ -96,7 +103,7 @@ class OfflineVideos(private val context: Context) {
             val previousId = current?.id
             feed = feed.filterNot { it.id == previousId }
             prefs.edit().putString("subscription-feed", json.encodeToString(feed)).apply()
-            deferredDeletes.filter { it != video?.id }.forEach { file(it).delete() }
+            deferredDeletes.filter { it != video?.id }.forEach { deleteFiles(it) }
             deferredDeletes.removeAll { it != video?.id }
             dismissed.remove(video?.id)
         }
@@ -113,15 +120,18 @@ class OfflineVideos(private val context: Context) {
     }
 
     @Synchronized
-    fun keep(video: VideoItem) {
+    fun keep(video: VideoItem, audioOnly: Boolean = false) {
         if (!validId(video.id) || video.isLive) return
         dismissed.remove(video.id)
         val previous = _videos.value.firstOrNull { it.video.id == video.id }
+        // Asking for the other kind replaces the copy that's here, once the new one's wanted.
+        val switching = previous != null && previous.audioOnly != audioOnly
+        if (switching && current?.id != video.id) deleteFiles(video.id)
         save(_videos.value.filterNot { it.video.id == video.id } +
-            (previous ?: OfflineVideo(video)).copy(kept = true, error = null))
+            (previous ?: OfflineVideo(video)).copy(kept = true, error = null, audioOnly = audioOnly, complete = !switching && previous?.complete == true))
         // Promotion replaces an automatic job so a later Wi-Fi change cannot cancel the saved job.
         work.cancelUniqueWork(workName(video.id))
-        enqueue(video, automatic = false)
+        enqueue(video, automatic = false, audioOnly = audioOnly)
     }
 
     /** Remove a saved copy or cancel a pending download; current playback stays protected. */
@@ -131,7 +141,7 @@ class OfflineVideos(private val context: Context) {
         feed = feed.filterNot { it.id == id }
         prefs.edit().putString("subscription-feed", json.encodeToString(feed)).apply()
         dismissed += id
-        if (current?.id == id) deferredDeletes += id else file(id).delete()
+        if (current?.id == id) deferredDeletes += id else deleteFiles(id)
         save(_videos.value.filterNot { it.video.id == id })
     }
 
@@ -154,7 +164,7 @@ class OfflineVideos(private val context: Context) {
             val keep = OfflinePolicy.retain(entry, current?.id, ids)
             if (!keep) {
                 work.cancelUniqueWork(workName(entry.video.id))
-                file(entry.video.id).delete()
+                deleteFiles(entry.video.id)
             }
             keep
         }
@@ -175,17 +185,17 @@ class OfflineVideos(private val context: Context) {
             work.cancelAllWorkByTag(AUTO_TAG)
             work.cancelAllWorkByTag("saved-download")
         }
-        if (NetworkPolicy.downloadsAllowed()) retained.filter { it.kept && !it.complete && it.error == null }.forEach { enqueue(it.video, automatic = false) }
+        if (NetworkPolicy.downloadsAllowed()) retained.filter { it.kept && !it.complete && it.error == null }.forEach { enqueue(it.video, automatic = false, audioOnly = it.audioOnly) }
     }
 
     @Synchronized
-    private fun enqueue(video: VideoItem, automatic: Boolean) {
+    private fun enqueue(video: VideoItem, automatic: Boolean, audioOnly: Boolean = false) {
         if (!validId(video.id) || local(video.id) != null) return
         val entry = _videos.value.firstOrNull { it.video.id == video.id }
         if (automatic && entry?.kept == true) return
         if (entry == null) save(_videos.value + OfflineVideo(video))
         val request = OneTimeWorkRequestBuilder<VideoDownloadWorker>()
-            .setInputData(workDataOf("video" to json.encodeToString(video), "automatic" to automatic))
+            .setInputData(workDataOf("video" to json.encodeToString(video), "automatic" to automatic, "audio" to audioOnly))
             .setConstraints(Constraints.Builder().setRequiredNetworkType(
                 if (AppGraph.store.settings.value.downloadWifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
             ).setRequiresBatteryNotLow(automatic).build())
@@ -206,7 +216,8 @@ class OfflineVideos(private val context: Context) {
     @Synchronized
     fun finish(video: VideoItem, completed: File) {
         if (!wanted(video)) return
-        val target = file(video.id)
+        deleteFiles(video.id)
+        val target = if (completed.extension == "m4a") audioFile(video.id) else file(video.id)
         check(completed.renameTo(target)) { "Couldn't save the downloaded video" }
         save(_videos.value.map { if (it.video.id == video.id) it.copy(video = video, complete = true, error = null) else it })
     }
@@ -235,6 +246,7 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         val video = inputData.getString("video")?.let { json.decodeFromString<VideoItem>(it) } ?: return@withContext Result.failure()
         if (!OfflineVideos.validId(video.id) || !AppGraph.offline.wanted(video)) return@withContext Result.success()
         val automatic = inputData.getBoolean("automatic", true)
+        val audioOnly = inputData.getBoolean("audio", false)
         if (!NetworkPolicy.downloadsAllowed()) return@withContext Result.retry()
         val dir = File(applicationContext.filesDir, "offline/tmp/$id").apply { mkdirs() }
         try {
@@ -264,8 +276,8 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
                     val pace = io.github.shoalapps.swordfish.player.NetworkPace
                     addOption("--limit-rate", "${pace.downloadLimitBps(pace.speedBps(), pace.mediaBps) / 8 / 1024}K")
                 }
-                addOption("-f", "bv*[height<=$quality][ext=mp4]+ba[ext=m4a]/b[height<=$quality][ext=mp4]")
-                addOption("--merge-output-format", "mp4")
+                addOption("-f", OfflinePolicy.format(quality, audioOnly))
+                if (!audioOnly) addOption("--merge-output-format", "mp4")
                 addOption("-o", File(dir, "video.%(ext)s").absolutePath)
             }
             suspend fun execute() = runInterruptible {
@@ -289,13 +301,14 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
                 execute()
             }
             ensureActive()
-            val completed = File(dir, "video.mp4")
+            val completed = File(dir, if (audioOnly) "video.m4a" else "video.mp4")
             check(completed.isFile && completed.length() > 0) { "The download did not produce a complete video" }
             AppGraph.offline.finish(video, completed)
             Result.success()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            android.util.Log.w("VideoDownload", "attempt $runAttemptCount: ${e.message?.takeLast(400)}")
             if (runAttemptCount < 2) Result.retry() else {
                 AppGraph.offline.failed(video.id, DownloadErrors.message(e.message.orEmpty()))
                 Result.failure()
@@ -340,7 +353,7 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         val notification = NotificationCompat.Builder(applicationContext, "saved-downloads")
             .setSilent(true)
             .setSmallIcon(android.R.drawable.stat_sys_download)
-            .setContentTitle(io.github.shoalapps.swordfish.AppLanguage.translate("Downloading video"))
+            .setContentTitle(io.github.shoalapps.swordfish.AppLanguage.translate("Saving for offline"))
             .setContentText(video.title)
             .setOngoing(true)
             .addAction(0, io.github.shoalapps.swordfish.AppLanguage.translate("Cancel"), PendingIntent.getBroadcast(applicationContext, video.id.hashCode(),

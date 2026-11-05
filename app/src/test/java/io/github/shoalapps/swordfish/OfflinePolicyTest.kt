@@ -27,6 +27,13 @@ class OfflinePolicyTest {
         assertEquals(listOf(current), OfflinePolicy.toDownload(current, listOf(next), watching = true))
     }
 
+    @Test fun audioAsksForSoundAloneAndVideoForBoth() {
+        assertFalse(OfflinePolicy.format(720, true).contains("bv"))
+        assertTrue(OfflinePolicy.format(720, true).startsWith("ba"))
+        assertTrue(OfflinePolicy.format(720, false).contains("height<=720"))
+        assertFalse(OfflineVideo(video("old00000001")).audioOnly)
+    }
+
     @Test fun cleanupKeepsManualDownloadsAndCurrentButDropsStaleAutomaticCopies() {
         val saved = OfflineVideo(video("saved000001"), kept = true)
         val playing = OfflineVideo(video("current0001"))

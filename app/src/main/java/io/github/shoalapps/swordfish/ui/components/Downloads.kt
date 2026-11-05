@@ -24,6 +24,7 @@ fun DownloadButton(video: VideoItem) {
     val entry = downloads.firstOrNull { it.video.id == video.id }
     if (!video.isLive) FilledTonalButton(onClick = { AppGraph.offline.keep(video) }) {
         Text(when {
+            entry?.audioOnly == true && entry.complete -> "Download video"
             entry?.kept == true && entry.complete -> "Downloaded"
             entry?.error != null -> "Retry download"
             entry?.kept == true -> progress[video.id]?.let { "Downloading $it%" } ?: "Download queued"
@@ -32,13 +33,21 @@ fun DownloadButton(video: VideoItem) {
     }
 }
 
+/** Just the sound, for talks and music: far smaller than the video. */
+@Composable
+fun SaveAudioButton(video: VideoItem) {
+    val downloads by AppGraph.offline.videos.collectAsState()
+    val entry = downloads.firstOrNull { it.video.id == video.id }
+    if (!video.isLive && entry?.audioOnly != true && entry?.kept != true) OutlinedButton(onClick = { AppGraph.offline.keep(video, audioOnly = true) }) { Text("Save audio") }
+}
+
 @Composable
 fun Downloads(onVideo: (VideoItem) -> Unit) {
     val downloads by AppGraph.offline.videos.collectAsState()
     val progress by AppGraph.offline.progress.collectAsState()
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Text("Downloads", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(vertical = 12.dp))
-        Text("Saved videos stay until you remove them. Automatic copies change with your video and recommendations.", style = MaterialTheme.typography.bodySmall)
+        Text("Saved videos stay until you remove them. Automatic copies come from your subscriptions and change as they post.", style = MaterialTheme.typography.bodySmall)
         if (downloads.isEmpty()) Text("Tap Download on a video to keep it offline.", Modifier.padding(vertical = 12.dp))
         downloads.forEach { entry ->
             Column(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -54,7 +63,7 @@ fun Downloads(onVideo: (VideoItem) -> Unit) {
                 }
                 Text(when {
                     entry.error != null -> DownloadErrors.message(entry.error)
-                    entry.complete -> if (entry.kept) "Saved - ready offline" else "Automatic - ready offline"
+                    entry.complete -> if (entry.audioOnly) "Audio only - ready offline" else if (entry.kept) "Saved - ready offline" else "Automatic - ready offline"
                     progress.containsKey(entry.video.id) -> "Downloading ${progress[entry.video.id]}%"
                     else -> "Queued - waiting for an allowed connection"
                 }, style = MaterialTheme.typography.bodySmall)

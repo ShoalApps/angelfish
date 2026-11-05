@@ -18,4 +18,8 @@ class DownloadErrorsTest {
         assertTrue(DownloadErrors.message("ENOSPC").contains("free space"))
         assertEquals("Couldn't download this video. Try again.", DownloadErrors.message("private internal diagnostics without a useful user message"))
     }
+
+    @Test fun aBotCheckSaysSoInsteadOfBlamingTheVideo() {
+        assertTrue(DownloadErrors.message("ERROR: [youtube] x: Sign in to confirm you're not a bot. This helps protect").contains("VPN"))
+    }
 }
