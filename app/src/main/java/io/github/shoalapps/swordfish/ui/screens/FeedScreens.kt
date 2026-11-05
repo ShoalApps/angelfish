@@ -644,11 +644,21 @@ fun YouScreen(
     onPlaylist: (String) -> Unit,
     onSwitchChannel: () -> Unit,
     onAbout: () -> Unit,
+    onLocalPlaylist: (String) -> Unit = {},
     vm: YouViewModel = viewModel(),
 ) {
     val account by AppGraph.store.account.collectAsState()
     val cookie by AppGraph.store.cookie.collectAsState()
     val localHistory by AppGraph.store.history.collectAsState()
+    val localPlaylists by AppGraph.store.playlists.collectAsState()
+    var newPlaylist by remember { mutableStateOf(false) }
+    if (newPlaylist) io.github.shoalapps.swordfish.ui.components.PlaylistNameDialog(
+        onDismiss = { newPlaylist = false },
+        onSave = { name ->
+            newPlaylist = false
+            AppGraph.store.createPlaylist(name)?.let(onLocalPlaylist)
+        },
+    )
     LaunchedEffect(cookie) { vm.load() }
     val signedIn = cookie?.contains("SAPISID") == true
     val online by AppGraph.online.collectAsState()
@@ -721,8 +731,20 @@ fun YouScreen(
                 }
             }
 
+            item(key = "local-pl-head") { SectionHeader("Playlists", "New playlist") { newPlaylist = true } }
+            item(key = "local-pl-note") {
+                Text("Saved on this phone", modifier = Modifier.padding(horizontal = 16.dp))
+            }
+            items(localPlaylists, key = { "local-pl-${it.id}" }) { playlist ->
+                ListItem(
+                    headlineContent = { Text(playlist.name, localise = false) },
+                    supportingContent = { Text("${playlist.items.size} videos") },
+                    leadingContent = { Icon(Icons.Rounded.VideoLibrary, null) },
+                    modifier = Modifier.clickable { onLocalPlaylist(playlist.id) },
+                )
+            }
             if (signedIn) {
-                item(key = "pl-head") { SectionHeader("Playlists", null) {} }
+                item(key = "pl-head") { SectionHeader("YouTube playlists", null) {} }
                 item(key = "pl") {
                     Column {
                         PlaylistEntry(Icons.Rounded.WatchLater, "Watch later", vm.watchLater.size) { onPlaylist("VLWL") }

@@ -307,6 +307,7 @@ fun AppRoot(vm: PlayerViewModel, inPip: Boolean, pendingRoute: String? = null, o
                             onSettings = { nav.navigate("settings") },
                             onSignIn = { nav.navigate("login") },
                             onPlaylist = { id -> nav.navigate("playlist/$id") },
+                            onLocalPlaylist = { id -> nav.navigate("local-playlist/$id") },
                             onSwitchChannel = { nav.navigate("channels") },
                             onAbout = { nav.navigate("about") },
                         )
@@ -317,6 +318,16 @@ fun AppRoot(vm: PlayerViewModel, inPip: Boolean, pendingRoute: String? = null, o
                     composable("channel/{url}") { e ->
                         val url = Uri.decode(e.arguments?.getString("url").orEmpty())
                         ChannelScreen(url = url, onBack = { nav.popBackStack() }, onVideo = openVideo)
+                    }
+                    composable("local-playlist/{id}") { e ->
+                        io.github.shoalapps.swordfish.ui.screens.LocalPlaylistScreen(
+                            id = e.arguments?.getString("id").orEmpty(),
+                            onBack = { nav.popBackStack() },
+                            onPlay = { items ->
+                                AppGraph.store.replaceQueue(items)
+                                items.firstOrNull()?.let { vm.jumpToQueue(it); vm.showSheet(1f) }
+                            },
+                        )
                     }
                     composable("playlist/{id}") { e ->
                         PlaylistScreen(

@@ -1202,6 +1202,8 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
     var showDescription by remember { mutableStateOf(false) }
     var showComments by remember { mutableStateOf(false) }
     var showQueue by remember { mutableStateOf(false) }
+    var showPlaylist by remember { mutableStateOf(false) }
+    if (showPlaylist && item != null) io.github.shoalapps.swordfish.ui.components.AddToPlaylistDialog(item) { showPlaylist = false }
     val onLink: (String) -> Unit = { url ->
         Links.route(
             context = context,
@@ -1329,6 +1331,7 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
                     item { ActionChip(Icons.Rounded.PlayArrow, "Play next") { AppGraph.store.playNext(item); toast(context, "This video is already playing") } }
                     item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Add to queue") { AppGraph.store.addToQueue(item); toast(context, "This video is already playing") } }
                     item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Queue") { showQueue = true } }
+                    item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Add to playlist") { showPlaylist = true } }
                 }
               }
             }

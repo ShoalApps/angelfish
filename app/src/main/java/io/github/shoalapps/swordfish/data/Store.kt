@@ -173,6 +173,46 @@ class Store(context: Context) {
         return true
     }
 
+    // Each playlist has its own record so one damaged record cannot hide the others.
+    private val playlistPrefix = "local-playlist:"
+    private val _playlists = MutableStateFlow(LocalPlaylists(prefs.all.mapNotNull { (key, value) ->
+        if (key.startsWith(playlistPrefix) && value is String)
+            LocalPlaylists.read(key.removePrefix(playlistPrefix), value) else null
+    }).playlists.sortedBy { it.name.lowercase() })
+    val playlists: StateFlow<List<LocalPlaylist>> = _playlists
+
+    fun createPlaylist(name: String): String? {
+        if (name.isBlank()) return null
+        val id = java.util.UUID.randomUUID().toString()
+        changePlaylists { it.create(id, name) }
+        return id
+    }
+
+    fun renamePlaylist(id: String, name: String) = changePlaylists { it.rename(id, name) }
+    fun deletePlaylist(id: String) = changePlaylists { it.delete(id) }
+    fun addToPlaylist(id: String, item: VideoItem) = changePlaylists { it.add(id, item) }
+    fun removeFromPlaylist(id: String, videoId: String) = changePlaylists { it.remove(id, videoId) }
+    fun moveInPlaylist(id: String, videoId: String, offset: Int) = changePlaylists { it.move(id, videoId, offset) }
+
+    private fun changePlaylists(change: (LocalPlaylists) -> LocalPlaylists): Boolean {
+        val before = _playlists.value
+        val after = change(LocalPlaylists(before)).playlists
+        if (before == after) return false
+        val editor = prefs.edit()
+        before.filter { old -> after.none { it.id == old.id } }.forEach { editor.remove(playlistPrefix + it.id) }
+        after.filter { it !in before }.forEach { editor.putString(playlistPrefix + it.id, json.encodeToString(it)) }
+        editor.apply()
+        _playlists.value = after
+        return true
+    }
+
+    fun addAllToQueue(items: List<VideoItem>) = changeQueue { queue ->
+        items.fold(queue) { result, item -> result.add(item, queueCurrentId) }
+    }
+
+    /** Keep the first choice even if it's currently playing; the existing queue jump opens it. */
+    fun replaceQueue(items: List<VideoItem>) = changeQueue { PlaybackQueue(items) }
+
     private val _searches = MutableStateFlow(load<List<String>>("searches") ?: emptyList())
     val searches: StateFlow<List<String>> = _searches
 

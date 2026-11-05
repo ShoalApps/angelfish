@@ -308,6 +308,8 @@ fun rememberChannelAvatar(channelUrl: String?): String? {
 /** The ⋮ menu on every video. */
 @Composable
 fun VideoMenu(item: VideoItem, onChannel: ((String) -> Unit)?) {
+    var showPlaylist by remember { mutableStateOf(false) }
+    if (showPlaylist) AddToPlaylistDialog(item) { showPlaylist = false }
     val context = LocalContext.current
     var open by remember { mutableStateOf(false) }
     Box {
@@ -337,6 +339,10 @@ fun VideoMenu(item: VideoItem, onChannel: ((String) -> Unit)?) {
             DropdownMenuItem(
                 text = { Text("Add to queue") },
                 onClick = { open = false; toast(context, if (AppGraph.store.addToQueue(item)) "Added to queue" else "Already playing or queued") },
+            )
+            DropdownMenuItem(
+                text = { Text("Add to playlist") },
+                onClick = { open = false; showPlaylist = true },
             )
             if (onChannel != null && item.channelUrl != null) {
                 DropdownMenuItem(
