@@ -2,6 +2,7 @@ package io.github.shoalapps.swordfish.data
 
 import android.content.Context
 import io.github.shoalapps.swordfish.player.PlaybackQueue
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -46,6 +47,7 @@ data class Settings(
 
     // Playback
     val backgroundPlay: Boolean = true,
+    val rememberWatchPositions: Boolean = true,
     val autoPip: Boolean = true,
     val autoplayNext: Boolean = true,
 
@@ -143,6 +145,46 @@ class Store(context: Context) {
 
     private val _history = MutableStateFlow(load<List<VideoItem>>("history") ?: emptyList())
     val history: StateFlow<List<VideoItem>> = _history
+
+    // Separate preferences are excluded from Android backup and device transfer.
+    private val watchPrefs = context.getSharedPreferences("watch-positions", Context.MODE_PRIVATE)
+    private val _watchPositions = MutableStateFlow(WatchPositions.decode(watchPrefs.getString("positions", null)).entries)
+    val watchPositions: StateFlow<List<WatchPosition>> = _watchPositions
+
+    // One writer preserves ordering (in particular clear/remove after a periodic save).
+    // Encoding and synchronous durability both happen on IO, never the player/UI thread.
+    private val watchWrites = kotlinx.coroutines.channels.Channel<Pair<List<WatchPosition>?, kotlinx.coroutines.CompletableDeferred<Unit>?>>(
+        kotlinx.coroutines.channels.Channel.UNLIMITED,
+    )
+    private val watchScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO)
+    private val watchWriter = watchScope.launch {
+        for ((snapshot, done) in watchWrites) {
+            if (snapshot != null) watchPrefs.edit().putString("positions", WatchPositions(snapshot).encode()).commit()
+            done?.complete(Unit)
+        }
+    }
+
+    fun recordWatchPosition(video: VideoItem, positionMs: Long, durationMs: Long, nowMs: Long = System.currentTimeMillis()) {
+        if (!settings.value.rememberWatchPositions) return
+        changeWatchPositions { it.record(video, positionMs, durationMs, nowMs) }
+    }
+
+    fun removeWatchPosition(id: String) = changeWatchPositions { it.remove(id) }
+    fun clearWatchPositions() = changeWatchPositions { WatchPositions() }
+
+    private fun changeWatchPositions(change: (WatchPositions) -> WatchPositions) {
+        val after = change(WatchPositions(_watchPositions.value)).entries
+        if (after == _watchPositions.value) return
+        _watchPositions.value = after
+        watchWrites.trySend(after to null)
+    }
+
+    /** Barrier for local persistence tests; callers must never block the main thread. */
+    suspend fun awaitWatchPositionWrites() {
+        val done = kotlinx.coroutines.CompletableDeferred<Unit>()
+        watchWrites.send(null to done)
+        done.await()
+    }
 
     private val _queue = MutableStateFlow(PlaybackQueue(load<List<VideoItem>>("queue").orEmpty()).items)
     val queue: StateFlow<List<VideoItem>> = _queue

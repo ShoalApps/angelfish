@@ -125,6 +125,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
+        playerVm.saveWatchPosition()
         super.onStop()
         // The widget shows your last video.
         lifecycleScope.launch { io.github.shoalapps.swordfish.widget.refreshWidget(this@MainActivity) }

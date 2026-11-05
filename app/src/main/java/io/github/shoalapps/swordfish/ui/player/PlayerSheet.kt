@@ -209,6 +209,7 @@ fun PlayerSheet(
     /** Width of a navigation rail on the left, which the mini player keeps clear of. */
     startInset: androidx.compose.ui.unit.Dp = 0.dp,
 ) {
+    ResumeSnackbar(vm)
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val spatial = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
@@ -1793,5 +1794,25 @@ private fun CommentRow(c: Comment, vm: PlayerViewModel, onLink: (String) -> Unit
                 }
             }
         }
+    }
+}
+
+/** A non-modal snackbar shared by the phone, wide and full-screen player layouts. */
+@Composable
+private fun ResumeSnackbar(vm: PlayerViewModel) {
+    val host = remember { androidx.compose.material3.SnackbarHostState() }
+    val notice = vm.resumeNotice
+    LaunchedEffect(notice) {
+        if (notice == null) return@LaunchedEffect
+        val result = host.showSnackbar(
+            message = "Resumed at ${formatDuration(notice.second / 1000)}",
+            actionLabel = "Start over",
+            duration = androidx.compose.material3.SnackbarDuration.Short,
+        )
+        if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) vm.startOver(notice.first)
+        vm.dismissResumeNotice(notice)
+    }
+    if (notice != null) androidx.compose.ui.window.Popup(alignment = Alignment.BottomCenter) {
+        androidx.compose.material3.SnackbarHost(host, Modifier.padding(16.dp).navigationBarsPadding())
     }
 }

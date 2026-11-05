@@ -115,6 +115,7 @@ fun SettingsScreen(
     val cookie by store.cookie.collectAsState()
     val signedIn = cookie?.contains("SAPISID") == true
     var choice by remember { mutableStateOf<Choice?>(null) }
+    var clearPositions by remember { mutableStateOf(false) }
     val update: ((Settings) -> Settings) -> Unit = { store.updateSettings(it) }
 
     SettingsScaffold("Settings", onBack) {
@@ -233,6 +234,10 @@ fun SettingsScreen(
         }
 
         group("Playback") {
+            row { sh -> Toggle("Remember where I stopped", "Save watch positions on this device only", s.rememberWatchPositions, sh) { enabled ->
+                update { it.copy(rememberWatchPositions = enabled) }
+                if (!enabled) clearPositions = true
+            } }
             row { sh -> Toggle("Autoplay", "Play the next video when one ends", s.autoplayNext, sh) { v -> update { it.copy(autoplayNext = v) } } }
             row { sh -> Toggle("Background play", "Keep audio playing with the screen off or app closed", s.backgroundPlay, sh) { v -> update { it.copy(backgroundPlay = v) } } }
             row { sh -> Toggle("Picture-in-picture", "Shrink to a floating window when you leave the app", s.autoPip, sh) { v -> update { it.copy(autoPip = v) } } }
@@ -272,6 +277,10 @@ fun SettingsScreen(
             }
         }
 
+        group("Data") {
+            row { sh -> Link("Clear watch positions", "Remove all saved playback positions on this device", sh) { clearPositions = true } }
+        }
+
         group("More") {
             row { sh -> Link("What's new", "Changes in this version", sh) { io.github.shoalapps.swordfish.WhatsNew.open() } }
             row { sh ->
@@ -286,6 +295,13 @@ fun SettingsScreen(
     }
 
     choice?.let { c -> ChoiceDialog(c) { choice = null } }
+    if (clearPositions) AlertDialog(
+        onDismissRequest = { clearPositions = false },
+        title = { Text("Clear watch positions?") },
+        text = { Text("Remove saved positions and Continue watching from this device?") },
+        confirmButton = { TextButton(onClick = { store.clearWatchPositions(); clearPositions = false }) { Text("Clear") } },
+        dismissButton = { TextButton(onClick = { clearPositions = false }) { Text("Keep") } },
+    )
 }
 
 private fun qualityChoices() = qualityOptions.map { (if (it == 1080) "${it}p (default)" else "${it}p") to it.toString() }
@@ -377,6 +393,10 @@ fun DeveloperSettingsScreen(onBack: () -> Unit) {
                     toast(context, "Image cache cleared")
                 }
             }
+            row { sh -> Link("Clear watch positions", "Remove all saved playback positions on this device", sh) {
+                store.clearWatchPositions()
+                toast(context, "Watch positions cleared")
+            } }
             row { sh ->
                 Link("Reset all settings", "Keeps your sign-in, subscriptions and history", sh) {
                     store.updateSettings { Settings() }

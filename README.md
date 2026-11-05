@@ -56,7 +56,7 @@ since YouTube blocks GitHub's servers. Run the full set on a home connection bef
 ## Roadmap
 
 - v1: browse, search, channels, subscriptions, player, SponsorBlock, DeArrow
-- v2: offline video downloads with yt-dlp; audio-only downloads remain planned
+- v2: offline video downloads and audio-only saves with yt-dlp
 - v3: extras
 
 ## Licence
@@ -73,7 +73,7 @@ Angelfish is not affiliated with, endorsed by or sponsored by Google or YouTube.
 
 ## Privacy and legal
 
-No ads, no tracking, nothing sent to us unless you agree to anonymous error reports. See the [privacy policy](https://shoalapps.github.io/privacy.html) and [legal notices](https://shoalapps.github.io/legal.html).
+No ads, no tracking, nothing sent to us unless you agree to anonymous error reports. Watch positions (including video titles, channels and thumbnail URLs) are stored only on your device, never uploaded, and can be disabled or cleared in Settings. See the [privacy policy](https://shoalapps.github.io/privacy.html) and [legal notices](https://shoalapps.github.io/legal.html).
 
 ## Support
 
@@ -85,7 +85,7 @@ Update `app/src/main/assets/whats-new.json` with each release. Notes ship with t
 
 ## Offline videos and data use
 
-Angelfish uses on-device yt-dlp with FFmpeg. The current video and four recommendations are automatically downloaded on unmetered Wi-Fi by default. Settings can disable the current-video copy, choose 0-50 recommended copies, or explicitly allow mobile downloads. Saved videos are kept separately from automatic copies and can be played or removed in You. Only completed files are used offline; network playback switches to the complete file at the same position when it becomes available. Live streams are excluded.
+Angelfish uses on-device yt-dlp with FFmpeg. Automatic downloads are off by default. When turned on in Settings, they take the current video and up to 50 videos from your subscriptions, with no notification, waiting while you watch, on unmetered Wi-Fi unless you allow mobile data. Saved videos are kept separately from automatic copies and can be played or removed in You. Only completed files are used offline; network playback switches to the complete file at the same position when it becomes available. Live streams are excluded.
 
 Mobile playback defaults to 720p in both the main player and Shorts. Android Data Saver pauses metered downloads and background prefetching, disables new thumbnail requests and optional community lookups, and caps native playback at 720p.
 

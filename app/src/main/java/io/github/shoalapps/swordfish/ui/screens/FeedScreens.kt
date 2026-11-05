@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
@@ -260,6 +261,8 @@ fun HomeScreen(
     val cookie by AppGraph.store.cookie.collectAsState()
     val pageId by AppGraph.store.pageId.collectAsState()
     val settings by AppGraph.store.settings.collectAsState()
+    val watchPositions by AppGraph.store.watchPositions.collectAsState()
+    val continuing = io.github.shoalapps.swordfish.data.WatchPositions(watchPositions).continuing
     LaunchedEffect(cookie, pageId, settings.feedMode, settings.learningTopics, settings.shortsDisabled) { vm.reloadIfChanged() }
     // Back online after a failed load: try again without making the user tap.
     val online by AppGraph.online.collectAsState()
@@ -294,6 +297,9 @@ fun HomeScreen(
         ) {
             LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = listPadding(LocalBottomPadding.current)) {
                 item(key = "offline-status") { io.github.shoalapps.swordfish.ui.components.OfflineStatus() }
+                if (settings.rememberWatchPositions && continuing.isNotEmpty()) item(key = "continue-watching") {
+                    ContinueWatchingRow(continuing, onVideo)
+                }
                 item(key = "chips") {
                     Chips(vm.chips(), vm.chip, vm::select, onExplore = { showFeedSheet = true }, learning = vm.learning)
                 }
@@ -877,6 +883,54 @@ fun PlaylistScreen(
                 vm.items.isEmpty() -> item { EmptyState(Icons.Rounded.History, "Nothing here yet", "Videos you add will show up here.") }
                 else -> itemsIndexed(vm.items, key = { _, v -> v.id }) { i, v ->
                     io.github.shoalapps.swordfish.ui.components.VideoRow(v, { onVideo(v) }, Modifier.animateItem().staggeredReveal(i))
+                }
+            }
+        }
+    }
+}
+
+/** Uses Coil's ordinary thumbnail cache directly, without fetching DeArrow branding. */
+@Composable
+internal fun ContinueWatchingRow(
+    positions: List<io.github.shoalapps.swordfish.data.WatchPosition>,
+    onVideo: (VideoItem) -> Unit,
+) {
+    Column(Modifier.testTag("continue-watching")) {
+        SectionHeader("Continue watching", null) {}
+        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(positions, key = { it.video.id }) { entry ->
+                val video = entry.video
+                var menu by remember { mutableStateOf(false) }
+                Column(Modifier.width(180.dp)) {
+                    Column(Modifier.clickable { onVideo(video) }) {
+                        AsyncImage(
+                            model = video.thumbnail,
+                            contentDescription = video.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(10.dp)),
+                        )
+                        androidx.compose.material3.LinearProgressIndicator(
+                            progress = { (entry.positionMs.toFloat() / entry.durationMs).coerceIn(0f, 1f) },
+                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        )
+                        Text(video.title, localise = false, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 6.dp))
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(video.channelName, localise = false, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                        Box {
+                            IconButton(onClick = { menu = true }) {
+                                Icon(androidx.compose.material.icons.Icons.Rounded.MoreVert, "Watch position options")
+                            }
+                            androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                                androidx.compose.material3.DropdownMenuItem(
+                                    text = { Text("Remove from Continue watching") },
+                                    onClick = { AppGraph.store.removeWatchPosition(video.id); menu = false },
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

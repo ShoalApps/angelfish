@@ -19,6 +19,7 @@ import io.github.shoalapps.swordfish.AppGraph
 import io.github.shoalapps.swordfish.data.Comment
 import io.github.shoalapps.swordfish.data.RydVotes
 import io.github.shoalapps.swordfish.data.SbSegment
+import io.github.shoalapps.swordfish.data.WatchPositions
 import io.github.shoalapps.swordfish.data.VideoItem
 import io.github.shoalapps.swordfish.data.toVideo
 import io.github.shoalapps.swordfish.data.videoIdOf
@@ -136,6 +137,54 @@ class PlayerViewModel : ViewModel() {
     var queueMessage by mutableStateOf<String?>(null)
         private set
 
+    var resumeNotice by mutableStateOf<Pair<String, Long>?>(null)
+        private set
+    private var resumeOnLoad = false
+    private var lastWatchSaveMs = 0L
+    private var completedVideo = false
+
+    /** Snapshot Media3 on its application thread; Store writes the immutable copy on IO. */
+    fun saveWatchPosition() {
+        val video = current ?: return
+        if (loading || completedVideo || player.currentMediaItem?.mediaId != video.id || player.duration <= 0) return
+        val live = video.isLive || player.isCurrentMediaItemLive ||
+            info?.streamType == org.schabi.newpipe.extractor.stream.StreamType.LIVE_STREAM ||
+            info?.streamType == org.schabi.newpipe.extractor.stream.StreamType.AUDIO_LIVE_STREAM
+        store.recordWatchPosition(video.copy(isLive = live), player.currentPosition.coerceAtLeast(0), player.duration)
+        lastWatchSaveMs = android.os.SystemClock.elapsedRealtime()
+    }
+
+    private fun initialPosition(video: VideoItem): Long {
+        val explicit = pendingStartMs
+        pendingStartMs = 0
+        val shouldRestore = resumeOnLoad
+        resumeOnLoad = false
+        if (explicit > 0) return explicit
+        if (!shouldRestore || !store.settings.value.rememberWatchPositions ||
+            !WatchPositions.eligible(video, video.durationSec * 1000) ||
+            info?.streamType == org.schabi.newpipe.extractor.stream.StreamType.AUDIO_LIVE_STREAM) return 0
+        val saved = WatchPositions(store.watchPositions.value).resumeMs(video.id)
+        // The current metadata can have a shorter duration than the saved copy.
+        if (WatchPositions.finished(saved, video.durationSec * 1000)) {
+            store.removeWatchPosition(video.id)
+            return 0
+        }
+        if (saved > 0) resumeNotice = video.id to saved
+        return saved
+    }
+
+    fun dismissResumeNotice(notice: Pair<String, Long>) {
+        if (resumeNotice == notice) resumeNotice = null
+    }
+
+    fun startOver(id: String) {
+        if (current?.id != id) return
+        store.removeWatchPosition(id)
+        completedVideo = false
+        seekTo(0)
+        resumeNotice = null
+    }
+
     private fun queueNotice(message: String) {
         queueMessage = message
         android.widget.Toast.makeText(AppGraph.app, message, android.widget.Toast.LENGTH_LONG).show()
@@ -191,7 +240,13 @@ class PlayerViewModel : ViewModel() {
             }
             audioTracks = choices
         }
-        override fun onIsPlayingChanged(playing: Boolean) { isPlaying = playing }
+        override fun onIsPlayingChanged(playing: Boolean) {
+            isPlaying = playing
+            if (!playing) saveWatchPosition()
+        }
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            if (!playWhenReady) saveWatchPosition()
+        }
         override fun onPlaybackStateChanged(state: Int) {
             buffering = state == Player.STATE_BUFFERING
             if (state == Player.STATE_READY) { durationMs = player.duration.coerceAtLeast(0); queueFailures = 0 }
@@ -206,6 +261,7 @@ class PlayerViewModel : ViewModel() {
         override fun onPositionDiscontinuity(old: Player.PositionInfo, new: Player.PositionInfo, reason: Int) {
             if (reason != Player.DISCONTINUITY_REASON_SEEK) return
             endHandled = false
+            completedVideo = false
             // Going back into a segment means you want to watch it: don't skip it, and load it.
             val pos = new.positionMs / 1000.0
             segments.firstOrNull { pos >= it.startSec && pos < it.endSec - 0.4 }?.let { skippedIds += it.uuid }
@@ -250,6 +306,7 @@ class PlayerViewModel : ViewModel() {
     }
 
     private fun tick() {
+        if (player.isPlaying && android.os.SystemClock.elapsedRealtime() - lastWatchSaveMs >= 10_000) saveWatchPosition()
         positionMs = player.currentPosition
         bufferedMs = player.bufferedPosition
         if (io.github.shoalapps.swordfish.BuildConfig.DEBUG && positionMs / 1000 != lastLoggedSec) {
@@ -298,6 +355,8 @@ class PlayerViewModel : ViewModel() {
     private fun onEnded() {
         if (endHandled || loading || current == null) return
         endHandled = true
+        completedVideo = true
+        current?.let { store.removeWatchPosition(it.id) }
         val s = store.settings.value
         if (sleepMinutes == -1) {
             player.pause()
@@ -306,7 +365,7 @@ class PlayerViewModel : ViewModel() {
         }
         when {
             store.queue.value.isNotEmpty() -> next()
-            s.loopVideo -> { endHandled = false; player.seekTo(0); player.play() }
+            s.loopVideo -> { endHandled = false; player.seekTo(0); completedVideo = false; player.play() }
             s.autoplayNext && !fullscreen && sheetVisible && current != null -> autoplayNext()
         }
     }
@@ -350,13 +409,29 @@ class PlayerViewModel : ViewModel() {
 
     fun open(item: VideoItem) = open(item, expandSheet = true)
 
-    private fun open(item: VideoItem, expandSheet: Boolean, fromQueue: Boolean = false) {
+    private fun open(item: VideoItem, expandSheet: Boolean, fromQueue: Boolean = false, startMs: Long = 0) {
         nextJob?.cancel()
         queuedPlayback = fromQueue
+        if (expandSheet) showSheet(1f)
+        if ((info?.url == item.url || usingLocal && player.currentMediaItem?.mediaId == item.id) && error == null) {
+            current = item
+            store.queueCurrent(item.id)
+            if (startMs > 0) seekTo(startMs)
+            else if (completedVideo || player.playbackState == Player.STATE_ENDED) {
+                store.removeWatchPosition(item.id)
+                seekTo(0)
+                player.play()
+            }
+            return
+        }
+        saveWatchPosition()
+        resumeNotice = null
+        resumeOnLoad = true
+        pendingStartMs = startMs.coerceAtLeast(0)
+        completedVideo = false
+        lastWatchSaveMs = android.os.SystemClock.elapsedRealtime()
         current = item
         store.queueCurrent(item.id)
-        if (expandSheet) showSheet(1f)
-        if ((info?.url == item.url || usingLocal && player.currentMediaItem?.mediaId == item.id) && error == null) return
         load(item.url)
     }
 
@@ -364,11 +439,14 @@ class PlayerViewModel : ViewModel() {
         val id = videoIdOf(url)
         if (id == info?.id) {
             showSheet(1f)
-            if (startSec > 0) player.seekTo(startSec * 1000)
+            if (startSec > 0) seekTo(startSec * 1000)
+            else if (completedVideo || player.playbackState == Player.STATE_ENDED) {
+                store.removeWatchPosition(id)
+                seekTo(0)
+                player.play()
+            }
             return
         }
-        // Set before loading starts, so a cached video can't begin playing from 0.
-        pendingStartMs = startSec * 1000
         open(
             VideoItem(
                 url = "https://www.youtube.com/watch?v=$id",
@@ -376,7 +454,10 @@ class PlayerViewModel : ViewModel() {
                 title = "",
                 channelName = "",
                 thumbnail = "https://i.ytimg.com/vi/$id/hqdefault.jpg",
+                isShort = url.contains("/shorts/"),
             ),
+            expandSheet = true,
+            startMs = startSec.coerceAtLeast(0) * 1000,
         )
     }
 
@@ -465,8 +546,15 @@ class PlayerViewModel : ViewModel() {
         val videoId = videoIdOf(url)
         AppGraph.offline.watching(current)
         if (AppGraph.offline.local(videoId) != null) {
-            playLocal(videoId, pendingStartMs, true)
-            pendingStartMs = 0
+            // Download metadata is available even when opening a bare watch URL offline.
+            AppGraph.offline.videos.value.firstOrNull { it.video.id == videoId }?.video?.let { local ->
+                val knownDuration = store.watchPositions.value.firstOrNull { it.video.id == videoId }?.durationMs?.div(1000)
+                current = local.copy(
+                    isShort = local.isShort || current?.isShort == true,
+                    durationSec = local.durationSec.takeIf { it > 0 } ?: knownDuration ?: -1,
+                )
+            }
+            playLocal(videoId, current?.let(::initialPosition) ?: 0, true)
             loading = false
             current?.let(store::addHistory)
             return
@@ -498,7 +586,7 @@ class PlayerViewModel : ViewModel() {
                 val video = i.toVideo().let { v ->
                     // keep the avatar/thumbnail we already had if the page lacks them
                     val prev = current
-                    v.copy(channelAvatar = v.channelAvatar ?: prev?.channelAvatar)
+                    v.copy(channelAvatar = v.channelAvatar ?: prev?.channelAvatar, isShort = prev?.isShort == true || prev?.url?.contains("/shorts/") == true)
                 }
                 current = video
                 AppGraph.offline.watching(video)
@@ -507,8 +595,9 @@ class PlayerViewModel : ViewModel() {
                         .ifEmpty { io.github.shoalapps.swordfish.data.KidsClient.related[i.id].orEmpty() },
                 )
                 store.addHistory(video)
-                if (AppGraph.offline.local(video.id) != null) playLocal(video.id, pendingStartMs, true)
-                else play(i, pendingStartMs)
+                val startMs = initialPosition(video)
+                if (AppGraph.offline.local(video.id) != null) playLocal(video.id, startMs, true)
+                else play(i, startMs)
                 skipFailed = queuedPlayback && error != null
                 pendingStartMs = 0
                 captionTracks = Captions.tracks(i)
@@ -732,12 +821,15 @@ class PlayerViewModel : ViewModel() {
 
     fun togglePlay() {
         endHandled = false
-        if (player.playbackState == Player.STATE_ENDED) player.seekTo(0)
+        if (player.playbackState == Player.STATE_ENDED || completedVideo) {
+            player.seekTo(0)
+            completedVideo = false
+        }
         if (player.isPlaying) player.pause() else player.play()
     }
 
-    fun seekBy(ms: Long) = player.seekTo((player.currentPosition + ms).coerceAtLeast(0))
-    fun seekTo(ms: Long) { endHandled = false; player.seekTo(ms) }
+    fun seekBy(ms: Long) = seekTo((player.currentPosition + ms).coerceAtLeast(0))
+    fun seekTo(ms: Long) { endHandled = false; completedVideo = false; player.seekTo(ms) }
 
     fun showSheet(target: Float) {
         sheetVisible = true
@@ -748,6 +840,8 @@ class PlayerViewModel : ViewModel() {
     fun collapse() = showSheet(0f)
 
     fun close() {
+        saveWatchPosition()
+        resumeNotice = null
         nextJob?.cancel()
         loadJob?.cancel()
         player.stop()
@@ -763,6 +857,7 @@ class PlayerViewModel : ViewModel() {
     }
 
     override fun onCleared() {
+        saveWatchPosition()
         player.removeListener(listener)
     }
 }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Watch positions stay on this device. Other existing backup behaviour is unchanged. -->
+    <exclude domain="sharedpref" path="watch-positions.xml" />
+</full-backup-content>
