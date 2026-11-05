@@ -651,6 +651,7 @@ fun YouScreen(
     val cookie by AppGraph.store.cookie.collectAsState()
     val localHistory by AppGraph.store.history.collectAsState()
     val localPlaylists by AppGraph.store.playlists.collectAsState()
+    val transfer = io.github.shoalapps.swordfish.ui.components.rememberPlaylistTransfer()
     var newPlaylist by remember { mutableStateOf(false) }
     if (newPlaylist) io.github.shoalapps.swordfish.ui.components.PlaylistNameDialog(
         onDismiss = { newPlaylist = false },
@@ -734,6 +735,13 @@ fun YouScreen(
             item(key = "local-pl-head") { SectionHeader("Playlists", "New playlist") { newPlaylist = true } }
             item(key = "local-pl-note") {
                 Text("Saved on this phone", modifier = Modifier.padding(horizontal = 16.dp))
+            }
+            item(key = "local-pl-files") {
+                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    item { OutlinedButton(onClick = { transfer.import() }, enabled = !transfer.busy) { Text("Import playlists") } }
+                    item { OutlinedButton(onClick = { transfer.export(localPlaylists.map { it.id }) },
+                        enabled = !transfer.busy && localPlaylists.isNotEmpty()) { Text("Export all playlists") } }
+                }
             }
             items(localPlaylists, key = { "local-pl-${it.id}" }) { playlist ->
                 ListItem(

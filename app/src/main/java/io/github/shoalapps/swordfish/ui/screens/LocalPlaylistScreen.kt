@@ -29,6 +29,7 @@ fun LocalPlaylistScreen(id: String, onBack: () -> Unit, onPlay: (List<VideoItem>
     val queue by AppGraph.store.queue.collectAsState()
     val playlist = playlists.firstOrNull { it.id == id }
     val context = LocalContext.current
+    val transfer = rememberPlaylistTransfer()
     var rename by remember { mutableStateOf(false) }
     var delete by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<List<VideoItem>?>(null) }
@@ -78,6 +79,7 @@ fun LocalPlaylistScreen(id: String, onBack: () -> Unit, onPlay: (List<VideoItem>
                             AppGraph.store.addAllToQueue(playlist.items)
                             toast(context, "Added to queue")
                         }, enabled = playlist.items.isNotEmpty()) { Text("Add all to queue") } }
+                        item { OutlinedButton(onClick = { transfer.export(listOf(id)) }, enabled = !transfer.busy) { Text("Export playlist") } }
                         item { TextButton(onClick = { rename = true }) { Text("Rename") } }
                         item { TextButton(onClick = { delete = true }) { Text("Delete") } }
                     }

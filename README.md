@@ -9,7 +9,7 @@ open-source apps that take on your wallpaper colours with Material You.
 - NewPipeExtractor backend: no Google account, no ads
 - Media3 ExoPlayer with background play and picture-in-picture
 - SponsorBlock, DeArrow and Return YouTube Dislike built in
-- A playback queue, and named playlists kept on your phone, with no account needed
+- A playback queue, and named playlists kept on your phone, with no account needed, which you can export and import
 - Save a video or just its audio for offline. Automatic downloads are off by default, come only from your subscriptions, and wait until you've stopped watching
 - Buffering follows your measured connection speed, fetching only as much as it needs
 - TV mode for big screens, remotes and Bluetooth/USB controllers (see below)

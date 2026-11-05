@@ -194,6 +194,12 @@ class Store(context: Context) {
     fun removeFromPlaylist(id: String, videoId: String) = changePlaylists { it.remove(id, videoId) }
     fun moveInPlaylist(id: String, videoId: String, offset: Int) = changePlaylists { it.move(id, videoId, offset) }
 
+    fun importPlaylists(incoming: LocalPlaylistCodec.Decoded): LocalPlaylistCodec.Imported {
+        val imported = LocalPlaylistCodec().merge(_playlists.value, incoming) { java.util.UUID.randomUUID().toString() }
+        changePlaylists { LocalPlaylists(imported.playlists) }
+        return imported
+    }
+
     private fun changePlaylists(change: (LocalPlaylists) -> LocalPlaylists): Boolean {
         val before = _playlists.value
         val after = change(LocalPlaylists(before)).playlists
