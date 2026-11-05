@@ -93,6 +93,9 @@ import io.github.shoalapps.swordfish.ui.components.openExternal
 import io.github.shoalapps.swordfish.ui.components.toast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.rounded.Favorite
+import io.github.shoalapps.common.ui.SupportCard
+import io.github.shoalapps.swordfish.AppLanguage
 
 private val qualityOptions = listOf(2160, 1440, 1080, 720, 480, 360, 240, 144)
 
@@ -119,7 +122,16 @@ fun SettingsScreen(
     val update: ((Settings) -> Settings) -> Unit = { store.updateSettings(it) }
 
     SettingsScaffold("Settings", onBack) {
-        item(key = "support") { val ctx = androidx.compose.ui.platform.LocalContext.current; SupportCard { openExternal(ctx, "https://liberapay.com/ShoalApps") } }
+        item(key = "support") {
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            SupportCard(
+                title = AppLanguage.text("Support Shoal"),
+                description = AppLanguage.text("Free, open source and ad-free. Donations on Liberapay keep it going."),
+                donateLabel = AppLanguage.text("Donate"),
+                onDonateLabel = "Donate on Liberapay",
+                heartIcon = Icons.Rounded.Favorite,
+            ) { openExternal(ctx, "https://liberapay.com/ShoalApps") }
+        }
         group("Account") {
             if (signedIn) {
                 row { sh -> Row2(account?.name ?: "Signed in", account?.handle ?: "YouTube account", sh) {
