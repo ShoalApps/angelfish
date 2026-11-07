@@ -112,7 +112,7 @@ dependencies {
     implementation("androidx.media3:media3-session:1.11.1")
 
     // YouTube backend (same build NewPipe ships; uses the visionOS client to avoid bot checks)
-    implementation("com.github.TeamNewPipe:NewPipeExtractor:6cb36e982311dc1c529997bc329013afe75f37d1")
+    implementation("com.github.TeamNewPipe:NewPipeExtractor:v0.27.0")
 
     // Networking, images, JSON
     implementation("com.squareup.okhttp3:okhttp:4.12.1")
