@@ -1,0 +1,42 @@
+Performing Streamed Install
+Success
+screen 1080x2400
+[tap] 'Let's dive in' at 769,1935
+[shot] shots/01_home_light.png alive=True
+[check] home: found=['Angelfish', 'You'] text=Help fix bugs? | Angelfish can send anonymous crash and error reports to Shoal (through Sentry) so problems get fixed. They include the error, the app and Android version and the phone model, never your accounts, history or anything you've looked at. You can change this in Settings. | Privacy policy | No thanks | Send reports
+[shot] shots/02_home_scrolled.png alive=True
+[shot] shots/03_home_back_up_immediate.png alive=True
+[shot] shots/04_player_opened.png alive=True
+[shot] shots/05_player_after_24s.png alive=True
+[check] player: found=[] text=Help fix bugs? | Angelfish can send anonymous crash and error reports to Shoal (through Sentry) so problems get fixed. They include the error, the app and Android version and the phone model, never your accounts, history or anything you've looked at. You can change this in Settings. | Privacy policy | No thanks | Send reports
+[shot] shots/06_watch_page_scrolled.png alive=True
+[shot] shots/07_mini_player.png alive=True
+[miss] could not find 'Search'
+[shot] shots/08_mini_reopened.png alive=True
+[crash-check] after reopening alive=True
+[shot] shots/09_collapsed_again.png alive=True
+[shot] shots/10_returned_to_app.png alive=True
+[crash-check] after leaving and returning alive=True
+[miss] could not find 'Shorts'
+[shot] shots/11_shorts_fallback.png alive=True
+[miss] could not find 'Subscriptions'
+[shot] shots/12_subscriptions.png alive=True
+[miss] could not find 'You'
+[shot] shots/13_you.png alive=True
+[miss] could not find 'About Angelfish'
+[miss] could not find 'Settings'
+[shot] shots/14_settings_top.png alive=True
+[shot] shots/15_settings_middle.png alive=True
+[shot] shots/16_settings_bottom.png alive=True
+[miss] could not find 'Developer settings'
+[miss] could not find 'Home'
+[miss] could not find 'Choose feed'
+[miss] could not find 'Music'
+[miss] could not find 'Search'
+[shot] shots/17_home_dark.png alive=True
+[miss] could not find 'Shorts'
+[shot] shots/18_shorts_dark.png alive=True
+[miss] could not find 'Home'
+[shot] shots/19_mini_swiped_away.png alive=True
+[shot] shots/20_shortcut_search.png alive=True
+crash lines: 80
