@@ -86,7 +86,7 @@ dependencies {
     implementation("com.github.TeamNewPipe:nanojson:e9d656ddb49a412a5a0a5d5ef20ca7ef09549996")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
     // Error reports, only with consent (MIT). See Telemetry.kt.
-    implementation("io.sentry:sentry-android:8.62.0")
+    implementation("io.sentry:sentry-android:8.63.0")
     // Home-screen widgets (Material You colours via Glance).
     implementation("androidx.glance:glance-appwidget:1.2.0")
     implementation("androidx.glance:glance-material3:1.2.0")
