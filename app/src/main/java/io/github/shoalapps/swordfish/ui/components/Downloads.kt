@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package io.github.shoalapps.swordfish.ui.components
 
 import androidx.compose.foundation.layout.*
@@ -67,7 +69,7 @@ fun Downloads(onVideo: (VideoItem) -> Unit) {
                     progress.containsKey(entry.video.id) -> "Downloading ${progress[entry.video.id]}%"
                     else -> "Queued - waiting for an allowed connection"
                 }, style = MaterialTheme.typography.bodySmall)
-                progress[entry.video.id]?.let { percent -> LinearProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth()) }
+                progress[entry.video.id]?.let { percent -> androidx.compose.material3.LinearWavyProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth()) }
                 Row {
                     if (entry.complete) TextButton(onClick = { onVideo(entry.video) }) { Text("Play") }
                     if (!entry.kept || entry.error != null) TextButton(onClick = { AppGraph.offline.keep(entry.video) }) { Text(if (entry.error != null) "Retry" else "Keep") }

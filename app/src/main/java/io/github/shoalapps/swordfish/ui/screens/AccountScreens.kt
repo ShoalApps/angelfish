@@ -126,7 +126,7 @@ fun LoginScreen(onDone: () -> Unit, onBack: () -> Unit) {
                 modifier = Modifier.fillMaxSize(),
             )
             AnimatedVisibility(loading, enter = fadeIn(tween(150)), exit = fadeOut(tween(300)), modifier = Modifier.align(Alignment.TopCenter)) {
-                LinearProgressIndicator(Modifier.fillMaxWidth())
+                androidx.compose.material3.LinearWavyProgressIndicator(Modifier.fillMaxWidth())
             }
         }
     }
