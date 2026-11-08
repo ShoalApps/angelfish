@@ -178,9 +178,9 @@ import io.github.shoalapps.swordfish.data.uploadedText
 import io.github.shoalapps.swordfish.player.Rating
 import io.github.shoalapps.swordfish.ui.Links
 import io.github.shoalapps.swordfish.ui.components.CenterLoading
-import io.github.shoalapps.swordfish.ui.components.PolygonShape
-import io.github.shoalapps.swordfish.ui.components.rememberMorphShape
-import io.github.shoalapps.swordfish.ui.components.rememberSpin
+import io.github.shoalapps.common.expressive.PolygonShape
+import io.github.shoalapps.common.expressive.rememberMorphShape
+import io.github.shoalapps.common.expressive.rememberSpin
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.foundation.interaction.collectIsPressedAsState

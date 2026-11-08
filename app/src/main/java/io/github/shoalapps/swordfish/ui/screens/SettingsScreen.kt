@@ -86,8 +86,9 @@ import io.github.shoalapps.swordfish.AppGraph
 import io.github.shoalapps.swordfish.data.SbCategories
 import io.github.shoalapps.swordfish.data.Settings
 import io.github.shoalapps.swordfish.ui.components.LocalBottomPadding
-import io.github.shoalapps.swordfish.ui.components.MorphShape
-import io.github.shoalapps.swordfish.ui.components.PolygonShape
+import io.github.shoalapps.common.expressive.MorphShape
+import io.github.shoalapps.common.expressive.PolygonShape
+import io.github.shoalapps.common.expressive.settingsGroup
 import io.github.shoalapps.swordfish.ui.components.listPadding
 import io.github.shoalapps.swordfish.ui.components.openExternal
 import io.github.shoalapps.swordfish.ui.components.toast
@@ -635,38 +636,14 @@ private fun SettingsScaffold(title: String, onBack: () -> Unit, content: android
     }
 }
 
-/** Rows of one settings group; each row is handed the Expressive shape for its place in the group. */
-private class GroupBuilder {
-    val rows = mutableListOf<@Composable (ListItemShapes) -> Unit>()
-    fun row(content: @Composable (ListItemShapes) -> Unit) { rows += content }
-}
+// The settings tiles come from the shared Shoal library (shoal-expressive), so every app looks the same.
+private typealias GroupBuilder = io.github.shoalapps.common.expressive.SettingsGroupBuilder
 
-/**
- * A titled group of Material 3 Expressive segmented list items: rounded tiles with small gaps,
- * the outer corners rounder than the inner ones, morphing when pressed.
- */
-private fun androidx.compose.foundation.lazy.LazyListScope.group(title: String, showTitle: Boolean = true, build: GroupBuilder.() -> Unit) {
-    val rows = GroupBuilder().apply(build).rows
-    if (rows.isEmpty()) return
-    if (showTitle) item(key = "title-$title") { Section(title) }
-    rows.forEachIndexed { i, row ->
-        item(key = "$title-$i") {
-            Box(Modifier.padding(horizontal = 16.dp, vertical = ListItemDefaults.SegmentedGap / 2)) {
-                row(ListItemDefaults.segmentedShapes(i, rows.size))
-            }
-        }
-    }
-}
+private fun androidx.compose.foundation.lazy.LazyListScope.group(title: String, showTitle: Boolean = true, build: GroupBuilder.() -> Unit) =
+    settingsGroup(title, showTitle, build)
 
 @Composable
-private fun Section(title: String) {
-    Text(
-        title,
-        style = MaterialTheme.typography.titleSmallEmphasized,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 32.dp, top = 24.dp, bottom = 8.dp),
-    )
-}
+private fun Section(title: String) = io.github.shoalapps.common.expressive.SettingsSection(title)
 
 @Composable
 private fun Toggle(
@@ -676,28 +653,11 @@ private fun Toggle(
     shapes: ListItemShapes,
     leading: (@Composable () -> Unit)? = null,
     onChange: (Boolean) -> Unit,
-) {
-    SegmentedListItem(
-        checked = checked,
-        onCheckedChange = onChange,
-        shapes = shapes,
-        leadingContent = leading,
-        supportingContent = body?.let { { Text(it) } },
-        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        colors = tileColors(),
-    ) { Text(title) }
-}
+) = io.github.shoalapps.common.expressive.SettingsToggle(title, body, checked, shapes, leading, onChange)
 
 @Composable
-private fun Link(title: String, body: String?, shapes: ListItemShapes, trailingArrow: Boolean = true, onClick: () -> Unit) {
-    SegmentedListItem(
-        onClick = onClick,
-        shapes = shapes,
-        supportingContent = body?.let { { Text(it) } },
-        trailingContent = if (trailingArrow) ({ Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null) }) else null,
-        colors = tileColors(),
-    ) { Text(title) }
-}
+private fun Link(title: String, body: String?, shapes: ListItemShapes, trailingArrow: Boolean = true, onClick: () -> Unit) =
+    io.github.shoalapps.common.expressive.SettingsLink(title, body, shapes, trailingArrow, onClick)
 
 @Composable
 private fun Row2(title: String, body: String, shapes: ListItemShapes, trailing: @Composable () -> Unit) {
@@ -709,22 +669,12 @@ private fun Row2(title: String, body: String, shapes: ListItemShapes, trailing: 
     ) { Text(title) }
 }
 
-/** Every tile sits on the same tonal container, whether its switch is on or off. */
 @Composable
-private fun tileColors() = ListItemDefaults.segmentedColors(
-    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-    selectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-    selectedContentColor = MaterialTheme.colorScheme.onSurface,
-    selectedSupportingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-)
+private fun tileColors() = io.github.shoalapps.common.expressive.settingsTileColors()
 
-/** Free-form content in a group tile. */
 @Composable
-private fun Tile(shapes: ListItemShapes, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
-    Surface(shape = shapes.shape, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), content = content)
-    }
-}
+private fun Tile(shapes: ListItemShapes, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) =
+    io.github.shoalapps.common.expressive.SettingsTile(shapes, content)
 
 @Composable
 private fun Segmented(title: String, labels: List<String>, selected: Int, shapes: ListItemShapes, onSelect: (Int) -> Unit) {

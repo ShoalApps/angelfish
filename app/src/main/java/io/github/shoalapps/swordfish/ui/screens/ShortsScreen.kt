@@ -134,7 +134,7 @@ import io.github.shoalapps.swordfish.ui.ScreenAwake
 import io.github.shoalapps.swordfish.ui.components.Avatar
 import io.github.shoalapps.swordfish.ui.components.CenterLoading
 import io.github.shoalapps.swordfish.ui.components.ErrorState
-import io.github.shoalapps.swordfish.ui.components.ShapeIcon
+import io.github.shoalapps.common.expressive.ShapeIcon
 import io.github.shoalapps.swordfish.ui.components.shareVideo
 import io.github.shoalapps.swordfish.ui.components.toast
 import kotlinx.coroutines.CancellationException

@@ -54,8 +54,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.MaterialShapes
-import io.github.shoalapps.swordfish.ui.components.CookieAvatar
-import io.github.shoalapps.swordfish.ui.components.ShapeIcon
+import io.github.shoalapps.common.expressive.CookieAvatar
+import io.github.shoalapps.common.expressive.ShapeIcon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -114,7 +114,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import io.github.shoalapps.swordfish.data.FeedFilter
 import io.github.shoalapps.swordfish.data.LearningTopics
-import io.github.shoalapps.swordfish.ui.components.PolygonShape
+import io.github.shoalapps.common.expressive.PolygonShape
 import io.github.shoalapps.swordfish.ui.components.VideoRow
 import io.github.shoalapps.swordfish.ui.components.rememberCachedListState
 import kotlinx.coroutines.async

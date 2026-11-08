@@ -56,7 +56,7 @@ import io.github.shoalapps.swordfish.AppGraph
 import io.github.shoalapps.swordfish.data.ChannelChoice
 import io.github.shoalapps.swordfish.ui.components.Avatar
 import io.github.shoalapps.swordfish.ui.components.CenterLoading
-import io.github.shoalapps.swordfish.ui.components.CookieAvatar
+import io.github.shoalapps.common.expressive.CookieAvatar
 import io.github.shoalapps.swordfish.ui.components.EmptyState
 import io.github.shoalapps.swordfish.ui.components.ErrorState
 import kotlinx.coroutines.launch

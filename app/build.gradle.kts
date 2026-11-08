@@ -76,6 +76,7 @@ android {
 
 dependencies {
     implementation("io.github.shoalapps.common:shoal-ui:" + rootProject.file("shoal-common.version").readText().trim())
+    implementation("io.github.shoalapps.common:shoal-expressive:" + rootProject.file("shoal-common.version").readText().trim())
     implementation("androidx.work:work-runtime-ktx:2.12.0")
     implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
     implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
