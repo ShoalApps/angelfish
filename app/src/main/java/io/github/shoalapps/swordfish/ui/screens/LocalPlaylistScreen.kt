@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.github.shoalapps.swordfish.AppGraph
-import io.github.shoalapps.swordfish.LocalisedIcon as Icon
-import io.github.shoalapps.swordfish.LocalisedText as Text
+import io.github.shoalapps.common.ui.LocalisedIcon as Icon
+import io.github.shoalapps.common.ui.LocalisedText as Text
 import io.github.shoalapps.swordfish.data.VideoItem
 import io.github.shoalapps.swordfish.ui.components.*
 

@@ -13,7 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import io.github.shoalapps.swordfish.AppGraph
-import io.github.shoalapps.swordfish.LocalisedText as Text
+import io.github.shoalapps.common.ui.LocalisedText as Text
 import io.github.shoalapps.swordfish.data.VideoItem
 
 @Composable

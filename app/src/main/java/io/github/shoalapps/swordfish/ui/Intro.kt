@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PlayArrow
-import io.github.shoalapps.swordfish.LocalisedIcon as Icon
+import io.github.shoalapps.common.ui.LocalisedIcon as Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import io.github.shoalapps.swordfish.LocalisedText as Text
+import io.github.shoalapps.common.ui.LocalisedText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue

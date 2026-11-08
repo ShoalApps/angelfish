@@ -35,7 +35,7 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Subscriptions
 import androidx.compose.material.icons.rounded.VideoLibrary
-import io.github.shoalapps.swordfish.LocalisedIcon as Icon
+import io.github.shoalapps.common.ui.LocalisedIcon as Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
@@ -44,7 +44,7 @@ import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.material3.Scaffold
-import io.github.shoalapps.swordfish.LocalisedText as Text
+import io.github.shoalapps.common.ui.LocalisedText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState

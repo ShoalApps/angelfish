@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import io.github.shoalapps.swordfish.AppGraph
-import io.github.shoalapps.swordfish.LocalisedText as Text
+import io.github.shoalapps.common.ui.LocalisedText as Text
 import io.github.shoalapps.swordfish.data.LocalPlaylistCodec
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
