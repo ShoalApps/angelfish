@@ -158,7 +158,7 @@ object AppGraph {
 
     /** A newer release found on GitHub, its download progress, and any message about it. */
     object Update {
-        var available by androidx.compose.runtime.mutableStateOf<io.github.shoalapps.swordfish.data.Updater.Release?>(null)
+        var available by androidx.compose.runtime.mutableStateOf<io.github.shoalapps.common.update.AppRelease?>(null)
         var progress by androidx.compose.runtime.mutableStateOf<Float?>(null)
         var message by androidx.compose.runtime.mutableStateOf<String?>(null)
     }
