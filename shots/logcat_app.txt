@@ -1,0 +1,334 @@
+11-11 19:02:19.587 D/ShortcutService(  558): Getting shortcuts for launcher= com.google.android.asuser=0 pkg=io.github.shoalapps.swordfish
+11-11 19:02:19.587 D/ShortcutService(  558): Getting shortcuts for launcher= com.google.android.asuser=0 pkg=io.github.shoalapps.swordfish
+11-11 19:02:24.548 W/gle.android.gms( 1391): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~qM1jNV-bYaRrph5tK96MEQ==/io.github.shoalapps.swordfish-_96pEfRgEm-FleAgsbGlqw==/base.apk' with 1 weak references
+11-11 19:04:18.477 I/ActivityTaskManager(  558): START u0 {flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+11-11 19:04:18.478 V/WindowManagerShell(  906): Transition requested (#96): android.os.BinderProxy@b19bd0b TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=52 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity } baseActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} topActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} origActivity=null realActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} numActivities=1 lastActiveTime=326035 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@31107e8} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 136 - 0, 0) topActivityInfo=ActivityInfo{4193e01 io.github.shoalapps.swordfish.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1080 topActivityLetterboxHeight=2400 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 96 }
+11-11 19:04:18.480 I/AppsFilter(  558): interaction: PackageSetting{8fea1ec com.android.microdroid.empty_payload/10195} -> PackageSetting{f12b54 io.github.shoalapps.swordfish/10211} BLOCKED
+11-11 19:04:18.482 I/TopTaskTracker( 1182): onTaskMovedToFront: (moved taskInfo to front) taskId=52, baseIntent=Intent { flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity }
+11-11 19:04:18.516 I/AppWidgetServiceImpl(  558): Updating package stopped masked state for uid 10211 package io.github.shoalapps.swordfish isStopped false
+11-11 19:04:18.535 I/ActivityManager(  558): Start proc 5326:io.github.shoalapps.swordfish/u0a211 for next-top-activity {io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}
+11-11 19:04:18.605 E/lapps.swordfish( 5326): Not starting debugger since process cannot load the jdwp agent.
+11-11 19:04:18.658 W/.apps.wellbeing( 1367): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~qM1jNV-bYaRrph5tK96MEQ==/io.github.shoalapps.swordfish-_96pEfRgEm-FleAgsbGlqw==/base.apk' with 1 weak references
+11-11 19:04:18.760 D/nativeloader( 5326): Configuring clns-7 for other apk /data/app/~~qM1jNV-bYaRrph5tK96MEQ==/io.github.shoalapps.swordfish-_96pEfRgEm-FleAgsbGlqw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~qM1jNV-bYaRrph5tK96MEQ==/io.github.shoalapps.swordfish-_96pEfRgEm-FleAgsbGlqw==/lib/x86_64:/data/app/~~qM1jNV-bYaRrph5tK96MEQ==/io.github.shoalapps.swordfish-_96pEfRgEm-FleAgsbGlqw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/io.github.shoalapps.swordfish
+11-11 19:04:18.791 V/WindowManager(  558): Sent Transition (#96) createdAt=11-11 19:04:18.473 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=52 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity } baseActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} topActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} origActivity=null realActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} numActivities=1 lastActiveTime=326035 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{a2ce3b4 Task{d5eca8 #52 type=standard A=10211:io.github.shoalapps.swordfish}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 136 - 0, 0) topActivityInfo=ActivityInfo{3b5fbdd io.github.shoalapps.swordfish.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1080 topActivityLetterboxHeight=2400 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 96 }
+11-11 19:04:18.791 V/WindowManager(  558):         {WCT{RemoteToken{a2ce3b4 Task{d5eca8 #52 type=standard A=10211:io.github.shoalapps.swordfish}}} m=OPEN f=NONE leash=Surface(name=Task=52)/@0x4a4df08 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},
+11-11 19:04:19.045 D/ConnectivityService(  558): requestNetwork for uid/pid:10211/5326 activeRequest: null callbackRequest: 156 [NetworkRequest [ REQUEST id=157, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false
+11-11 19:04:19.049 D/OemPaidWifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=157, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.049 D/MultiInternetWifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=157, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.049 D/WifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=157, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.049 D/UntrustedWifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=157, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.088 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:04:19.089 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:04:19.089 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:04:19.090 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:04:19.090 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:04:19.135 D/WM-SystemJobScheduler( 5326): Scheduling work ID d1feba70-7f08-4819-a308-b73c3add6dc5 (io.github.shoalapps.swordfish.data.SubscriptionWorker), Job ID 0
+11-11 19:04:19.141 E/A       ( 1680): onError
+11-11 19:04:19.141 E/A       ( 1680): com.google.android.apps.gsa.shared.speech.b.l: errorCode: 65561, engine: 2
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.staticplugins.bp.a.f.a(PG:23)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.s3.o.hi(PG:13)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.ci.g.a.f.e(PG:9)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:162)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.speech.k.a.g.iO(PG:26)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.s3.p.c(PG:102)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.s3.q.run(PG:1)
+11-11 19:04:19.141 E/A       ( 1680): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+11-11 19:04:19.141 E/A       ( 1680): 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:12)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-11 19:04:19.141 E/A       ( 1680): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+11-11 19:04:19.141 E/A       ( 1680): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+11-11 19:04:19.141 E/A       ( 1680): 	at java.lang.Thread.run(Thread.java:1012)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:42)
+11-11 19:04:19.141 E/A       ( 1680): Caused by: com.google.android.apps.gsa.shared.speech.b.n: errorCode: 65586, engine: 2
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.s3.o.hi(PG:6)
+11-11 19:04:19.141 E/A       ( 1680): 	... 14 more
+11-11 19:04:19.141 E/A       ( 1680): Caused by: com.google.android.apps.gsa.shared.speech.b.j: errorCode: 401, engine: 2
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.assistant.shared.n.i.b(PG:30)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.s3.producers.j.hs(PG:11)
+11-11 19:04:19.141 E/A       ( 1680): 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:135)
+11-11 19:04:19.141 E/A       ( 1680): 	... 12 more
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): Exception in upload method
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): com.google.android.apps.gsa.shared.n.d: Error code: 262182
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.shared.w.bg.d(PG:41)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.libraries.gsa.c.a.am.d(PG:10)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.libraries.gsa.c.a.bl.b(PG:39)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.libraries.gsa.c.a.e.a(PG:18)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.libraries.gsa.c.a.a.run(PG:13)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.be.execute(PG:1)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.i(PG:1)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:95)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.m(PG:17)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.j.fC(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.m(PG:17)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.j.fC(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.m(PG:17)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.j.fC(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.m(PG:17)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.j.fC(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.m(PG:17)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.c.fC(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.bt.cancel(PG:5)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:84)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.staticplugins.an.b.a.run(PG:18)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.be.execute(PG:1)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.i(PG:1)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:95)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.m(PG:17)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.j.fC(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.shared.util.c.ai.fC(PG:13)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.m(PG:17)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.c.fC(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.l(PG:30)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.common.util.concurrent.d.cancel(PG:52)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.s3.p.a(PG:9)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.s3.s.a(PG:7)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.staticplugins.bp.a.d.e(PG:7)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.staticplugins.bp.a.d.c(PG:35)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.staticplugins.bp.a.f.a(PG:37)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.s3.o.hi(PG:13)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.ci.g.a.f.e(PG:9)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:162)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.speech.k.a.g.iO(PG:26)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.s3.p.c(PG:102)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.s3.q.run(PG:1)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:12)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.bg.run(PG:3)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at java.lang.Thread.run(Thread.java:1012)
+11-11 19:04:19.142 E/cr_CronetUrlRequestContext( 1680): 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:42)
+11-11 19:04:19.148 D/ConnectivityService(  558): requestNetwork for uid/pid:10211/5326 activeRequest: null callbackRequest: 160 [NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false
+11-11 19:04:19.154 D/OemPaidWifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.154 D/MultiInternetWifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.155 D/WifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.155 D/UntrustedWifiNetworkFactory(  558): got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10211 RequestorUid: 10211 RequestorPkg: io.github.shoalapps.swordfish UnderlyingNetworks: Null] ]
+11-11 19:04:19.198 E/ActivityThread( 5326): Failed to find provider info for io.github.shoalapps.shoal.accounts
+11-11 19:04:19.203 D/CoreBackPreview(  558): Window{bc1cc62 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@53053e0, mPriority=-1, mIsAnimationCallback=false}
+11-11 19:04:19.569 D/CoreBackPreview(  558): Window{57a1212 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@1a59355, mPriority=-1, mIsAnimationCallback=false}
+11-11 19:04:19.602 I/ActivityTaskManager(  558): Displayed io.github.shoalapps.swordfish/.MainActivity for user 0: +1s75ms
+11-11 19:04:19.658 W/InputManager-JNI(  558): Input channel object '8d3779f Splash Screen io.github.shoalapps.swordfish (client)' was disposed without first being removed with the input manager!
+11-11 19:04:20.060 W/JobServiceContext(  558): Sending onNetworkChanged for a job that isn't started. JobStatus{7b8a203 androidx.work.systemjobscheduler:u0a211/0 @androidx.work.systemjobscheduler@io.github.shoalapps.swordfish/androidx.work.impl.background.systemjob.SystemJobService u=0 s=10211 NET READY}
+11-11 19:04:20.158 I/AppsFilter(  558): interaction: PackageSetting{8fea1ec com.android.microdroid.empty_payload/10195} -> PackageSetting{d23dc4b io.github.shoalapps.swordfish/10211} BLOCKED
+11-11 19:04:20.174 I/AiAiEcho( 1501): AppFetcherImpl onPackageChanged io.github.shoalapps.swordfish.
+11-11 19:04:20.177 I/AiAiEcho( 1501): AppIndexer Package:[io.github.shoalapps.swordfish] UserProfile:[0] Enabled:[true].
+11-11 19:04:20.177 I/AiAiEcho( 1501): AppFetcherImplV2 updateApps package:[io.github.shoalapps.swordfish], userId:[0], reason:[package is updated.].
+11-11 19:04:20.196 D/CarrierSvcBindHelper( 1062): onPackageModified: io.github.shoalapps.swordfish
+11-11 19:04:20.215 D/WM-WorkerWrapper( 5326): Starting work for io.github.shoalapps.swordfish.data.SubscriptionWorker
+11-11 19:04:20.221 D/ShortcutService(  558): changing package: io.github.shoalapps.swordfish userId0
+11-11 19:04:20.221 D/ShortcutService(  558): handlePackageChanged: io.github.shoalapps.swordfish user=0
+11-11 19:04:20.221 D/ShortcutService(  558): rescanPackageIfNeeded 0@io.github.shoalapps.swordfish, forceRescan=true , isNewApp=false
+11-11 19:04:20.243 E/SmsApplication( 1062): com.google.android.apps.messaging lost android:read_cell_broadcasts:  (fixing)
+11-11 19:04:20.247 E/system_server(  558): No package ID 7f found for resource ID 0x7f07007e.
+11-11 19:04:20.247 E/system_server(  558): No package ID 7f found for resource ID 0x7f0e00a0.
+11-11 19:04:20.248 E/system_server(  558): No package ID 7f found for resource ID 0x7f070080.
+11-11 19:04:20.248 E/system_server(  558): No package ID 7f found for resource ID 0x7f0e00a2.
+11-11 19:04:20.248 E/system_server(  558): No package ID 7f found for resource ID 0x7f07007f.
+11-11 19:04:20.248 E/system_server(  558): No package ID 7f found for resource ID 0x7f0e00a1.
+11-11 19:04:20.248 D/ShortcutService(  558): Package io.github.shoalapps.swordfish has 3 manifest shortcut(s), and 0 share target(s)
+11-11 19:04:20.248 D/ShortcutService(  558): Package io.github.shoalapps.swordfish updated, version 91 -> 91
+11-11 19:04:20.253 I/MediaSessionStack(  558): addSession to bottom of stack | record: io.github.shoalapps.swordfish/androidx.media3.session.id./10 (userId=0)
+11-11 19:04:20.254 D/ShortcutService(  558): Package io.github.shoalapps.swordfish: publishing manifest shortcuts
+11-11 19:04:20.261 E/CellBroadcastUtils( 1062): getDefaultCellBroadcastReceiverPackageName: no package found
+11-11 19:04:20.264 D/MediaSessionService(  558): onSessionPlaybackStateChanged: record=io.github.shoalapps.swordfish/androidx.media3.session.id./10 (userId=0) playbackState=PlaybackState {state=NONE(0), position=0, buffered position=0, speed=0.0, updated=327822, actions=7339685, custom actions=[], active item id=0, error=null}
+11-11 19:04:20.265 D/MediaSessionService(  558): onSessionActiveStateChanged: record=io.github.shoalapps.swordfish/androidx.media3.session.id./10 (userId=0) playbackState=PlaybackState {state=NONE(0), position=0, buffered position=0, speed=0.0, updated=327822, actions=7339685, custom actions=[], active item id=0, error=null}
+11-11 19:04:20.266 D/MediaSessionService(  558): onSessionPlaybackStateChanged: record=io.github.shoalapps.swordfish/androidx.media3.session.id./10 (userId=0) playbackState=PlaybackState {state=NONE(0), position=0, buffered position=0, speed=0.0, updated=327824, actions=7339685, custom actions=[], active item id=0, error=null}
+11-11 19:04:20.270 I/MediaPlayerList( 1082): Adding wrapped media player: io.github.shoalapps.swordfish at key: 2
+11-11 19:04:20.270 I/MediaPlayerList( 1082): Adding wrapped media player: io.github.shoalapps.swordfish at key: 2
+11-11 19:04:20.278 E/ActivityThread( 5326): Failed to find provider info for androidx.car.app.connection
+11-11 19:04:20.283 E/RoleControllerServiceImpl(  558): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms.supervision, role: android.app.role.SYSTEM_SUPERVISION
+11-11 19:04:20.283 D/ImsResolver( 1062): maybeAddedImsService, packageName: io.github.shoalapps.swordfish
+11-11 19:04:20.298 E/RoleControllerServiceImpl(  558): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms, role: android.app.role.WALLET
+11-11 19:04:20.304 E/RoleControllerServiceImpl(  558): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.devicelockcontroller, role: android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER
+11-11 19:04:20.319 D/PackageUpdatedTask( 1182): Package updated: mOp=UPDATE packages=[io.github.shoalapps.swordfish]
+11-11 19:04:20.355 D/CoreBackPreview(  558): Window{7ece809 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@6f253af, mPriority=-1, mIsAnimationCallback=false}
+11-11 19:04:20.355 D/CoreBackPreview(  558): Window{7ece809 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@30723bc, mPriority=0, mIsAnimationCallback=true}
+11-11 19:04:20.366 D/ShortcutService(  558): Getting shortcuts for launcher= com.google.android.apps.nexuslauncheruser=0 pkg=io.github.shoalapps.swordfish
+11-11 19:04:20.366 D/ShortcutService(  558): Saving package item io.github.shoalapps.swordfish to /data/system_ce/0/shortcut_service/packages/io.github.shoalapps.swordfish.xml
+11-11 19:04:20.381 D/ShortcutService(  558): Getting shortcuts for launcher= com.android.systemuiuser=0 pkg=io.github.shoalapps.swordfish
+11-11 19:04:20.382 D/ShortcutService(  558): Getting shortcuts for launcher= com.google.android.asuser=0 pkg=io.github.shoalapps.swordfish
+11-11 19:04:20.918 I/WM-WorkerWrapper( 5326): Worker result SUCCESS for Work [ id=d1feba70-7f08-4819-a308-b73c3add6dc5, class=io.github.shoalapps.swordfish.data.SubscriptionWorker, tags={ io.github.shoalapps.swordfish.data.SubscriptionWorker } ]
+11-11 19:04:21.202 I/ImeTracker(  558): io.github.shoalapps.swordfish:2e04943c: onRequestHide at ORIGIN_SERVER reason HIDE_UNSPECIFIED_WINDOW fromUser false
+11-11 19:04:21.203 I/ImeTracker(  558): io.github.shoalapps.swordfish:2e04943c: onCancelled at PHASE_SERVER_SHOULD_HIDE
+11-11 19:04:21.260 D/MediaSessionService(  558): onSessionPlaybackStateChanged: record=io.github.shoalapps.swordfish/androidx.media3.session.id./10 (userId=0) playbackState=PlaybackState {state=NONE(0), position=0, buffered position=0, speed=0.0, updated=328785, actions=7339685, custom actions=[], active item id=0, error=null}
+11-11 19:04:21.265 I/GoogleInputMethodService( 1333): GoogleInputMethodService.onStartInput():1986 onStartInput(EditorInfo{EditorInfo{packageName=io.github.shoalapps.swordfish, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+11-11 19:04:21.310 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:04:21.503 E/TaskPersister(  558): File error accessing recents directory (directory doesn't exist?).
+11-11 19:04:21.735 D/WM-SystemJobScheduler( 5326): Scheduling work ID d1feba70-7f08-4819-a308-b73c3add6dc5 (io.github.shoalapps.swordfish.data.SubscriptionWorker), Job ID 1
+11-11 19:04:21.870 W/JobScheduler(  558): Job didn't exist in JobStore: 7b8a203 {androidx.work.systemjobscheduler} #u0a211/0 @androidx.work.systemjobscheduler@io.github.shoalapps.swordfish/androidx.work.impl.background.systemjob.SystemJobService
+11-11 19:04:23.398 D/ShortcutService(  558): Getting shortcuts for launcher= com.google.android.asuser=0 pkg=io.github.shoalapps.swordfish
+11-11 19:04:23.399 D/ShortcutService(  558): Getting shortcuts for launcher= com.google.android.asuser=0 pkg=io.github.shoalapps.swordfish
+11-11 19:04:24.882 D/ProfileInstaller( 5326): Installing profile for io.github.shoalapps.swordfish
+11-11 19:04:40.672 D/CoreBackPreview(  558): Window{7ece809 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback null
+11-11 19:04:40.711 W/InputManager-JNI(  558): Input channel object '7ece809 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity (client)' was disposed without first being removed with the input manager!
+11-11 19:04:41.371 E/GnssPsdsDownloader(  558): No Long-Term PSDS servers were specified in the GnssConfiguration
+11-11 19:04:45.760 E/SettingsToPropertiesMapper(  558): key=persist.device_config.storage_native_boot.transcode_compat_manifest value=com.yelp.android,0,com.yy.biu,0,com.groupme.android,0,air.tv.douyu.android,0,com.baidu.mbaby,0,com.vlocker.locker,0,com.znxh.hyhuo,0,com.yixia.xiaokaxiu,0 exceeds system property max length.
+11-11 19:04:45.760 E/SettingsToPropertiesMapper(  558): key=persist.device_config.aconfig_flags.storage_native_boot.transcode_compat_manifest value=com.yelp.android,0,com.yy.biu,0,com.groupme.android,0,air.tv.douyu.android,0,com.baidu.mbaby,0,com.vlocker.locker,0,com.znxh.hyhuo,0,com.yixia.xiaokaxiu,0 exceeds system property max length.
+11-11 19:04:46.016 W/.gms.persistent( 1169): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~qM1jNV-bYaRrph5tK96MEQ==/io.github.shoalapps.swordfish-_96pEfRgEm-FleAgsbGlqw==/base.apk' with 1 weak references
+11-11 19:04:46.446 W/s.nexuslauncher( 1182): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~qM1jNV-bYaRrph5tK96MEQ==/io.github.shoalapps.swordfish-_96pEfRgEm-FleAgsbGlqw==/base.apk' with 1 weak references
+11-11 19:04:46.734 E/DeviceConfig(  558): Parsing int failed for location_mode
+11-11 19:05:44.559 V/WindowManager(  558):         {WCT{RemoteToken{a2ce3b4 Task{d5eca8 #52 type=standard A=10211:io.github.shoalapps.swordfish}}} m=TO_BACK f=NONE leash=Surface(name=Task=52)/@0x4a4df08 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},
+11-11 19:05:45.411 E/native  ( 1391): E0000 00:00:1794423945.411506    1655 document-store.cc:1359] Failed to update per-doc-data with usage report
+11-11 19:05:48.132 V/WindowManagerShell(  906): Transition requested (#101): android.os.BinderProxy@751579 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=52 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity } baseActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} topActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} origActivity=null realActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} numActivities=1 lastActiveTime=411692 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@2fb32be} topActivityType=1 pictureInPictureParams=PictureInPictureParams( aspectRatio=16/9 expandedAspectRatio=null sourceRectHint=null hasSetActions=false hasSetCloseAction=false isAutoPipEnabled=false isSeamlessResizeEnabled=true title=null subtitle=null isLaunchIntoPip=false) shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 136 - 0, 0) topActivityInfo=ActivityInfo{b5eaf1f io.github.shoalapps.swordfish.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1080 topActivityLetterboxHeight=2400 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 101 }
+11-11 19:05:48.132 I/ActivityTaskManager(  558): START u0 {flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=2
+11-11 19:05:48.134 D/WindowManagerShell(  906): onActivityRestartAttempt: ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}
+11-11 19:05:48.148 I/TopTaskTracker( 1182): onTaskMovedToFront: (moved taskInfo to front) taskId=52, baseIntent=Intent { flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity }
+11-11 19:05:48.164 V/WindowManager(  558): Sent Transition (#101) createdAt=11-11 19:05:48.128 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=52 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity } baseActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} topActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} origActivity=null realActivity=ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} numActivities=1 lastActiveTime=411692 supportsMultiWindow=true resizeMode=2 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{a2ce3b4 Task{d5eca8 #52 type=standard A=10211:io.github.shoalapps.swordfish}}} topActivityType=1 pictureInPictureParams=PictureInPictureParams( aspectRatio=16/9 expandedAspectRatio=null sourceRectHint=null hasSetActions=false hasSetCloseAction=false isAutoPipEnabled=false isSeamlessResizeEnabled=true title=null subtitle=null isLaunchIntoPip=false) shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 136 - 0, 0) topActivityInfo=ActivityInfo{3b5fbdd io.github.shoalapps.swordfish.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= falseisLetterboxEducationEnabled= true isLetterboxDoubleTapEnabled= false topActivityEligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=1080 topActivityLetterboxHeight=2400 isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatControlState=hidden freeformCameraCompatMode=inactive}}}, pipTask = null, remoteTransition = null, displayChange = null, flags = 0, debugId = 101 }
+11-11 19:05:48.166 V/WindowManager(  558):         {WCT{RemoteToken{a2ce3b4 Task{d5eca8 #52 type=standard A=10211:io.github.shoalapps.swordfish}}} m=TO_FRONT f=MOVE_TO_TOP leash=Surface(name=Task=52)/@0x4a4df08 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},
+11-11 19:05:48.195 E/ActivityThread( 5326): Failed to find provider info for io.github.shoalapps.shoal.accounts
+11-11 19:05:51.131 E/TaskPersister(  558): File error accessing recents directory (directory doesn't exist?).
+11-11 19:06:43.874 D/CoreBackPreview(  558): Window{57a1212 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback null
+11-11 19:06:43.891 W/InputManager-JNI(  558): Input channel object '57a1212 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity (client)' was disposed without first being removed with the input manager!
+11-11 19:06:43.902 E/WindowManager( 5326): android.view.WindowLeaked: Activity io.github.shoalapps.swordfish.MainActivity has leaked window com.android.internal.policy.DecorView{b2d26c2 V.E...... R....... 0,0-1024,794}[MainActivity] that was originally added here
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.view.ViewRootImpl.<init>(ViewRootImpl.java:1246)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.view.ViewRootImpl.<init>(ViewRootImpl.java:1232)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:428)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.view.WindowManagerImpl.addView(WindowManagerImpl.java:158)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.Dialog.show(Dialog.java:352)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.AlertDialog$Builder.show(AlertDialog.java:1131)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at io.github.shoalapps.common.reports.ErrorReports.askOnce(ErrorReports.kt:97)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at io.github.shoalapps.swordfish.Telemetry.askOnce(Telemetry.kt:32)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at io.github.shoalapps.swordfish.MainActivity.onCreate(MainActivity.kt:41)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.Activity.performCreate(Activity.java:9002)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.Activity.performCreate(Activity.java:8980)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1526)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4030)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4235)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:112)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:174)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:109)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:81)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2636)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.os.Looper.loopOnce(Looper.java:232)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.os.Looper.loop(Looper.java:317)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at java.lang.reflect.Method.invoke(Native Method)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+11-11 19:06:43.902 E/WindowManager( 5326): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+11-11 19:06:43.909 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:43.909 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:43.911 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:43.912 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:43.912 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): No service published for: ethernet
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): android.os.ServiceManager$ServiceNotFoundException: No service published for: ethernet
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.os.ServiceManager.getServiceOrThrow(ServiceManager.java:203)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.app.SystemServiceRegistry$145.createService(SystemServiceRegistry.java:2120)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.app.SystemServiceRegistry$CachedServiceFetcher.getService(SystemServiceRegistry.java:2231)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.app.SystemServiceRegistry.getSystemService(SystemServiceRegistry.java:1812)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.app.ContextImpl.getSystemService(ContextImpl.java:2241)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.content.ContextWrapper.getSystemService(ContextWrapper.java:936)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.isEthernetSupported(Tethering.java:1579)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.makeSupportedDownstreams(Tethering.java:2562)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.updateSupportedDownstreams(Tethering.java:2536)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.updateConfiguration(Tethering.java:549)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.-$$Nest$mupdateConfiguration(Tethering.java:0)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering$StateReceiver.onReceive(Tethering.java:1186)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.app.LoadedApk$ReceiverDispatcher$Args.lambda$getRunnable$0(LoadedApk.java:1814)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.app.LoadedApk$ReceiverDispatcher$Args.$r8$lambda$mcNAAl1SQ4MyJPyDg8TJ2x2h0Rk(Unknown Source:0)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.os.Handler.handleCallback(Handler.java:959)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.os.Handler.dispatchMessage(Handler.java:100)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.os.Looper.loopOnce(Looper.java:232)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.os.Looper.loop(Looper.java:317)
+11-11 19:06:43.917 E/SystemServiceRegistry( 1016): 	at android.os.HandlerThread.run(HandlerThread.java:85)
+11-11 19:06:43.983 E/ActivityThread( 5326): Failed to find provider info for io.github.shoalapps.shoal.accounts
+11-11 19:06:44.004 D/CoreBackPreview(  558): Window{474b45 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@6676697, mPriority=-1, mIsAnimationCallback=false}
+11-11 19:06:44.081 D/CoreBackPreview(  558): Window{4417231 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b1f80f0, mPriority=-1, mIsAnimationCallback=false}
+11-11 19:06:44.282 I/WindowManager(  558): finishDrawing of relaunch: Window{4417231 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} 476ms
+11-11 19:06:44.283 D/CoreBackPreview(  558): Window{bc1cc62 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback null
+11-11 19:06:44.283 W/InputManager-JNI(  558): Input channel object 'bc1cc62 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity (client)' was disposed without first being removed with the input manager!
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): No service published for: ethernet
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): android.os.ServiceManager$ServiceNotFoundException: No service published for: ethernet
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.os.ServiceManager.getServiceOrThrow(ServiceManager.java:203)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.app.SystemServiceRegistry$145.createService(SystemServiceRegistry.java:2120)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.app.SystemServiceRegistry$CachedServiceFetcher.getService(SystemServiceRegistry.java:2231)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.app.SystemServiceRegistry.getSystemService(SystemServiceRegistry.java:1812)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.app.ContextImpl.getSystemService(ContextImpl.java:2241)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.content.ContextWrapper.getSystemService(ContextWrapper.java:936)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.isEthernetSupported(Tethering.java:1579)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.makeSupportedDownstreams(Tethering.java:2562)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.updateSupportedDownstreams(Tethering.java:2536)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.updateConfiguration(Tethering.java:549)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering.-$$Nest$mupdateConfiguration(Tethering.java:0)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at com.android.networkstack.tethering.Tethering$StateReceiver.onReceive(Tethering.java:1186)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.app.LoadedApk$ReceiverDispatcher$Args.lambda$getRunnable$0(LoadedApk.java:1814)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.app.LoadedApk$ReceiverDispatcher$Args.$r8$lambda$mcNAAl1SQ4MyJPyDg8TJ2x2h0Rk(Unknown Source:0)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.os.Handler.handleCallback(Handler.java:959)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.os.Handler.dispatchMessage(Handler.java:100)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.os.Looper.loopOnce(Looper.java:232)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.os.Looper.loop(Looper.java:317)
+11-11 19:06:55.025 E/SystemServiceRegistry( 1016): 	at android.os.HandlerThread.run(HandlerThread.java:85)
+11-11 19:06:55.100 D/CoreBackPreview(  558): Window{4417231 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback null
+11-11 19:06:55.102 W/InputManager-JNI(  558): Input channel object '4417231 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity (client)' was disposed without first being removed with the input manager!
+11-11 19:06:55.108 E/WindowManager( 5326): android.view.WindowLeaked: Activity io.github.shoalapps.swordfish.MainActivity has leaked window com.android.internal.policy.DecorView{ca51597 V.E...... R....... 0,0-1024,794}[MainActivity] that was originally added here
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.view.ViewRootImpl.<init>(ViewRootImpl.java:1246)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.view.ViewRootImpl.<init>(ViewRootImpl.java:1232)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:428)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.view.WindowManagerImpl.addView(WindowManagerImpl.java:158)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.Dialog.show(Dialog.java:352)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.AlertDialog$Builder.show(AlertDialog.java:1131)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at io.github.shoalapps.common.reports.ErrorReports.askOnce(ErrorReports.kt:97)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at io.github.shoalapps.swordfish.Telemetry.askOnce(Telemetry.kt:32)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at io.github.shoalapps.swordfish.MainActivity.onCreate(MainActivity.kt:41)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.Activity.performCreate(Activity.java:9002)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.Activity.performCreate(Activity.java:8980)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1526)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4030)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4235)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.ActivityThread.handleRelaunchActivityInner(ActivityThread.java:6304)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.ActivityThread.handleRelaunchActivity(ActivityThread.java:6195)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.servertransaction.ActivityRelaunchItem.execute(ActivityRelaunchItem.java:79)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.servertransaction.ActivityTransactionItem.execute(ActivityTransactionItem.java:60)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:174)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:109)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:81)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2636)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.os.Handler.dispatchMessage(Handler.java:107)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.os.Looper.loopOnce(Looper.java:232)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.os.Looper.loop(Looper.java:317)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at android.app.ActivityThread.main(ActivityThread.java:8705)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at java.lang.reflect.Method.invoke(Native Method)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+11-11 19:06:55.108 E/WindowManager( 5326): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+11-11 19:06:55.120 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:55.120 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:55.121 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:55.123 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:55.123 W/PackageConfigPersister(  558): App-specific configuration not found for packageName: io.github.shoalapps.swordfish and userId: 0
+11-11 19:06:55.171 E/ActivityThread( 5326): Failed to find provider info for io.github.shoalapps.shoal.accounts
+11-11 19:06:55.177 D/CoreBackPreview(  558): Window{d414a1f u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@43f7521, mPriority=-1, mIsAnimationCallback=false}
+11-11 19:06:55.231 D/CoreBackPreview(  558): Window{b14172b u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@3033434, mPriority=-1, mIsAnimationCallback=false}
+11-11 19:06:55.377 I/WindowManager(  558): finishDrawing of relaunch: Window{b14172b u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity} 348ms
+11-11 19:06:55.377 D/CoreBackPreview(  558): Window{474b45 u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback null
+11-11 19:06:55.379 W/InputManager-JNI(  558): Input channel object '474b45 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity (client)' was disposed without first being removed with the input manager!
+11-11 19:06:55.380 W/InputDispatcher(  558): Not creating InputTarget for 474b45 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity, no input channel
+11-11 19:06:58.555 I/ActivityTaskManager(  558): START u0 {act=android.intent.action.VIEW dat=materialtube://search/... flg=0x10000000 cmp=io.github.shoalapps.swordfish/.MainActivity} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=3
+11-11 19:06:58.556 E/ActivityThread( 5326): Failed to find provider info for io.github.shoalapps.shoal.accounts
+11-11 19:06:58.558 D/WindowManagerShell(  906): onActivityRestartAttempt: ComponentInfo{io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}
+11-11 19:06:58.578 D/CoreBackPreview(  558): Window{b14172b u0 io.github.shoalapps.swordfish/io.github.shoalapps.swordfish.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@fcd9d65, mPriority=0, mIsAnimationCallback=true}
+11-11 19:06:58.757 I/ImeTracker( 5326): io.github.shoalapps.swordfish:441f4b85: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT_BY_INSETS_API fromUser false
+11-11 19:06:58.758 I/ImeTracker( 5326): io.github.shoalapps.swordfish:441f4b85: onFailed at PHASE_CLIENT_REQUEST_IME_SHOW
+11-11 19:06:58.770 D/ContentCapturePerUserService(  558): Notified activity assist data for activity: Token{b2123c1 ActivityRecord{6843ccb u0 io.github.shoalapps.swordfish/.MainActivity t52}} without a session Id
