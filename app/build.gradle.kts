@@ -1,3 +1,6 @@
+import java.time.LocalDate
+import java.time.ZoneOffset
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -13,6 +16,7 @@ android {
     defaultConfig {
         // Shoal\'s Sentry address, given to release builds by CI; blank means reports are off.
         buildConfigField("String", "SENTRY_DSN", "\"${System.getenv("SENTRY_DSN") ?: ""}\"")
+        buildConfigField("String", "RELEASE_DATE", "\"${LocalDate.now(ZoneOffset.UTC)}\"")
         applicationId = "io.github.shoalapps.swordfish"
         minSdk = 26
         targetSdk = 36

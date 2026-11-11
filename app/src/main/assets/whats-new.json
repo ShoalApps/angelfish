@@ -1,42 +1,10 @@
 [
   {
-    "title": "Playlists on your phone",
-    "body": "Save videos to named playlists without signing in. Find them in You, change their order, and play or shuffle them through your queue. Playlists can be saved to a file and brought back, on this phone or another."
+    "title": "Videos play after YouTube redirects them",
+    "body": "The player keeps the video connection on HTTPS when YouTube's servers redirect a request, fixing the cleartext error that stopped some videos from starting."
   },
   {
-    "title": "Choose what plays next",
-    "body": "Play next and Add to queue put videos in a queue that plays before the suggestions and stays put if you leave the app. Open Queue in the player to reorder, remove or jump around."
-  },
-  {
-    "title": "Smoother watching",
-    "body": "Angelfish now watches your connection speed and only fetches as much video as it needs, holding less on fast connections and more on slow ones. Automatic downloads are off, including for existing installs, because they were slowing playback down. Turn them on in Settings to keep the newest videos from your subscriptions: they download out of sight and wait until you've stopped watching. There's also a new Save audio button, for talks and music you only want to hear."
-  },
-  {
-    "title": "Swordfish is now Angelfish",
-    "body": "Same app, same settings, new name and icon. An angelfish's body is a natural play button, so it suits this app better."
-  },
-  {
-    "title": "Keep watching offline",
-    "body": "Downloaded videos now work in Home, search, subscriptions, channels and saved playlists. Account actions wait safely on your phone and sync after reconnection. Check saved actions in You; comments with an uncertain send status require review. Automatic copies stay available while offline."
-  },
-  {
-    "title": "More reliable background downloads",
-    "body": "Updated Android background-work handling to fix a crash when download services start and stop close together, including on Android 16."
-  },
-  {
-    "title": "Downloads with a clearer view",
-    "body": "Downloads now show thumbnails and short, readable errors. Angelfish refreshes yt-dlp before first use and checks for updates daily on an allowed connection."
-  },
-  {
-    "title": "TV mode, under your fingertips",
-    "body": "Tap items and drag lists directly in TV mode. The oversized touch buttons are gone, and the settings overlay is styled and hidden correctly."
-  },
-  {
-    "title": "Audio tracks and app language",
-    "body": "Choose the available audio language or audio description from the player menu. Thumbnails request a sharper image with a fallback when it is unavailable. The app follows the system language by default; Settings can select a bundled translation. Coverage varies, and untranslated text stays in British English."
-  },
-  {
-    "title": "Your video, ready offline",
-    "body": "Automatically keep the whole current video and four recommendations on Wi-Fi. Change the count in Settings; use Download to keep a video until you remove it."
+    "title": "A new look for What's New",
+    "body": "Release notes follow your Material You colours, with animated cards and a shape that morphs as the screen opens. The same notes appear on GitHub alongside the APK."
   }
 ]

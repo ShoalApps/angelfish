@@ -1,0 +1,402 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b4ad2c5..e6be714 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,12 +12,12 @@ set(LIBROMFS_PREBUILT_GENERATOR
+ include(${BOREALIS_LIBRARY}/cmake/commonOption.cmake)
+ include(${BOREALIS_LIBRARY}/cmake/toolchain.cmake)
+ 
+-project(switch_newpipe
+-    VERSION 0.0.5
++project(angelfish_switch
++    VERSION 0.1.0
+     LANGUAGES C CXX
+ )
+ 
+-set(PROJECT_AUTHOR "switch-newpipe")
++set(PROJECT_AUTHOR "ShoalApps")
+ set(PROJECT_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/icon/icon.jpg)
+ set(PROJECT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+ 
+@@ -109,7 +109,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
+ if (PLATFORM_SWITCH)
+     add_custom_target(${PROJECT_NAME}.nro
+         DEPENDS ${PROJECT_NAME}
+-        COMMAND ${NX_NACPTOOL_EXE} --create "Switch-NewPipe" "${PROJECT_AUTHOR}" "${PROJECT_VERSION}" ${PROJECT_NAME}.nacp
++        COMMAND ${NX_NACPTOOL_EXE} --create "Angelfish" "${PROJECT_AUTHOR}" "${PROJECT_VERSION}" ${PROJECT_NAME}.nacp
+         COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_RESOURCES} ${CMAKE_BINARY_DIR}/resources
+         COMMAND ${NX_ELF2NRO_EXE} ${PROJECT_NAME}.elf ${PROJECT_NAME}.nro
+             --icon=${PROJECT_ICON}
+diff --git a/build.sh b/build.sh
+index a098683..d895579 100755
+--- a/build.sh
++++ b/build.sh
+@@ -7,7 +7,7 @@ BOREALIS_VENDOR_DIR="vendor/borealis"
+ SWITCH_PORTLIBS_DIR="vendor/switch-portlibs"
+ LIBROMFS_GENERATOR="${BOREALIS_VENDOR_DIR}/libromfs-generator"
+ LIBROMFS_BUILD_DIR=".build-libromfs-generator"
+-PORTLIBS_VOLUME="switch-newpipe-portlibs"
++PORTLIBS_VOLUME="angelfish-switch-portlibs"
+ PORTLIBS_DIR="${PORTLIBS_DIR:-}"
+ DOCKER_IMAGE="${DOCKER_IMAGE:-devkitpro/devkita64}"
+ APP_ONLY=0
+@@ -131,6 +131,6 @@ docker run --rm \
+       -DCMAKE_BUILD_TYPE=Release \
+       -DPLATFORM_SWITCH=ON \
+       -DUSE_DEKO3D=OFF
+-    cmake --build '"$BUILD_DIR"' -j$(nproc) --target switch_newpipe.nro
++    cmake --build '"$BUILD_DIR"' -j$(nproc) --target angelfish_switch.nro
+     chown -R '"$(id -u):$(id -g)"' /work/'"$BUILD_DIR"'
+   '
+diff --git a/resources/i18n/en-US/strings.json b/resources/i18n/en-US/strings.json
+index 2d1455b..a724183 100644
+--- a/resources/i18n/en-US/strings.json
++++ b/resources/i18n/en-US/strings.json
+@@ -1,12 +1,12 @@
+ {
+   "app": {
+-    "title": "Switch-NewPipe",
++    "title": "Angelfish",
+     "home": "Home",
+     "search": "Search",
+     "subscriptions": "Subscriptions",
+     "library": "Library",
+     "settings": "Settings",
+-    "info_body": "Switch-NewPipe\nVersion: {}\n\nReal YouTube home, search, subscriptions, related feeds, channel navigation, and on-device playback are connected.\nYou can change playback quality, startup tab, default home category, short-video filtering, and language in Settings.",
++    "info_body": "Angelfish\nVersion: {}\n\nReal YouTube home, search, subscriptions, related feeds, channel navigation, and on-device playback are connected.\nYou can change playback quality, startup tab, default home category, short-video filtering, and language in Settings.",
+     "playback_failed": "Playback failed: {}"
+   },
+   "hints": {
+diff --git a/resources/i18n/ko/strings.json b/resources/i18n/ko/strings.json
+index 73710db..60395da 100644
+--- a/resources/i18n/ko/strings.json
++++ b/resources/i18n/ko/strings.json
+@@ -1,12 +1,12 @@
+ {
+   "app": {
+-    "title": "Switch-NewPipe",
++    "title": "Angelfish",
+     "home": "홈",
+     "search": "검색",
+     "subscriptions": "구독",
+     "library": "라이브러리",
+     "settings": "설정",
+-    "info_body": "Switch-NewPipe\n버전: {}\n\n실제 YouTube 홈, 검색, 구독, 연관 피드, 채널 탐색과 실기 재생 경로가 연결되어 있습니다.\n설정에서 재생 품질, 시작 탭, 기본 홈 카테고리, 짧은 영상 필터, 언어를 바꿀 수 있습니다.",
++    "info_body": "Angelfish\n버전: {}\n\n실제 YouTube 홈, 검색, 구독, 연관 피드, 채널 탐색과 실기 재생 경로가 연결되어 있습니다.\n설정에서 재생 품질, 시작 탭, 기본 홈 카테고리, 짧은 영상 필터, 언어를 바꿀 수 있습니다.",
+     "playback_failed": "재생 실패: {}"
+   },
+   "hints": {
+diff --git a/resources/svg/home_active.svg b/resources/svg/home_active.svg
+index 119ae61..8e1f780 100644
+--- a/resources/svg/home_active.svg
++++ b/resources/svg/home_active.svg
+@@ -1,4 +1,4 @@
+ <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+   <path d="M12 30 32 14l20 16v20a2 2 0 0 1-2 2H38V38H26v14H14a2 2 0 0 1-2-2Z"
+-        fill="#F44336" stroke="#F44336" stroke-width="4" stroke-linejoin="round"/>
++        fill="#FFB3B1" stroke="#FFB3B1" stroke-width="4" stroke-linejoin="round"/>
+ </svg>
+diff --git a/resources/svg/library_active.svg b/resources/svg/library_active.svg
+index 2941d6a..65717de 100644
+--- a/resources/svg/library_active.svg
++++ b/resources/svg/library_active.svg
+@@ -1,4 +1,4 @@
+ <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+-  <rect x="14" y="14" width="36" height="36" rx="4" fill="none" stroke="#F44336" stroke-width="4"/>
+-  <path d="M24 24h16M24 32h16M24 40h10" fill="none" stroke="#F44336" stroke-width="4" stroke-linecap="round"/>
++  <rect x="14" y="14" width="36" height="36" rx="4" fill="none" stroke="#FFB3B1" stroke-width="4"/>
++  <path d="M24 24h16M24 32h16M24 40h10" fill="none" stroke="#FFB3B1" stroke-width="4" stroke-linecap="round"/>
+ </svg>
+diff --git a/resources/svg/search_active.svg b/resources/svg/search_active.svg
+index 16d5aea..d91b1eb 100644
+--- a/resources/svg/search_active.svg
++++ b/resources/svg/search_active.svg
+@@ -1,4 +1,4 @@
+ <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+-  <circle cx="28" cy="28" r="14" fill="none" stroke="#F44336" stroke-width="4"/>
+-  <path d="M38 38l12 12" fill="none" stroke="#F44336" stroke-width="4" stroke-linecap="round"/>
++  <circle cx="28" cy="28" r="14" fill="none" stroke="#FFB3B1" stroke-width="4"/>
++  <path d="M38 38l12 12" fill="none" stroke="#FFB3B1" stroke-width="4" stroke-linecap="round"/>
+ </svg>
+diff --git a/resources/svg/settings_active.svg b/resources/svg/settings_active.svg
+index b5e5c9b..e609b79 100644
+--- a/resources/svg/settings_active.svg
++++ b/resources/svg/settings_active.svg
+@@ -1,4 +1,4 @@
+ <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+-  <path d="M27.8 6h8.4l1.5 6.2c1.5.4 2.9 1 4.2 1.8l5.5-3 5.9 5.9-3 5.5c.8 1.3 1.4 2.7 1.8 4.2L58 28v8.4l-6.2 1.5c-.4 1.5-1 2.9-1.8 4.2l3 5.5-5.9 5.9-5.5-3c-1.3.8-2.7 1.4-4.2 1.8L36.2 58h-8.4l-1.5-6.2c-1.5-.4-2.9-1-4.2-1.8l-5.5 3-5.9-5.9 3-5.5c-.8-1.3-1.4-2.7-1.8-4.2L6 36.2v-8.4l6.2-1.5c.4-1.5 1-2.9 1.8-4.2l-3-5.5 5.9-5.9 5.5 3c1.3-.8 2.7-1.4 4.2-1.8L27.8 6Z" stroke="#F44336" stroke-width="4" stroke-linejoin="round"/>
+-  <circle cx="32" cy="32" r="9" stroke="#F44336" stroke-width="4"/>
++  <path d="M27.8 6h8.4l1.5 6.2c1.5.4 2.9 1 4.2 1.8l5.5-3 5.9 5.9-3 5.5c.8 1.3 1.4 2.7 1.8 4.2L58 28v8.4l-6.2 1.5c-.4 1.5-1 2.9-1.8 4.2l3 5.5-5.9 5.9-5.5-3c-1.3.8-2.7 1.4-4.2 1.8L36.2 58h-8.4l-1.5-6.2c-1.5-.4-2.9-1-4.2-1.8l-5.5 3-5.9-5.9 3-5.5c-.8-1.3-1.4-2.7-1.8-4.2L6 36.2v-8.4l6.2-1.5c.4-1.5 1-2.9 1.8-4.2l-3-5.5 5.9-5.9 5.5 3c1.3-.8 2.7-1.4 4.2-1.8L27.8 6Z" stroke="#FFB3B1" stroke-width="4" stroke-linejoin="round"/>
++  <circle cx="32" cy="32" r="9" stroke="#FFB3B1" stroke-width="4"/>
+ </svg>
+diff --git a/resources/svg/subscriptions_active.svg b/resources/svg/subscriptions_active.svg
+index f33fe57..1211638 100644
+--- a/resources/svg/subscriptions_active.svg
++++ b/resources/svg/subscriptions_active.svg
+@@ -1,5 +1,5 @@
+ <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+-  <rect x="12" y="16" width="40" height="10" rx="3" fill="none" stroke="#F44336" stroke-width="4"/>
+-  <rect x="12" y="30" width="40" height="10" rx="3" fill="none" stroke="#F44336" stroke-width="4"/>
+-  <path d="M28 44h8l-4 8z" fill="#F44336"/>
++  <rect x="12" y="16" width="40" height="10" rx="3" fill="none" stroke="#FFB3B1" stroke-width="4"/>
++  <rect x="12" y="30" width="40" height="10" rx="3" fill="none" stroke="#FFB3B1" stroke-width="4"/>
++  <path d="M28 44h8l-4 8z" fill="#FFB3B1"/>
+ </svg>
+diff --git a/src/common/auth_store.cpp b/src/common/auth_store.cpp
+index 8bd09a6..e919432 100644
+--- a/src/common/auth_store.cpp
++++ b/src/common/auth_store.cpp
+@@ -299,17 +299,17 @@ std::string build_sapisid_hash(const std::string& sapisid, const std::string& or
+ 
+ std::string default_auth_import_path() {
+ #ifdef __SWITCH__
+-    return "sdmc:/switch/switch_newpipe_auth.txt";
++    return "sdmc:/switch/angelfish_switch_auth.txt";
+ #else
+-    return "switch_newpipe_auth.txt";
++    return "angelfish_switch_auth.txt";
+ #endif
+ }
+ 
+ std::string default_auth_session_path() {
+ #ifdef __SWITCH__
+-    return "sdmc:/switch/switch_newpipe_session.json";
++    return "sdmc:/switch/angelfish_switch_session.json";
+ #else
+-    return "switch_newpipe_session.json";
++    return "angelfish_switch_session.json";
+ #endif
+ }
+ 
+diff --git a/src/common/http_client.cpp b/src/common/http_client.cpp
+index 161ccdf..47bf4d1 100644
+--- a/src/common/http_client.cpp
++++ b/src/common/http_client.cpp
+@@ -81,9 +81,7 @@ std::optional<std::string> HttpsHttpClient::get(
+     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+     curl_easy_setopt(curl, CURLOPT_USERAGENT,
+-                     "Mozilla/5.0 (Nintendo Switch; Switch-NewPipe)");
+-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
++                     "Mozilla/5.0 (Nintendo Switch; Angelfish)");
+     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+@@ -164,9 +162,7 @@ std::optional<std::string> HttpsHttpClient::post(
+     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+     curl_easy_setopt(curl, CURLOPT_USERAGENT,
+-                     "Mozilla/5.0 (Nintendo Switch; Switch-NewPipe)");
+-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
++                     "Mozilla/5.0 (Nintendo Switch; Angelfish)");
+     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+diff --git a/src/common/library_store.cpp b/src/common/library_store.cpp
+index bcbab22..4d62fe3 100644
+--- a/src/common/library_store.cpp
++++ b/src/common/library_store.cpp
+@@ -90,9 +90,9 @@ void upsert_front(std::vector<StreamItem>& items, const StreamItem& item, size_t
+ 
+ std::string default_library_store_path() {
+ #ifdef __SWITCH__
+-    return "sdmc:/switch/switch_newpipe_library.json";
++    return "sdmc:/switch/angelfish_switch_library.json";
+ #else
+-    return "switch_newpipe_library.json";
++    return "angelfish_switch_library.json";
+ #endif
+ }
+ 
+diff --git a/src/common/log.cpp b/src/common/log.cpp
+index d5b1226..a112c44 100644
+--- a/src/common/log.cpp
++++ b/src/common/log.cpp
+@@ -13,9 +13,9 @@ FILE* g_log_file = nullptr;
+ 
+ const char* log_path() {
+ #ifdef __SWITCH__
+-    return "sdmc:/switch/switch_newpipe.log";
++    return "sdmc:/switch/angelfish_switch.log";
+ #else
+-    return "switch_newpipe.log";
++    return "angelfish_switch.log";
+ #endif
+ }
+ 
+@@ -32,7 +32,7 @@ void init_log() {
+         return;
+     }
+ 
+-    std::fprintf(g_log_file, "=== switch_newpipe log start ===\n");
++    std::fprintf(g_log_file, "=== angelfish_switch log start ===\n");
+     std::fflush(g_log_file);
+ }
+ 
+@@ -42,7 +42,7 @@ void shutdown_log() {
+         return;
+     }
+ 
+-    std::fprintf(g_log_file, "=== switch_newpipe log end ===\n");
++    std::fprintf(g_log_file, "=== angelfish_switch log end ===\n");
+     std::fflush(g_log_file);
+     std::fclose(g_log_file);
+     g_log_file = nullptr;
+diff --git a/src/common/settings_store.cpp b/src/common/settings_store.cpp
+index f90fb5a..fbac3ef 100644
+--- a/src/common/settings_store.cpp
++++ b/src/common/settings_store.cpp
+@@ -109,9 +109,9 @@ AppSettings deserialize_settings(const json& root) {
+ 
+ std::string default_settings_store_path() {
+ #ifdef __SWITCH__
+-    return "sdmc:/switch/switch_newpipe_settings.json";
++    return "sdmc:/switch/angelfish_switch_settings.json";
+ #else
+-    return "switch_newpipe_settings.json";
++    return "angelfish_switch_settings.json";
+ #endif
+ }
+ 
+diff --git a/src/main.cpp b/src/main.cpp
+index e3039be..9fec3cf 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -30,15 +30,15 @@ namespace {
+ void configure_theme() {
+     brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+ 
+-    brls::Theme::getDarkTheme().addColor("color/newpipe", nvgRGB(244, 67, 54));
+-    brls::Theme::getDarkTheme().addColor("color/newpipe_bg", nvgRGB(18, 18, 18));
+-    brls::Theme::getDarkTheme().addColor("color/newpipe_card", nvgRGB(28, 28, 28));
+-    brls::Theme::getDarkTheme().addColor("color/grey_1", nvgRGB(28, 28, 28));
+-    brls::Theme::getDarkTheme().addColor("color/grey_2", nvgRGB(36, 38, 42));
++    brls::Theme::getDarkTheme().addColor("color/newpipe", nvgRGB(255, 179, 177));
++    brls::Theme::getDarkTheme().addColor("color/newpipe_bg", nvgRGB(28, 20, 22));
++    brls::Theme::getDarkTheme().addColor("color/newpipe_card", nvgRGB(45, 34, 36));
++    brls::Theme::getDarkTheme().addColor("color/grey_1", nvgRGB(45, 34, 36));
++    brls::Theme::getDarkTheme().addColor("color/grey_2", nvgRGB(58, 44, 46));
+     brls::Theme::getDarkTheme().addColor("color/grey_3", nvgRGBA(160, 160, 160, 160));
+ 
+-    brls::Theme::getLightTheme().addColor("color/newpipe", nvgRGB(216, 67, 21));
+-    brls::Theme::getLightTheme().addColor("color/newpipe_bg", nvgRGB(248, 248, 248));
++    brls::Theme::getLightTheme().addColor("color/newpipe", nvgRGB(159, 42, 49));
++    brls::Theme::getLightTheme().addColor("color/newpipe_bg", nvgRGB(255, 245, 244));
+     brls::Theme::getLightTheme().addColor("color/newpipe_card", nvgRGB(255, 255, 255));
+     brls::Theme::getLightTheme().addColor("color/grey_1", nvgRGB(255, 255, 255));
+     brls::Theme::getLightTheme().addColor("color/grey_2", nvgRGB(235, 236, 238));
+diff --git a/src/switch/switch_player.cpp b/src/switch/switch_player.cpp
+index 1cd590e..cecc250 100644
+--- a/src/switch/switch_player.cpp
++++ b/src/switch/switch_player.cpp
+@@ -39,7 +39,7 @@ namespace newpipe {
+ namespace {
+ 
+ constexpr const char* kUserAgent =
+-    "Mozilla/5.0 (Nintendo Switch; Switch-NewPipe)";
++    "Mozilla/5.0 (Nintendo Switch; Angelfish)";
+ constexpr const char* kDownloadUserAgent =
+     "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip";
+ constexpr const char* kUmpDownloadUserAgent =
+@@ -995,9 +995,9 @@ private:
+         active_is_live_ = resolved->is_live;
+         if (!resolved->playlist_body.empty()) {
+ #ifdef __SWITCH__
+-            active_local_media_path_ = "sdmc:/switch/switch_newpipe_selected.m3u8";
++            active_local_media_path_ = "sdmc:/switch/angelfish_switch_selected.m3u8";
+ #else
+-            active_local_media_path_ = "/tmp/switch_newpipe_selected.m3u8";
++            active_local_media_path_ = "/tmp/angelfish_switch_selected.m3u8";
+ #endif
+             std::remove(active_local_media_path_.c_str());
+             if (!write_text_file(active_local_media_path_, resolved->playlist_body)) {
+@@ -1198,8 +1198,6 @@ private:
+             ch,
+             CURLOPT_USERAGENT,
+             active_use_ump_ ? kUmpDownloadUserAgent : kDownloadUserAgent);
+-        curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 0L);
+-        curl_easy_setopt(ch, CURLOPT_SSL_VERIFYHOST, 0L);
+         curl_easy_setopt(ch, CURLOPT_CONNECTTIMEOUT, 15L);
+         curl_easy_setopt(ch, CURLOPT_TIMEOUT, 30L);
+         curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
+@@ -1300,9 +1298,9 @@ private:
+             newpipe::tr("player/loading/starting_transfer"));
+ 
+ #ifdef __SWITCH__
+-        stream_cache_path_ = "sdmc:/switch/switch_newpipe_stream.cache";
++        stream_cache_path_ = "sdmc:/switch/angelfish_switch_stream.cache";
+ #else
+-        stream_cache_path_ = "/tmp/switch_newpipe_stream.cache";
++        stream_cache_path_ = "/tmp/angelfish_switch_stream.cache";
+ #endif
+ 
+         std::remove(stream_cache_path_.c_str());
+@@ -1349,8 +1347,6 @@ private:
+             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+             curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+             curl_easy_setopt(curl, CURLOPT_USERAGENT, ua);
+-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+             curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 0L);
+             curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+@@ -1460,8 +1456,6 @@ private:
+         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+         curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+         curl_easy_setopt(curl, CURLOPT_USERAGENT, is_gv ? kDownloadUserAgent : kUserAgent);
+-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 0L);
+         curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+@@ -1563,9 +1557,9 @@ private:
+         }
+ 
+ #ifdef __SWITCH__
+-        audio_cache_path_ = "sdmc:/switch/switch_newpipe_audio.cache";
++        audio_cache_path_ = "sdmc:/switch/angelfish_switch_audio.cache";
+ #else
+-        audio_cache_path_ = "/tmp/switch_newpipe_audio.cache";
++        audio_cache_path_ = "/tmp/angelfish_switch_audio.cache";
+ #endif
+ 
+         std::remove(audio_cache_path_.c_str());
+@@ -1612,8 +1606,6 @@ private:
+             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+             curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+             curl_easy_setopt(curl, CURLOPT_USERAGENT, audio_ua);
+-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+             curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 0L);
+             curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+@@ -1724,8 +1716,6 @@ private:
+                             curl_easy_setopt(ch, CURLOPT_FOLLOWLOCATION, 1L);
+                             curl_easy_setopt(ch, CURLOPT_MAXREDIRS, 10L);
+                             curl_easy_setopt(ch, CURLOPT_USERAGENT, audio_ua);
+-                            curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 0L);
+-                            curl_easy_setopt(ch, CURLOPT_SSL_VERIFYHOST, 0L);
+                             curl_easy_setopt(ch, CURLOPT_CONNECTTIMEOUT, 15L);
+                             curl_easy_setopt(ch, CURLOPT_TIMEOUT, 30L);
+                             curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
+@@ -1879,7 +1869,7 @@ private:
+         int width = mode == AppletOperationMode_Console ? 1920 : 1280;
+         int height = mode == AppletOperationMode_Console ? 1080 : 720;
+ 
+-        window_ = SDL_CreateWindow("Switch-NewPipe Player", 0, 0, width, height, SDL_WINDOW_SHOWN);
++        window_ = SDL_CreateWindow("Angelfish Player", 0, 0, width, height, SDL_WINDOW_SHOWN);
+         if (!window_) {
+             error = std::string("SDL_CreateWindow failed: ") + SDL_GetError();
+             return false;
+@@ -1931,7 +1921,8 @@ private:
+         mpv_set_option_string(mpv_, "keep-open", "yes");
+         mpv_set_option_string(mpv_, "force-seekable", "no");
+         mpv_set_option_string(mpv_, "ytdl", "no");
+-        mpv_set_option_string(mpv_, "tls-verify", "no");
++        mpv_set_option_string(mpv_, "tls-verify", "yes");
++        mpv_set_option_string(mpv_, "tls-ca-file", "romfs:/certs/google-roots.pem");
+         mpv_set_option_string(mpv_, "access-references", "yes");
+         if (!active_local_media_path_.empty()) {
+             mpv_set_option_string(mpv_, "load-unsafe-playlists", "yes");

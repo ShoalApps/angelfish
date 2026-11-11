@@ -1,0 +1,43 @@
+name: Build Switch Homebrew
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'switch/**'
+      - '.github/workflows/build-switch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Prepare native source
+        run: bash switch/prepare.sh "$RUNNER_TEMP/angelfish-switch"
+
+      - name: Cache Switch libraries
+        uses: actions/cache@v5
+        with:
+          path: .cache/portlibs-switch
+          key: ${{ runner.os }}-angelfish-switch-portlibs-${{ hashFiles('switch/prepare.sh', 'switch/angelfish.patch') }}
+
+      - name: Build native homebrew
+        run: |
+          cd "$RUNNER_TEMP/angelfish-switch"
+          PORTLIBS_DIR="$GITHUB_WORKSPACE/.cache/portlibs-switch" ./build.sh
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp cmake-build-switch/angelfish_switch.nro "$GITHUB_WORKSPACE/dist/Angelfish.nro"
+          cd "$GITHUB_WORKSPACE/dist"
+          sha256sum Angelfish.nro > SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Angelfish-Switch
+          path: dist/
+          if-no-files-found: error

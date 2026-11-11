@@ -13,6 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Prepare release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous_tag=$(gh release list --limit 100 --exclude-drafts --exclude-pre-releases \
+            --json tagName --jq '[.[].tagName | select(test("^build-[0-9]+$"))
+              | sub("^build-"; "") | tonumber | select(. < (env.GITHUB_RUN_NUMBER | tonumber))]
+              | max | if . == null then "" else "build-\(.)" end')
+          python3 ci/release_notes.py "$previous_tag" "$RUNNER_TEMP/release-notes.md"
 
       - uses: actions/setup-java@v6
         with:
@@ -47,7 +59,7 @@ jobs:
           path: app/build/reports/tests/testDebugUnitTest
 
       - name: Save error log to ci-log branch
-        if: failure()
+        if: failure() && hashFiles('build.log') != ''
         run: |
           grep -E "^e: |What went wrong|Could not (find|resolve|GET)|^> |error:" build.log | head -60 > errors.txt || true
           head -45 errors.txt | while IFS= read -r line; do echo "::error::$line"; done
@@ -75,8 +87,9 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: build-${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
           name: Angelfish build ${{ github.run_number }}
-          body: Install Angelfish.apk below. Angelfish is free software under the GPL-3.0 and is not affiliated with Google or YouTube.
+          body_path: ${{ runner.temp }}/release-notes.md
           files: |
             Angelfish.apk
             Swordfish.apk

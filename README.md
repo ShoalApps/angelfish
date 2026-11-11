@@ -81,7 +81,11 @@ Shoal is free, open source and has no ads. If you'd like to help it keep going, 
 
 ## Release notes
 
-Update `app/src/main/assets/whats-new.json` with each release. Notes ship with the APK, appear once per installed version and can be reopened from Settings. Keep them specific to changes in that release.
+For user-facing changes, update `app/src/main/assets/whats-new.json` with a short title and a specific description for each change since the last published build. The release workflow publishes the same notes on GitHub and bundles them in the APK. If the file is unchanged since the previous release, the workflow uses the intervening commit summaries. Notes work offline, appear once per installed version and can be reopened from Settings.
+
+## Nintendo Switch preview
+
+The original Nintendo Switch has a native Atmosphère homebrew preview. See the [Switch build and installation instructions](switch/README.md).
 
 ## Offline videos and data use
 

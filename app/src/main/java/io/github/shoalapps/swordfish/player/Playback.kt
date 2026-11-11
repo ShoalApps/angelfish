@@ -121,7 +121,8 @@ class YtDataSource(private val upstream: HttpDataSource) : DataSource by upstrea
     class Factory : DataSource.Factory {
         private val http = DefaultHttpDataSource.Factory()
             .setUserAgent(null)
-            .setAllowCrossProtocolRedirects(true)
+            // Some CDN redirects point to HTTP even when playback started over HTTPS.
+            .setCrossProtocolRedirectsForceOriginal(true)
             .setConnectTimeoutMs(15_000)
             .setReadTimeoutMs(20_000)
 
