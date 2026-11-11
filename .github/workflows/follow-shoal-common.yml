@@ -48,7 +48,7 @@ jobs:
           distribution: temurin
           java-version: 17
       # As in build.yml, use the runner's Android SDK.
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
         if: steps.pin.outputs.changed == 'true'
 
       - name: Validate translation catalogues
