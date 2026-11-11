@@ -56,8 +56,8 @@ abstract class TubeTest {
         runCatching { compose.waitUntil(15_000) { StartupState.homeReady } }
         compose.mainClock.advanceTimeBy(1_000)
         compose.waitForIdle()
-        if (compose.onAllNodesWithText("Let's dive in").fetchSemanticsNodes().isNotEmpty()) {
-            compose.onNodeWithText("Let's dive in").performClick()
+        if (compose.onAllNodesWithText("Done").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithText("Done").performClick()
             compose.waitForIdle()
         }
     }

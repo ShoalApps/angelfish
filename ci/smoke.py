@@ -144,7 +144,7 @@ def main():
     adb("shell cmd uimode night no")
     adb(f"shell am start -n {PKG}/.MainActivity")
     time.sleep(20)
-    tap("Let's dive in", exact=True)
+    tap("Done", exact=True)
     shot("home_light")
     check_text("home", "Angelfish", "Home", "Shorts", "Subscriptions", "You")
 
