@@ -46,7 +46,6 @@ styles the frame and the generic row types from render.js only
 }
 
 #vt-settings-overlay-root.vt-settings-hidden {
-    display: none !important;
     opacity: 0;
     pointer-events: none;
 }
@@ -382,6 +381,13 @@ styles the frame and the generic row types from render.js only
 .vt-toggle.vt-toggle-on .vt-toggle-thumb {
     transform: translateX(22px);
     background: var(--vt-bg);
+}
+
+/*a choice's selected option*/
+
+.vt-check {
+    font-size: 20px;
+    line-height: 1;
 }
 
 /*notice and text*/

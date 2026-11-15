@@ -1,4 +1,4 @@
-/* Angelfish TV mode. Includes VacuumTube 2.0.1 (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */
+/* Angelfish TV mode. Includes VacuumTube 2.1.0 (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */
 (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __commonJS = (cb, mod) => function __require() {
@@ -498,7 +498,7 @@
   // vt:vt:config-defaults
   var require_vt_config_defaults = __commonJS({
     "vt:vt:config-defaults"(exports, module) {
-      module.exports = { "volume": 100, "adblock": true, "sponsorblock": false, "sponsorblock_uuid": crypto.randomUUID(), "sponsorblock_skip_sponsor": true, "sponsorblock_skip_selfpromo": false, "sponsorblock_skip_interaction": false, "sponsorblock_skip_intro": false, "sponsorblock_skip_outro": false, "sponsorblock_skip_preview": false, "sponsorblock_skip_hook": false, "sponsorblock_skip_filler": false, "dearrow": false, "dislikes": false, "remove_super_resolution": false, "hide_shorts": false, "block_continue_watching": false, "h264ify": false, "h264ify_disable_webm": true, "h264ify_disable_vp8": true, "h264ify_disable_vp9": true, "h264ify_disable_av1": true, "unlock_resolution": false, "hardware_decoding": true, "wayland_hdr": false, "low_memory_mode": false, "fullscreen": false, "features_enabled": false, "music_mode_feature": false, "music_mode": false, "ultrawide_feature": false, "remaining_time_feature": false, "no_window_decorations": false, "keep_on_top": false, "pause_on_blur": false, "userstyles": false, "disabled_userstyles": [], "touch_overlay": false, "controller_support": true, "device_discoverability": false, "auto_update": false };
+      module.exports = { "volume": 100, "adblock": true, "sponsorblock": false, "sponsorblock_uuid": crypto.randomUUID(), "sponsorblock_skip_sponsor": true, "sponsorblock_skip_selfpromo": false, "sponsorblock_skip_interaction": false, "sponsorblock_skip_intro": false, "sponsorblock_skip_outro": false, "sponsorblock_skip_preview": false, "sponsorblock_skip_hook": false, "sponsorblock_skip_filler": false, "dearrow": false, "dislikes": false, "remove_super_resolution": false, "hide_shorts": false, "block_continue_watching": false, "h264ify": false, "h264ify_disable_webm": true, "h264ify_disable_vp8": true, "h264ify_disable_vp9": true, "h264ify_disable_av1": true, "unlock_resolution": false, "hardware_decoding": true, "wayland_hdr": false, "low_memory_mode": false, "fullscreen": false, "features_enabled": false, "music_mode_feature": false, "music_mode": false, "ultrawide_feature": false, "remaining_time_feature": false, "no_window_decorations": false, "keep_on_top": false, "pause_on_blur": false, "default_guest_mode": false, "userstyles": false, "disabled_userstyles": [], "touch_overlay": false, "controller_support": true, "device_discoverability": false, "auto_update": false, "screensaver_enabled": false, "screensaver_timeout": 5, "screensaver_dim_percentage": 75 };
     }
   });
 
@@ -536,7 +536,7 @@
       }
       var about = () => ({
         status: "idle",
-        currentVersion: "2.0.1",
+        currentVersion: "2.1.0",
         latestVersion: "",
         platform: "android",
         arch: "arm64",
@@ -710,6 +710,7 @@
   // tv/vacuumtube/preload/util/resolveCommandModifiers.js
   var require_resolveCommandModifiers = __commonJS({
     "tv/vacuumtube/preload/util/resolveCommandModifiers.js"(exports, module) {
+      var functions = require_functions();
       var inputModifiers = [];
       var outputModifiers = [];
       var globalResolveCommand;
@@ -717,15 +718,15 @@
         for (let key in window._yttv) {
           if (window._yttv[key]?.instance?.resolveCommand) {
             let resolveCommand = window._yttv[key].instance.resolveCommand;
-            globalResolveCommand = (command) => {
-              return window._yttv[key].instance.resolveCommand(command);
+            globalResolveCommand = (...args) => {
+              return window._yttv[key].instance.resolveCommand(...args);
             };
-            window._yttv[key].instance.resolveCommand = function(command) {
+            window._yttv[key].instance.resolveCommand = function(command, ...rest) {
               for (let modifier of inputModifiers) {
                 command = modifier(command);
                 if (command === false) return true;
               }
-              let output = resolveCommand.apply(this, [command]);
+              let output = resolveCommand.apply(this, [command, ...rest]);
               for (let modifier of outputModifiers) {
                 output = modifier(output);
               }
@@ -744,10 +745,8 @@
       }
       module.exports = {
         resolveCommand: (command) => {
-          if (globalResolveCommand) {
-            return globalResolveCommand(command);
-          } else {
-            throw new Error("resolveCommand doesn't exist yet, probably called too early");
+          if (!globalResolveCommand) {
+            functions.waitForCondition(() => globalResolveCommand).then(() => globalResolveCommand(command));
           }
         },
         addInputModifier,
@@ -1387,7 +1386,7 @@
   // vt:vt:files
   var require_vt_files = __commonJS({
     "vt:vt:files"(exports, module) {
-      module.exports = { "/vt/src/preload/modules/settings/style.css": { "text": "/*\nsettings overlay\nstyles the frame and the generic row types from render.js only\n*/\n\n#vt-settings-overlay-root {\n    --vt-bg: #212121;\n    --vt-card: #2b2b2b;\n    --vt-card-hover: #333;\n    --vt-card-focus: #3a3a3a;\n    --vt-line: #383838;\n    --vt-text: #fff;\n    --vt-muted: #aaa;\n    --vt-faint: #808080;\n    --vt-focus: #fff;\n    --vt-warning-bg: #332b18;\n    --vt-warning-line: #6f5a25;\n    --vt-radius: 12px;\n\n    position: fixed;\n    inset: 0;\n    z-index: 99999;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: opacity 0.2s ease;\n\n    /*own every inheritable base value instead of inheriting youtube's styling on <body>*/\n    font-family: 'YouTube Sans', Roboto, Arial, sans-serif;\n    font-size: 15px;\n    font-weight: 400;\n    font-style: normal;\n    line-height: normal;\n    letter-spacing: normal;\n    text-align: left;\n    text-transform: none;\n    white-space: normal;\n    color: var(--vt-text);\n    cursor: default;\n    user-select: none;\n}\n\n#vt-settings-overlay-root,\n#vt-settings-overlay-root * {\n    box-sizing: border-box;\n}\n\n#vt-settings-overlay-root.vt-settings-hidden {\n    display: none !important;\n    opacity: 0;\n    pointer-events: none;\n}\n\n.vt-settings-backdrop {\n    position: absolute;\n    inset: 0;\n    background: rgba(0, 0, 0, 0.85);\n}\n\n.vt-settings-container {\n    position: relative;\n    width: min(1100px, 90vw);\n    height: min(760px, 86vh);\n    background: var(--vt-bg);\n    border-radius: 18px;\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);\n}\n\n/*header*/\n\n.vt-settings-header {\n    display: flex;\n    align-items: center;\n    gap: 24px;\n    padding: 24px 32px 18px;\n}\n\n.vt-settings-title {\n    font-size: 28px;\n    font-weight: 700;\n}\n\n.vt-settings-hint {\n    margin-left: auto;\n    font-size: 14px;\n    color: var(--vt-muted);\n}\n\n.vt-settings-icon-button {\n    width: 40px;\n    height: 40px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    flex-shrink: 0;\n    border-radius: 50%;\n    font-size: 20px;\n    color: var(--vt-muted);\n    cursor: pointer;\n}\n\n.vt-settings-icon-button + .vt-settings-icon-button {\n    margin-left: -16px;\n}\n\n.vt-settings-icon-button:hover,\n.vt-settings-icon-button.vt-focused {\n    background: var(--vt-card-hover);\n    color: var(--vt-text);\n}\n\n/*category tabs*/\n\n.vt-tabbar {\n    display: flex;\n    gap: 8px;\n    padding: 12px 28px;\n    border-top: 1px solid var(--vt-line);\n    border-bottom: 1px solid var(--vt-line);\n    overflow: hidden;\n}\n\n.vt-tab {\n    padding: 10px 16px;\n    border-radius: 10px;\n    font-size: 16px;\n    font-weight: 500;\n    white-space: nowrap;\n    cursor: pointer;\n}\n\n.vt-tab:hover {\n    background: var(--vt-card-hover);\n}\n\n.vt-tab.vt-tab-selected {\n    background: var(--vt-text);\n    color: var(--vt-bg);\n}\n\n/*tabs keep their own background when focused and get an outer ring instead*/\n.vt-tabbar .vt-tab.vt-focused {\n    background: var(--vt-card-hover);\n    box-shadow: 0 0 0 2px var(--vt-bg), 0 0 0 4px var(--vt-focus);\n}\n\n.vt-tabbar .vt-tab.vt-tab-selected.vt-focused {\n    background: var(--vt-text);\n}\n\n/*content*/\n\n.vt-content-viewport {\n    position: relative;\n    flex: 1;\n    min-height: 0;\n    overflow: hidden;\n}\n\n.vt-content-list {\n    padding: 24px 28px 16px;\n    transition: transform 0.15s ease-out;\n}\n\n.vt-view-header {\n    display: flex;\n    align-items: flex-end;\n    gap: 16px;\n    margin-bottom: 16px;\n}\n\n.vt-view-title {\n    margin: 0;\n    font-size: 24px;\n    font-weight: 700;\n}\n\n.vt-view-description {\n    margin: 6px 0 0;\n    font-size: 15px;\n    color: var(--vt-muted);\n}\n\n.vt-view-count {\n    margin-left: auto;\n    font-size: 13px;\n    color: var(--vt-faint);\n    white-space: nowrap;\n}\n\n.vt-view-icon {\n    width: 64px;\n    height: 64px;\n    flex-shrink: 0;\n    align-self: center;\n    border-radius: 14px;\n}\n\n.vt-view-badge {\n    align-self: center;\n    margin-left: auto;\n    padding: 6px 12px;\n    border-radius: 8px;\n    background: var(--vt-card-hover);\n    font-size: 14px;\n    white-space: nowrap;\n}\n\n.vt-view-page > .vt-section + .vt-section {\n    margin-top: 16px;\n}\n\n.vt-section-grid {\n    display: grid;\n    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));\n    gap: 24px 20px;\n    align-items: start;\n}\n\n.vt-section-title {\n    margin: 0 0 10px 2px;\n    font-size: 12px;\n    font-weight: 600;\n    letter-spacing: 0.08em;\n    text-transform: uppercase;\n    color: var(--vt-muted);\n}\n\n.vt-card {\n    display: flex;\n    flex-direction: column;\n    background: var(--vt-card);\n    border-radius: var(--vt-radius);\n}\n\n.vt-view-page .vt-card {\n    max-width: 760px;\n}\n\n/*rows*/\n\n.vt-row {\n    display: flex;\n    align-items: center;\n    gap: 16px;\n    min-height: 60px;\n    padding: 12px 16px;\n    cursor: pointer;\n}\n\n.vt-card > * + * {\n    border-top: 1px solid var(--vt-line);\n}\n\n.vt-card > :first-child {\n    border-top-left-radius: var(--vt-radius);\n    border-top-right-radius: var(--vt-radius);\n}\n\n.vt-card > :last-child {\n    border-bottom-left-radius: var(--vt-radius);\n    border-bottom-right-radius: var(--vt-radius);\n}\n\n.vt-row.vt-focused {\n    border-radius: var(--vt-radius);\n}\n\n.vt-row:hover {\n    background: var(--vt-card-hover);\n}\n\n.vt-row.vt-row-static {\n    min-height: 48px;\n    cursor: default;\n}\n\n.vt-row.vt-row-static:hover {\n    background: none;\n}\n\n.vt-row-static .vt-row-value {\n    color: var(--vt-text);\n}\n\n.vt-focusable.vt-focused {\n    background: var(--vt-card-focus);\n    box-shadow: inset 0 0 0 2px var(--vt-focus);\n    border-color: transparent;\n}\n\n.vt-focused + * {\n    border-color: transparent;\n}\n\n/*a toggle's page link, tucked under it while the toggle is on*/\n.vt-card > .vt-row-sub {\n    min-height: 44px;\n    padding: 4px 16px 12px 32px;\n    border-top: none;\n}\n\n.vt-row-sub .vt-row-title {\n    font-size: 14px;\n    color: var(--vt-muted);\n}\n\n.vt-row-sub.vt-focused .vt-row-title {\n    color: var(--vt-text);\n}\n\n.vt-row-info {\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    flex: 1;\n    min-width: 0;\n}\n\n.vt-row-title {\n    font-size: 16px;\n    font-weight: 500;\n}\n\n.vt-row-description {\n    font-size: 13px;\n    line-height: 1.35;\n    color: var(--vt-muted);\n}\n\n.vt-row-value {\n    font-size: 14px;\n    color: var(--vt-muted);\n    white-space: nowrap;\n}\n\n.vt-chevron {\n    font-size: 24px;\n    line-height: 1;\n    color: var(--vt-muted);\n}\n\n.vt-inactive {\n    opacity: 0.4;\n    cursor: default;\n}\n\n.vt-inactive:hover {\n    background: none;\n}\n\n/*toggle*/\n\n.vt-toggle {\n    position: relative;\n    flex-shrink: 0;\n    width: 50px;\n    height: 28px;\n    border-radius: 14px;\n    background: #555;\n    transition: background 0.15s ease;\n}\n\n.vt-toggle-thumb {\n    position: absolute;\n    top: 3px;\n    left: 3px;\n    width: 22px;\n    height: 22px;\n    border-radius: 50%;\n    background: var(--vt-text);\n    transition: transform 0.15s ease, background 0.15s ease;\n}\n\n.vt-toggle.vt-toggle-on {\n    background: var(--vt-text);\n}\n\n.vt-toggle.vt-toggle-on .vt-toggle-thumb {\n    transform: translateX(22px);\n    background: var(--vt-bg);\n}\n\n/*notice and text*/\n\n.vt-notice {\n    margin: 8px;\n    padding: 12px 14px;\n    border: 1px solid var(--vt-line);\n    border-radius: 10px;\n}\n\n.vt-card > .vt-notice + * {\n    border-top: none;\n}\n\n.vt-notice-warning {\n    background: var(--vt-warning-bg);\n    border-color: var(--vt-warning-line);\n}\n\n.vt-notice-warning .vt-row-description {\n    color: #e0d2b0;\n}\n\n.vt-notice-success {\n    background: #173524;\n    border-color: #2b6a45;\n}\n\n.vt-notice-success .vt-row-description {\n    color: #b5dcc3;\n}\n\n.vt-notice-error {\n    background: #3a1c1c;\n    border-color: #7a3434;\n}\n\n.vt-notice-error .vt-row-description {\n    color: #f0c0c0;\n}\n\n.vt-text {\n    padding: 10px 16px;\n    font-size: 14px;\n    color: var(--vt-muted);\n}\n\n/*translation prompt under a category*/\n\n.vt-translate {\n    display: flex;\n    align-items: center;\n    gap: 6px;\n    width: fit-content;\n    margin-top: 16px;\n    padding: 6px 14px;\n    border-radius: 999px;\n    font-size: 14px;\n    color: var(--vt-muted);\n    cursor: pointer;\n}\n\n.vt-translate:hover,\n.vt-translate.vt-focused {\n    color: var(--vt-text);\n}\n\n/*back button on pages*/\n\n.vt-back {\n    display: inline-flex;\n    align-items: center;\n    gap: 8px;\n    margin-bottom: 14px;\n    padding: 6px 14px 6px 10px;\n    border-radius: 999px;\n    font-size: 14px;\n    color: var(--vt-muted);\n    cursor: pointer;\n}\n\n.vt-back:hover {\n    background: var(--vt-card-hover);\n}\n\n.vt-back.vt-focused {\n    color: var(--vt-text);\n}\n\n/*scrollbar*/\n\n.vt-scrollbar {\n    position: absolute;\n    top: 0;\n    bottom: 0;\n    right: 6px;\n    width: 4px;\n    display: none;\n}\n\n.vt-scrollbar.vt-scrollbar-visible {\n    display: block;\n}\n\n.vt-scrollbar-thumb {\n    width: 100%;\n    border-radius: 2px;\n    background: #666;\n    transition: transform 0.15s ease-out;\n}" }, "/vt/src/preload/modules/speed-control/style.css": { "text": "#vt-speed-indicator {\n    position: fixed;\n    bottom: 80px;\n    left: 50%;\n    transform: translateX(-50%);\n    background-color: rgba(0, 0, 0, 0.5);\n    color: white;\n    padding: 12px 24px;\n    border-radius: 1.5rem;\n    display: flex;\n    align-items: center;\n    z-index: 999999;\n    opacity: 0;\n    transition: opacity 0.3s ease-in-out;\n    pointer-events: none;\n}\n\n#vt-speed-indicator.visible {\n    opacity: 1;\n}\n\n.vt-speed-icon {\n    width: 24px;\n    height: 24px;\n    margin-right: 16px;\n    font-size: 24px;\n    font-family: 'YouTube Icons Outlined';\n}\n\n.vt-speed-icon::before {\n    content: '\\edf6';\n}\n\n.vt-speed-text {\n    font-size: 18px;\n    font-weight: 500;\n    min-width: 30px;\n    text-align: right;\n}" }, "/vt/src/preload/modules/volume-control/style.css": { "text": `div[idomkey="lazy-mdx-volume"] { /*hide ugly legacy volume indicator that appears when setVolume is called on player*/
+      module.exports = { "/vt/src/preload/modules/settings/style.css": { "text": "/*\nsettings overlay\nstyles the frame and the generic row types from render.js only\n*/\n\n#vt-settings-overlay-root {\n    --vt-bg: #212121;\n    --vt-card: #2b2b2b;\n    --vt-card-hover: #333;\n    --vt-card-focus: #3a3a3a;\n    --vt-line: #383838;\n    --vt-text: #fff;\n    --vt-muted: #aaa;\n    --vt-faint: #808080;\n    --vt-focus: #fff;\n    --vt-warning-bg: #332b18;\n    --vt-warning-line: #6f5a25;\n    --vt-radius: 12px;\n\n    position: fixed;\n    inset: 0;\n    z-index: 99999;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: opacity 0.2s ease;\n\n    /*own every inheritable base value instead of inheriting youtube's styling on <body>*/\n    font-family: 'YouTube Sans', Roboto, Arial, sans-serif;\n    font-size: 15px;\n    font-weight: 400;\n    font-style: normal;\n    line-height: normal;\n    letter-spacing: normal;\n    text-align: left;\n    text-transform: none;\n    white-space: normal;\n    color: var(--vt-text);\n    cursor: default;\n    user-select: none;\n}\n\n#vt-settings-overlay-root,\n#vt-settings-overlay-root * {\n    box-sizing: border-box;\n}\n\n#vt-settings-overlay-root.vt-settings-hidden {\n    opacity: 0;\n    pointer-events: none;\n}\n\n.vt-settings-backdrop {\n    position: absolute;\n    inset: 0;\n    background: rgba(0, 0, 0, 0.85);\n}\n\n.vt-settings-container {\n    position: relative;\n    width: min(1100px, 90vw);\n    height: min(760px, 86vh);\n    background: var(--vt-bg);\n    border-radius: 18px;\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);\n}\n\n/*header*/\n\n.vt-settings-header {\n    display: flex;\n    align-items: center;\n    gap: 24px;\n    padding: 24px 32px 18px;\n}\n\n.vt-settings-title {\n    font-size: 28px;\n    font-weight: 700;\n}\n\n.vt-settings-hint {\n    margin-left: auto;\n    font-size: 14px;\n    color: var(--vt-muted);\n}\n\n.vt-settings-icon-button {\n    width: 40px;\n    height: 40px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    flex-shrink: 0;\n    border-radius: 50%;\n    font-size: 20px;\n    color: var(--vt-muted);\n    cursor: pointer;\n}\n\n.vt-settings-icon-button + .vt-settings-icon-button {\n    margin-left: -16px;\n}\n\n.vt-settings-icon-button:hover,\n.vt-settings-icon-button.vt-focused {\n    background: var(--vt-card-hover);\n    color: var(--vt-text);\n}\n\n/*category tabs*/\n\n.vt-tabbar {\n    display: flex;\n    gap: 8px;\n    padding: 12px 28px;\n    border-top: 1px solid var(--vt-line);\n    border-bottom: 1px solid var(--vt-line);\n    overflow: hidden;\n}\n\n.vt-tab {\n    padding: 10px 16px;\n    border-radius: 10px;\n    font-size: 16px;\n    font-weight: 500;\n    white-space: nowrap;\n    cursor: pointer;\n}\n\n.vt-tab:hover {\n    background: var(--vt-card-hover);\n}\n\n.vt-tab.vt-tab-selected {\n    background: var(--vt-text);\n    color: var(--vt-bg);\n}\n\n/*tabs keep their own background when focused and get an outer ring instead*/\n.vt-tabbar .vt-tab.vt-focused {\n    background: var(--vt-card-hover);\n    box-shadow: 0 0 0 2px var(--vt-bg), 0 0 0 4px var(--vt-focus);\n}\n\n.vt-tabbar .vt-tab.vt-tab-selected.vt-focused {\n    background: var(--vt-text);\n}\n\n/*content*/\n\n.vt-content-viewport {\n    position: relative;\n    flex: 1;\n    min-height: 0;\n    overflow: hidden;\n}\n\n.vt-content-list {\n    padding: 24px 28px 16px;\n    transition: transform 0.15s ease-out;\n}\n\n.vt-view-header {\n    display: flex;\n    align-items: flex-end;\n    gap: 16px;\n    margin-bottom: 16px;\n}\n\n.vt-view-title {\n    margin: 0;\n    font-size: 24px;\n    font-weight: 700;\n}\n\n.vt-view-description {\n    margin: 6px 0 0;\n    font-size: 15px;\n    color: var(--vt-muted);\n}\n\n.vt-view-count {\n    margin-left: auto;\n    font-size: 13px;\n    color: var(--vt-faint);\n    white-space: nowrap;\n}\n\n.vt-view-icon {\n    width: 64px;\n    height: 64px;\n    flex-shrink: 0;\n    align-self: center;\n    border-radius: 14px;\n}\n\n.vt-view-badge {\n    align-self: center;\n    margin-left: auto;\n    padding: 6px 12px;\n    border-radius: 8px;\n    background: var(--vt-card-hover);\n    font-size: 14px;\n    white-space: nowrap;\n}\n\n.vt-view-page > .vt-section + .vt-section {\n    margin-top: 16px;\n}\n\n.vt-section-grid {\n    display: grid;\n    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));\n    gap: 24px 20px;\n    align-items: start;\n}\n\n.vt-section-title {\n    margin: 0 0 10px 2px;\n    font-size: 12px;\n    font-weight: 600;\n    letter-spacing: 0.08em;\n    text-transform: uppercase;\n    color: var(--vt-muted);\n}\n\n.vt-card {\n    display: flex;\n    flex-direction: column;\n    background: var(--vt-card);\n    border-radius: var(--vt-radius);\n}\n\n.vt-view-page .vt-card {\n    max-width: 760px;\n}\n\n/*rows*/\n\n.vt-row {\n    display: flex;\n    align-items: center;\n    gap: 16px;\n    min-height: 60px;\n    padding: 12px 16px;\n    cursor: pointer;\n}\n\n.vt-card > * + * {\n    border-top: 1px solid var(--vt-line);\n}\n\n.vt-card > :first-child {\n    border-top-left-radius: var(--vt-radius);\n    border-top-right-radius: var(--vt-radius);\n}\n\n.vt-card > :last-child {\n    border-bottom-left-radius: var(--vt-radius);\n    border-bottom-right-radius: var(--vt-radius);\n}\n\n.vt-row.vt-focused {\n    border-radius: var(--vt-radius);\n}\n\n.vt-row:hover {\n    background: var(--vt-card-hover);\n}\n\n.vt-row.vt-row-static {\n    min-height: 48px;\n    cursor: default;\n}\n\n.vt-row.vt-row-static:hover {\n    background: none;\n}\n\n.vt-row-static .vt-row-value {\n    color: var(--vt-text);\n}\n\n.vt-focusable.vt-focused {\n    background: var(--vt-card-focus);\n    box-shadow: inset 0 0 0 2px var(--vt-focus);\n    border-color: transparent;\n}\n\n.vt-focused + * {\n    border-color: transparent;\n}\n\n/*a toggle's page link, tucked under it while the toggle is on*/\n.vt-card > .vt-row-sub {\n    min-height: 44px;\n    padding: 4px 16px 12px 32px;\n    border-top: none;\n}\n\n.vt-row-sub .vt-row-title {\n    font-size: 14px;\n    color: var(--vt-muted);\n}\n\n.vt-row-sub.vt-focused .vt-row-title {\n    color: var(--vt-text);\n}\n\n.vt-row-info {\n    display: flex;\n    flex-direction: column;\n    gap: 3px;\n    flex: 1;\n    min-width: 0;\n}\n\n.vt-row-title {\n    font-size: 16px;\n    font-weight: 500;\n}\n\n.vt-row-description {\n    font-size: 13px;\n    line-height: 1.35;\n    color: var(--vt-muted);\n}\n\n.vt-row-value {\n    font-size: 14px;\n    color: var(--vt-muted);\n    white-space: nowrap;\n}\n\n.vt-chevron {\n    font-size: 24px;\n    line-height: 1;\n    color: var(--vt-muted);\n}\n\n.vt-inactive {\n    opacity: 0.4;\n    cursor: default;\n}\n\n.vt-inactive:hover {\n    background: none;\n}\n\n/*toggle*/\n\n.vt-toggle {\n    position: relative;\n    flex-shrink: 0;\n    width: 50px;\n    height: 28px;\n    border-radius: 14px;\n    background: #555;\n    transition: background 0.15s ease;\n}\n\n.vt-toggle-thumb {\n    position: absolute;\n    top: 3px;\n    left: 3px;\n    width: 22px;\n    height: 22px;\n    border-radius: 50%;\n    background: var(--vt-text);\n    transition: transform 0.15s ease, background 0.15s ease;\n}\n\n.vt-toggle.vt-toggle-on {\n    background: var(--vt-text);\n}\n\n.vt-toggle.vt-toggle-on .vt-toggle-thumb {\n    transform: translateX(22px);\n    background: var(--vt-bg);\n}\n\n/*a choice's selected option*/\n\n.vt-check {\n    font-size: 20px;\n    line-height: 1;\n}\n\n/*notice and text*/\n\n.vt-notice {\n    margin: 8px;\n    padding: 12px 14px;\n    border: 1px solid var(--vt-line);\n    border-radius: 10px;\n}\n\n.vt-card > .vt-notice + * {\n    border-top: none;\n}\n\n.vt-notice-warning {\n    background: var(--vt-warning-bg);\n    border-color: var(--vt-warning-line);\n}\n\n.vt-notice-warning .vt-row-description {\n    color: #e0d2b0;\n}\n\n.vt-notice-success {\n    background: #173524;\n    border-color: #2b6a45;\n}\n\n.vt-notice-success .vt-row-description {\n    color: #b5dcc3;\n}\n\n.vt-notice-error {\n    background: #3a1c1c;\n    border-color: #7a3434;\n}\n\n.vt-notice-error .vt-row-description {\n    color: #f0c0c0;\n}\n\n.vt-text {\n    padding: 10px 16px;\n    font-size: 14px;\n    color: var(--vt-muted);\n}\n\n/*translation prompt under a category*/\n\n.vt-translate {\n    display: flex;\n    align-items: center;\n    gap: 6px;\n    width: fit-content;\n    margin-top: 16px;\n    padding: 6px 14px;\n    border-radius: 999px;\n    font-size: 14px;\n    color: var(--vt-muted);\n    cursor: pointer;\n}\n\n.vt-translate:hover,\n.vt-translate.vt-focused {\n    color: var(--vt-text);\n}\n\n/*back button on pages*/\n\n.vt-back {\n    display: inline-flex;\n    align-items: center;\n    gap: 8px;\n    margin-bottom: 14px;\n    padding: 6px 14px 6px 10px;\n    border-radius: 999px;\n    font-size: 14px;\n    color: var(--vt-muted);\n    cursor: pointer;\n}\n\n.vt-back:hover {\n    background: var(--vt-card-hover);\n}\n\n.vt-back.vt-focused {\n    color: var(--vt-text);\n}\n\n/*scrollbar*/\n\n.vt-scrollbar {\n    position: absolute;\n    top: 0;\n    bottom: 0;\n    right: 6px;\n    width: 4px;\n    display: none;\n}\n\n.vt-scrollbar.vt-scrollbar-visible {\n    display: block;\n}\n\n.vt-scrollbar-thumb {\n    width: 100%;\n    border-radius: 2px;\n    background: #666;\n    transition: transform 0.15s ease-out;\n}" }, "/vt/src/preload/modules/speed-control/style.css": { "text": "#vt-speed-indicator {\n    position: fixed;\n    bottom: 80px;\n    left: 50%;\n    transform: translateX(-50%);\n    background-color: rgba(0, 0, 0, 0.5);\n    color: white;\n    padding: 12px 24px;\n    border-radius: 1.5rem;\n    display: flex;\n    align-items: center;\n    z-index: 999999;\n    opacity: 0;\n    transition: opacity 0.3s ease-in-out;\n    pointer-events: none;\n}\n\n#vt-speed-indicator.visible {\n    opacity: 1;\n}\n\n.vt-speed-icon {\n    width: 24px;\n    height: 24px;\n    margin-right: 16px;\n    font-size: 24px;\n    font-family: 'YouTube Icons Outlined';\n}\n\n.vt-speed-icon::before {\n    content: '\\edf6';\n}\n\n.vt-speed-text {\n    font-size: 18px;\n    font-weight: 500;\n    min-width: 30px;\n    text-align: right;\n}" }, "/vt/src/preload/modules/volume-control/style.css": { "text": `div[idomkey="lazy-mdx-volume"] { /*hide ugly legacy volume indicator that appears when setVolume is called on player*/
     display: none;
 }
 
@@ -1454,7 +1453,7 @@
     min-width: 55px;
     text-align: right;
     margin-left: 16px;
-}` }, "/vt/src/preload/style.css": { "text": "/*css patches*/\n\n::-webkit-scrollbar { /*hide native scrollbars from enableTouchSupport in touch-support.js*/\n    display: none;\n}\n\nbody {\n    user-select: none; /*without this, you can accidentally ctrl+a and select everything, have to refresh to fix*/\n}" }, "/vt/locale/README.md": { "text": "# Localizing VacuumTube\n\nVacuumTube has a good amount of strings of its own, and since it integrates with YouTube directly, it makes sense to localize them.\n\nTo get started on your own translation, you may need to have some JSON experience. If you're inexperienced, you can likely still do it.\n\nFirst, follow these steps:\n\n1. Open VacuumTube on a device with a keyboard.\n2. Change your language to the one you intend to translate, and let YouTube reload.\n3. Press **Ctrl+Shift+I** to open up developer tools.\n4. Navigate to the **Console** tab.\n5. Type `ytcfg.data_.HL` into the console and press enter.\n\nThis will provide you with the tag of the language you want to translate. If you want to translate a language by itself, without any regional dialects, you can remove everything after the `-`. This would turn `en-GB` to `en`, for example.\n\nThen, fork VacuumTube and open the `locale` folder. If you don't know anything about GitHub or what forking is, you can just download the source code as a zip file and do it there, then create an issue. Otherwise, you should create a PR with your fork.\n\nIf there's already a file for your desired language, but not everything is translated, you can bring it up to date. You will need JSON experience for this though, since you'll be manually copy pasting objects.\n\nOtherwise, copy the `en.json` file and paste it in the same directory. Rename it to the language tag you acquired previously, and make sure to keep the extension at the end.\n\nAfter that, just go through every string and translate it to the desired language. Make sure it's properly formatted and gramatically correct, as every other string in the regular YouTube app is.\n\nI'd recommend doing this in a more sophisticated editor that does syntax highlighting, especially if you're inexperienced with JSON since you may not know what parts to translate. Only translate the text between quotes, and make sure not to translate things like \"YouTube\", \"VacuumTube\", and \"SponsorBlock\", since those are names, and don't translate variables like `{path}`.\n\nOnce you're done translating, either create a PR with your fork, or if you didn't know how to fork, open an issue with the translated JSON file." }, "/vt/locale/bs.json": { "text": `{
+}` }, "/vt/src/preload/style.css": { "text": "/*css patches*/\n\n/*youtube's caption font system internally expects cobalt/leanback to bundle these fonts with it*/\n@import url('https://fonts.googleapis.com/css2?family=Carrois+Gothic+SC&family=Cutive+Mono&family=Dancing+Script:wght@400;700&family=Handlee&family=Marcellus+SC&family=PT+Mono&family=PT+Sans+Caption:wght@400;700&family=PT+Serif+Caption:ital@0;1&display=swap');\n\n::-webkit-scrollbar { /*hide native scrollbars from enableTouchSupport in touch-support.js*/\n    display: none;\n}\n\nbody {\n    user-select: none; /*without this, you can accidentally ctrl+a and select everything, have to refresh to fix*/\n}" }, "/vt/locale/README.md": { "text": "# Localizing VacuumTube\n\nVacuumTube has a good amount of strings of its own, and since it integrates with YouTube directly, it makes sense to localize them.\n\nTo get started on your own translation, you may need to have some JSON experience. If you're inexperienced, you can likely still do it.\n\nFirst, follow these steps:\n\n1. Open VacuumTube on a device with a keyboard.\n2. Change your language to the one you intend to translate, and let YouTube reload.\n3. Press **Ctrl+Shift+I** to open up developer tools.\n4. Navigate to the **Console** tab.\n5. Type `ytcfg.data_.HL` into the console and press enter.\n\nThis will provide you with the tag of the language you want to translate. If you want to translate a language by itself, without any regional dialects, you can remove everything after the `-`. This would turn `en-GB` to `en`, for example.\n\nThen, fork VacuumTube and open the `locale` folder. If you don't know anything about GitHub or what forking is, you can just download the source code as a zip file and do it there, then create an issue. Otherwise, you should create a PR with your fork.\n\nIf there's already a file for your desired language, but not everything is translated, you can bring it up to date. You will need JSON experience for this though, since you'll be manually copy pasting objects.\n\nOtherwise, copy the `en.json` file and paste it in the same directory. Rename it to the language tag you acquired previously, and make sure to keep the extension at the end.\n\nAfter that, just go through every string and translate it to the desired language. Make sure it's properly formatted and gramatically correct, as every other string in the regular YouTube app is.\n\nI'd recommend doing this in a more sophisticated editor that does syntax highlighting, especially if you're inexperienced with JSON since you may not know what parts to translate. Only translate the text between quotes, and make sure not to translate things like \"YouTube\", \"VacuumTube\", and \"SponsorBlock\", since those are names, and don't translate variables like `{path}`.\n\nOnce you're done translating, either create a PR with your fork, or if you didn't know how to fork, open an issue with the translated JSON file." }, "/vt/locale/bs.json": { "text": `{
     "general": {
         "video_copied": "Link videa kopiran u me\u0111uspremnik",
         "dislikes": "Palac dole"
@@ -1494,7 +1493,7 @@
         }
     }
 }
-` }, "/vt/locale/de.json": { "text": '{\n    "general": {\n        "video_copied": "Videolink in die Zwischenablage kopiert",\n        "dislikes": "Abneigungskn\xF6pfe"\n    },\n    "settings": {\n        "adblock": {\n            "title": "Anzeigenblocker",\n            "description": "Blockiert nahtlos Video- und Feed-Werbung und unterliegt nicht den Methoden von YouTube zur Verhinderung von Blockern"\n        },\n        "dearrow": {\n            "title": "DeArrow",\n            "description": "Ersetzt Titel und Vorschaubilder durch genauere, weniger sensationsl\xFCsterne Versionen aus einer \xF6ffentlichen Crowdsourced-Datenbank. Verlangsamt das Laden, da es Informationen vom Server abrufen muss"\n        },\n        "dislikes": {\n            "title": "Abneigungen zur\xFCckgeben",\n            "description": "Verwendet die YouTube Abneigungen zur\xFCckgeben API (returnyoutubedislike.com), um Abneigungskn\xF6pfe wieder zu YouTube hinzuzuf\xFCgen. Verlangsamt das Laden von Videos, da Informationen vom Server abgerufen werden m\xFCssen"\n        },\n        "hardware_decoding": {\n            "title": "Hardware-Dekodierung",\n            "description": "Verwendet Ihren Grafikprozessor zur Dekodierung von Videos, wenn m\xF6glich. Die Deaktivierung dieser Funktion kann Wiedergabeprobleme beheben, kann aber je nach CPU zu Verz\xF6gerungen f\xFChren. Starten Sie nach dem Umschalten neu."\n        },\n        "low_memory_mode": {\n            "title": "Wenigspeichermodus",\n            "description": "Weist YouTube an, den Modus f\xFCr geringen Speicherbedarf zu aktivieren, was die Leistung auf langsameren Ger\xE4ten auf Kosten einiger visueller Effekte verbessern kann. Starten Sie nach dem Umschalten neu."\n        },\n        "fullscreen": {\n            "title": "Vollbildschirm",\n            "description": "Aktiviert den Vollbildmodus und l\xE4sst VacuumTube immer im Vollbildmodus starten."\n        },\n        "keep_on_top": {\n            "title": "Oben halten",\n            "description": "Aktiviert \u201EOben halten\u201C und sorgt daf\xFCr, dass VacuumTube so gestartet wird, dass das Fenster \xFCber allen anderen Fenstern angeheftet ist."\n        },\n        "userstyles": {\n            "title": "Benutzerdefinierte CSS (Benutzerstile)",\n            "description": "Erm\xF6glicht das Einf\xFCgen von benutzerdefinierten CSS-Stilen. Legen Sie Ihre .css-Dateien im Ordner \u201EBenutzerstile\u201C ab."\n        },\n        "features": {\n            "settings": {\n                "remaining_time": {\n                    "title": "Verbleibende Zeit anzeigen",\n                    "description": "Zeigt die verbleibende Abspielzeit eines Videos anstatt der Gesamtl\xE4nge. Ber\xFCcksichtigt die aktuelle Wiedergabegeschwindigkeit."\n                }\n            }\n        }\n    }\n}\n' }, "/vt/locale/en.json": { "text": `{
+` }, "/vt/locale/de.json": { "text": '{\n    "general": {\n        "video_copied": "Videolink in die Zwischenablage kopiert",\n        "dislikes": "Dislikes",\n        "steam_controller_notice": "Externer Controller wird nicht erkannt? Probiere das steamdeck-input-disabler-Plugin von Decky aus.",\n        "encryption_error": {\n            "title": "Etwas ist schiefgelaufen",\n            "text": "Dieses Video konnte nicht dekodiert werden. Filme werden in VacuumTube wegen Verschl\xFCsselung nicht unterst\xFCtzt. Tritt das auch bei anderen Videos auf, versuche dich anzumelden oder das Konto zu wechseln.",\n            "switch_accounts": "Konto wechseln",\n            "okay": "Okay"\n        }\n    },\n    "settings": {\n        "generic": {\n            "title": "Einstellungen",\n            "description": "\xD6ffnet das VacuumTube-Einstellungsfenster. Du kannst es \xFCberall mit Strg+O \xF6ffnen",\n            "button_label": "VacuumTube-Einstellungen \xF6ffnen",\n            "hint": "Mit den Pfeiltasten navigieren",\n            "option_count": "{count} Optionen",\n            "translate": "Hilf mit, VacuumTube auf {language} zu \xFCbersetzen",\n            "ratio": "{on} von {total}"\n        },\n        "categories": {\n            "general": {\n                "title": "Allgemein",\n                "description": "Wie sich das VacuumTube-Fenster verh\xE4lt."\n            },\n            "playback": {\n                "title": "Wiedergabe",\n                "description": "Steuere, was abgespielt wird und wie Videos dargestellt werden."\n            },\n            "appearance": {\n                "title": "Darstellung",\n                "description": "\xC4ndere, was die Oberfl\xE4che zeigt und wie sie aussieht."\n            },\n            "controls": {\n                "title": "Steuerung & Ger\xE4te",\n                "description": "Eingabemethoden und verbundene Ger\xE4te."\n            },\n            "advanced": {\n                "title": "Erweitert",\n                "description": "Leistungsoptimierungen und optionale Funktionen."\n            }\n        },\n        "sections": {\n            "window": "Fenster",\n            "behavior": "Verhalten",\n            "updates": "Updates",\n            "content": "Inhalte",\n            "quality": "Qualit\xE4t & Kompatibilit\xE4t",\n            "interface": "Oberfl\xE4che",\n            "userstyles": "Benutzerdefiniertes CSS",\n            "input": "Eingabe",\n            "devices": "Ger\xE4te",\n            "performance": "Leistung",\n            "experimental": "Experimentell"\n        },\n        "adblock": {\n            "title": "Werbung blockieren",\n            "description": "Blockiert nahtlos Video- und Feed-Werbung und ist nicht von YouTubes Methoden zur Blockerverhinderung betroffen"\n        },\n        "sponsorblock": {\n            "title": "SponsorBlock",\n            "description": "\xDCberspringt Sponsorensegmente in YouTube-Videos mithilfe einer Crowdsourcing-Datenbank",\n            "categories_link": "Zu \xFCberspringende Segmente",\n            "categories": {\n                "sponsor": {\n                    "name": "Sponsor",\n                    "description": "Bezahlte Werbung, bezahlte Verweise und direkte Anzeigen. Nicht f\xFCr Eigenwerbung oder kostenlose Erw\xE4hnungen von Anliegen/Creatorinnen/Creatorn/Websites/Produkten, die man mag."\n                },\n                "selfpromo": {\n                    "name": "Unbezahlte Eigenwerbung",\n                    "description": "\xC4hnlich wie \u201ESponsor\u201C, jedoch f\xFCr unbezahlte Werbung oder Eigenwerbung. Dazu geh\xF6ren Abschnitte \xFCber Merchandise, Spenden oder Informationen dar\xFCber, mit wem zusammengearbeitet wurde."\n                },\n                "interaction": {\n                    "name": "Interaktionserinnerung (Abonnieren)",\n                    "description": "Wenn mitten im Inhalt kurz daran erinnert wird, zu liken, zu abonnieren oder zu folgen. Ist sie lang oder betrifft sie etwas Bestimmtes, geh\xF6rt sie eher unter Eigenwerbung."\n                },\n                "intro": {\n                    "name": "Pausen-/Intro-Animation",\n                    "description": "Ein Abschnitt ohne eigentlichen Inhalt. Kann eine Pause, ein Standbild oder eine wiederholte Animation sein. Nicht f\xFCr \xDCberg\xE4nge mit Informationen verwenden."\n                },\n                "outro": {\n                    "name": "Endkarten/Abspann",\n                    "description": "Abspann oder wenn die YouTube-Endkarten erscheinen. Nicht f\xFCr Fazits mit Informationen."\n                },\n                "preview": {\n                    "name": "Vorschau/Zusammenfassung",\n                    "description": "Sammlung von Ausschnitten, die zeigen, was in diesem oder in anderen Videos einer Reihe kommt, wobei alle Informationen sp\xE4ter wiederholt werden."\n                },\n                "hook": {\n                    "name": "Einstieg/Begr\xFC\xDFungen",\n                    "description": "Erz\xE4hlte Trailer f\xFCr das kommende Video, Begr\xFC\xDFungen und Verabschiedungen. Sollte keine Fazits mit Informationen \xFCberspringen."\n                },\n                "filler": {\n                    "name": "Abschweifungen/Witze",\n                    "description": "Abschweifende Szenen oder Witze, die zum Verst\xE4ndnis des Hauptinhalts nicht n\xF6tig sind. Sollte keine Abschnitte mit Kontext- oder Hintergrunddetails umfassen. Eine sehr aggressive Kategorie f\xFCr Momente, in denen dir nicht nach \u201ESpa\xDF\u201C ist."\n                }\n            }\n        },\n        "dearrow": {\n            "title": "DeArrow",\n            "description": "Ersetzt Titel und Vorschaubilder durch genauere, weniger rei\xDFerische Versionen aus einer \xF6ffentlichen Crowdsourcing-Datenbank. Verlangsamt das Laden, da Informationen vom Server abgerufen werden m\xFCssen"\n        },\n        "dislikes": {\n            "title": "Dislikes zur\xFCckbringen",\n            "description": "Nutzt Community-Daten der Return YouTube Dislike API (returnyoutubedislike.com), um ungef\xE4hre Dislike-Zahlen anzuzeigen. Verlangsamt das Laden von Videos, da Informationen vom Server abgerufen werden m\xFCssen"\n        },\n        "remove_super_resolution": {\n            "title": "Super Resolution entfernen",\n            "description": "Entfernt \u201ESuper Resolution\u201C-Qualit\xE4ten (KI-hochskaliert) aus Videos niedriger Qualit\xE4t"\n        },\n        "hide_shorts": {\n            "title": "Shorts ausblenden",\n            "description": "Blendet YouTube Shorts auf der Startseite aus"\n        },\n        "guide_tabs": {\n            "title": "Seitenleisten-Tabs",\n            "description": "W\xE4hle, welche Tabs in der Seitenleiste angezeigt werden. Schalte einen Tab aus, um ihn auszublenden. Nach \xC4nderung neu starten",\n            "tabs": {\n                "search": "Suche",\n                "shorts": "Shorts",\n                "subscriptions": "Abos",\n                "library": "Mediathek",\n                "gaming": "Gaming",\n                "music": "Musik",\n                "news": "Nachrichten",\n                "podcasts": "Podcasts",\n                "movies_and_tv": "Filme & TV",\n                "live": "Live",\n                "sports": "Sport"\n            }\n        },\n        "unlock_resolution": {\n            "title": "Aufl\xF6sung freischalten",\n            "description": "Hebt die Aufl\xF6sungsbegrenzung des Monitors auf und erlaubt Videos in jeder Aufl\xF6sung. Nach Umschalten neu starten"\n        },\n        "h264ify": {\n            "title": "Video-Codecs filtern",\n            "description": "Optionen zur Codec-Filterung. Nach dem Umschalten einer beliebigen Option neu starten.",\n            "enable_title": "Codec-Filter aktivieren (h264ify)",\n            "enable_description": "Aktiviert den Codec-Filter. Kann Leistung und Akkulaufzeit auf langsameren Ger\xE4ten verbessern, aber die verf\xFCgbaren Aufl\xF6sungen reduzieren.",\n            "disable_codec_title": "{codec} deaktivieren",\n            "disable_codec_description": "{codec}-Streams blockieren.",\n            "codecs_link": "Blockierte Codecs"\n        },\n        "block_continue_watching": {\n            "title": "\u201EWeiterschauen\u201C blockieren",\n            "description": "Blockiert die Aufforderung \u201EVideo pausiert. Weiterschauen?\u201C, die nach einer Weile Inaktivit\xE4t erscheint"\n        },\n        "hardware_decoding": {\n            "title": "Hardware-Dekodierung",\n            "description": "Nutzt nach M\xF6glichkeit deine GPU zum Dekodieren von Videos. Das Deaktivieren kann Wiedergabeprobleme beheben, je nach CPU aber Verz\xF6gerungen verursachen. Nach Umschalten neu starten"\n        },\n        "wayland_hdr": {\n            "title": "Wayland HDR",\n            "description": "Aktiviert HDR unter Wayland, kann auf nicht unterst\xFCtzten Plattformen aber blasse Farben verursachen. Nach Umschalten neu starten"\n        },\n        "low_memory_mode": {\n            "title": "Speichersparmodus",\n            "description": "Weist YouTube an, den Modus f\xFCr geringen Speicherbedarf zu aktivieren, was die Leistung auf langsameren Ger\xE4ten auf Kosten einiger visueller Effekte verbessern kann. Nach Umschalten neu starten"\n        },\n        "fullscreen": {\n            "title": "Vollbild",\n            "description": "Aktiviert den Vollbildmodus und l\xE4sst VacuumTube immer im Vollbild starten"\n        },\n        "no_window_decorations": {\n            "title": "Ohne Fensterdekoration",\n            "description": "Deaktiviert Fensterdekorationen einschlie\xDFlich Titelleiste und Fensterrahmen. Nach Umschalten neu starten"\n        },\n        "keep_on_top": {\n            "title": "Im Vordergrund halten",\n            "description": "Aktiviert \u201EIm Vordergrund halten\u201C und l\xE4sst VacuumTube mit dem Fenster \xFCber allen anderen Fenstern angeheftet starten"\n        },\n        "auto_update": {\n            "title": "Automatische Updates",\n            "description": "L\xE4dt neue Versionen im Hintergrund herunter und installiert sie beim Schlie\xDFen von VacuumTube. Wenn aus, kannst du auf der Info-Seite weiterhin nach Updates suchen"\n        },\n        "pause_on_blur": {\n            "title": "Bei Fokusverlust pausieren",\n            "description": "Pausiert das aktuelle Video, wenn VacuumTube den Fokus verliert (z. B. beim Wegschalten oder Minimieren des Fensters)"\n        },\n        "features": {\n            "title": "Funktionen",\n            "notice_title": "Nicht Teil der Standarderfahrung",\n            "notice_description": "Diese optionalen Funktionen erweitern VacuumTube \xFCber die normale TV-YouTube-Erfahrung hinaus. Aktiviere sie unten, um zu best\xE4tigen, dass sie auf internem YouTube-Verhalten beruhen und sich ohne Vorank\xFCndigung \xE4ndern oder aufh\xF6ren k\xF6nnen zu funktionieren.",\n            "enable_title": "Optionale Funktionen aktivieren",\n            "enable_description": "Ich verstehe, dass diese Funktionen au\xDFerhalb der Standarderfahrung von VacuumTube liegen und sich \xE4ndern oder kaputtgehen k\xF6nnen.",\n            "settings": {\n                "music_mode": {\n                    "title": "Musikmodus",\n                    "description": "F\xFCgt dem Video-Einstellungsmen\xFC einen Musikmodus-Schalter f\xFCr reine Audiowiedergabe \xFCber YouTubes native Musikansicht hinzu."\n                },\n                "remaining_time": {\n                    "title": "Verbleibende Zeit anzeigen",\n                    "description": "Zeigt im Player-Overlay die verbleibende Laufzeit des Videos statt der verstrichenen Zeit an. Ber\xFCcksichtigt die aktuelle Wiedergabegeschwindigkeit. Mit R f\xFCr das aktuelle Video umschalten."\n                },\n                "ultrawide": {\n                    "title": "Ultrawide-Unterst\xFCtzung",\n                    "description": "Erweitert die Oberfl\xE4che im Vollbild auf Ultrabreitbildschirme. Kann in mancher Hinsicht fehlerhaft und seltsam aussehen."\n                }\n            }\n        },\n        "userstyles": {\n            "title": "Benutzerdefiniertes CSS (Benutzerstile)",\n            "description": "Lege .css-Dateien im Benutzerstile-Ordner ab, um die Oberfl\xE4che anzupassen. \xC4nderungen werden automatisch \xFCbernommen",\n            "warn_empty": "Keine Benutzerstile gefunden",\n            "open_folder": "Benutzerstile-Ordner \xF6ffnen",\n            "enable": "Benutzerstile aktivieren",\n            "failed_to_load": "Benutzerstile konnten nicht geladen werden",\n            "manage_link": "Benutzerstile verwalten"\n        },\n        "touch_overlay": {\n            "title": "Touch-Overlay",\n            "description": "Aktiviert Bildschirm-Touchsteuerung f\xFCr einfachere Navigation, wenn Touch-Eingabe erkannt wird"\n        },\n        "controller_support": {\n            "title": "Controller-Unterst\xFCtzung",\n            "description": "Aktiviert die Unterst\xFCtzung f\xFCr Gamecontroller, inklusive Navigation und Wiedergabesteuerung. Erfordert einen externen Controller, etwa einen Xbox-Controller"\n        },\n        "device_discoverability": {\n            "title": "Ger\xE4teauffindbarkeit",\n            "description": "Erm\xF6glicht, dass VacuumTube von der YouTube-App auf Ger\xE4ten im selben lokalen Netzwerk gefunden wird. Nach Umschalten neu starten"\n        },\n        "mac_permissions": {\n            "title": "Berechtigungen",\n            "description": "Verwalte die von VacuumTube genutzten macOS-Berechtigungen.",\n            "microphone_title": "Mikrofon",\n            "microphone_description": "Wird nur verwendet, wenn du die YouTube-Sprachsuche startest.",\n            "status_label": "Status",\n            "status_loading": "Mikrofonberechtigung wird gepr\xFCft\u2026",\n            "request_microphone": "Mikrofonzugriff anfordern",\n            "open_microphone_settings": "macOS-Mikrofoneinstellungen \xF6ffnen",\n            "reset_microphone": "Fehlerbehebung: Berechtigungsabfrage zur\xFCcksetzen",\n            "relaunch_app": "VacuumTube neu starten",\n            "restart_required": "In den macOS-Einstellungen vorgenommene \xC4nderungen erfordern einen Neustart von VacuumTube.",\n            "request_granted": "Mikrofonzugriff ist erlaubt. Es ist keine Berechtigungsabfrage n\xF6tig.",\n            "request_not_determined": "macOS hat noch keine Berechtigungsabfrage angezeigt. Nutze \u201EBerechtigungsabfrage zur\xFCcksetzen\u201C und versuche es erneut.",\n            "request_denied_help": "macOS zeigt die Berechtigungsabfrage nicht erneut an, solange der Zugriff verweigert wird. Aktiviere ihn in den macOS-Einstellungen und starte VacuumTube neu.",\n            "request_failed": "VacuumTube konnte keinen Mikrofonzugriff anfordern. \xD6ffne die macOS-Einstellungen und starte die App nach dem \xC4ndern des Zugriffs neu.",\n            "resetting_microphone": "Gespeicherte macOS-Mikrofonentscheidung wird zur\xFCckgesetzt\u2026",\n            "statuses": {\n                "not-determined": "Nicht angefragt",\n                "granted": "Erlaubt",\n                "denied": "Verweigert",\n                "restricted": "Eingeschr\xE4nkt",\n                "unknown": "Unbekannt",\n                "unsupported": "Nicht unterst\xFCtzt"\n            }\n        },\n        "about": {\n            "title": "\xDCber",\n            "description": "YouTube f\xFCrs TV, auf deinem PC",\n            "version": "Version {version}",\n            "platform_label": "Plattform",\n            "installation_label": "Installation",\n            "update_method_label": "Update-Methode",\n            "view_github": "Auf GitHub ansehen",\n            "latest_releases": "Neueste Versionen",\n            "platforms": {\n                "darwin": "macOS",\n                "win32": "Windows",\n                "linux": "Linux"\n            },\n            "architectures": {\n                "arm64": "arm64",\n                "x64": "x64",\n                "ia32": "x86"\n            },\n            "installations": {\n                "application": "Anwendung",\n                "installer": "Installierte Anwendung",\n                "portable": "Portable Anwendung",\n                "flatpak": "Flatpak",\n                "appimage": "AppImage",\n                "package": "Systempaket",\n                "development": "Entwicklungsbuild",\n                "unknown": "Unbekannt"\n            },\n            "update_methods": {\n                "automatic": "Automatischer Installer",\n                "manual": "Manueller Download",\n                "flatpak": "Flatpak"\n            },\n            "updates": {\n                "idle_title": "Updates",\n                "idle_detail": "Pr\xFCfen, ob eine neuere Version von VacuumTube verf\xFCgbar ist.",\n                "check_now": "Nach Updates suchen",\n                "checking_title": "Suche nach Updates\u2026",\n                "checking_detail": "Neueste VacuumTube-Version wird gesucht.",\n                "checking_button": "Wird gepr\xFCft\u2026",\n                "current_title": "Du bist auf dem neuesten Stand",\n                "current_detail": "VacuumTube {version} ist die neueste verf\xFCgbare Version.",\n                "check_again": "Erneut pr\xFCfen",\n                "available_title": "VacuumTube {version} ist verf\xFCgbar",\n                "available_automatic_detail": "Lade das Update jetzt herunter und starte VacuumTube neu, wenn es bereit ist.",\n                "available_manual_detail": "Lade die neueste Version herunter und ersetze deine aktuelle Kopie.",\n                "download_update": "Update herunterladen",\n                "download_latest": "Neueste Version herunterladen",\n                "downloading_title": "Update wird heruntergeladen\u2026",\n                "downloading_detail": "Das Update ist zu {percent} % heruntergeladen.",\n                "downloading_button": "Wird heruntergeladen\u2026 {percent} %",\n                "ready_title": "Update bereit zur Installation",\n                "ready_detail": "Starte VacuumTube neu, um Version {version} zu installieren.",\n                "install_update": "Neu starten und installieren",\n                "error_title": "Updates konnten nicht gepr\xFCft werden",\n                "error_detail": "Pr\xFCfe deine Verbindung und versuche es erneut oder \xF6ffne die Releases-Seite.",\n                "try_again": "Erneut versuchen",\n                "development_title": "Entwicklungsbuild",\n                "development_detail": "Automatische Update-Pr\xFCfungen sind in paketierten Builds verf\xFCgbar.",\n                "unsupported_title": "Update-Pr\xFCfung nicht verf\xFCgbar",\n                "unsupported_detail": "Nutze die unten angezeigte Update-Methode, um nach einer neueren Version zu suchen.",\n                "view_update_source": "Update-Quelle ansehen",\n                "view_releases": "Neueste Releases ansehen"\n            }\n        }\n    },\n    "sponsorblock": {\n        "sponsor_skipped": "Sponsor \xFCbersprungen",\n        "selfpromo_skipped": "Eigenwerbung \xFCbersprungen",\n        "interaction_skipped": "Interaktion \xFCbersprungen",\n        "intro_skipped": "Intro \xFCbersprungen",\n        "outro_skipped": "Outro \xFCbersprungen",\n        "preview_skipped": "Vorschau \xFCbersprungen",\n        "hook_skipped": "Einstieg/Begr\xFC\xDFung \xFCbersprungen",\n        "filler_skipped": "Abschweifungen/Witze \xFCbersprungen"\n    },\n    "donate_unused": {\n        "setting": {\n            "title": "Spenden",\n            "description": "Unterst\xFCtze die Entwicklung von VacuumTube mit einer Spende! Du kannst \xFCber shy.rocks/donate spenden oder unten auf die Schaltfl\xE4che dr\xFCcken, um die Spendenseite im Browser zu \xF6ffnen",\n            "button_label": "Spenden"\n        }\n    }\n}' }, "/vt/locale/en.json": { "text": `{
     "general": {
         "video_copied": "Video link copied to clipboard",
         "dislikes": "Dislikes",
@@ -1675,6 +1674,22 @@
         "pause_on_blur": {
             "title": "Pause on Blur",
             "description": "Pause current video when VacuumTube loses focus (e.g. tabbing out or minimizing the window)"
+        },
+        "default_guest_mode": {
+            "title": "Default Guest Mode",
+            "description": "Automatically enter guest mode on launch"
+        },
+        "screensaver_enabled": {
+            "title": "Screensaver Dimmer",
+            "description": "Dims the screen after a period of inactivity when menus are idle or video is paused"
+        },
+        "screensaver_timeout": {
+            "title": "Dim After",
+            "description": "How long VacuumTube waits without any input before dimming"
+        },
+        "screensaver_dim_percentage": {
+            "title": "Dimming Level",
+            "description": "How dark the screen gets. 100% turns it fully black"
         },
         "features": {
             "title": "Features",
@@ -2367,6 +2382,23 @@
     }
   });
 
+  // tv/vacuumtube/preload/modules/default-guest-mode.js
+  var require_default_guest_mode = __commonJS({
+    "tv/vacuumtube/preload/modules/default-guest-mode.js"(exports, module) {
+      var rcMod = require_resolveCommandModifiers();
+      var configManager = require_config();
+      var config = configManager.get();
+      module.exports = () => {
+        if (!config.default_guest_mode) return;
+        rcMod.resolveCommand({
+          switchToGuestMode: {
+            identityType: "UNAUTHENTICATED_IDENTITY_TYPE_GUEST"
+          }
+        });
+      };
+    }
+  });
+
   // tv/vacuumtube/preload/modules/disable-direct-sign-in.js
   var require_disable_direct_sign_in = __commonJS({
     "tv/vacuumtube/preload/modules/disable-direct-sign-in.js"(exports, module) {
@@ -2727,7 +2759,7 @@
   // vt:vt:package
   var require_vt_package = __commonJS({
     "vt:vt:package"(exports, module) {
-      module.exports = { "version": "2.0.1" };
+      module.exports = { "version": "2.1.0" };
     }
   });
 
@@ -3439,8 +3471,8 @@ ${headersText}\r
         //8k width
         height: (value) => Number(value) > 0 && Number(value) <= 4320,
         //8k height
-        framerate: (value) => Number(value) > 0 && Number(value) <= 60,
-        //60fps
+        framerate: (value) => Number(value) > 0 && Number(value) <= 120,
+        //120fps. youtube only does 60 at most, but for some reason returning 60 causes changing the playback speed to limit you to 480p on 60fps videos
         bitrate: (value) => Number(value) > 0 && Number(value) <= 2e8,
         //almost double avg bitrate of 8k video
         eotf: (value) => value === "bt709" || (value === "smpte2084" || value === "arib-std-b67") && isHdrDisplay(),
@@ -4010,6 +4042,112 @@ ${headersText}\r
     }
   });
 
+  // tv/vacuumtube/preload/modules/screensaver.js
+  var require_screensaver = __commonJS({
+    "tv/vacuumtube/preload/modules/screensaver.js"(exports, module) {
+      var { ipcRenderer } = require_electron();
+      var configManager = require_config();
+      module.exports = () => {
+        let wakeKey = null;
+        let idleTimer = null;
+        let isDimmed = false;
+        const overlay = document.createElement("div");
+        overlay.id = "vt-screensaver-overlay";
+        Object.assign(overlay.style, {
+          position: "fixed",
+          top: "0",
+          left: "0",
+          width: "100vw",
+          height: "100vh",
+          backgroundColor: "#000000",
+          opacity: "0",
+          pointerEvents: "none",
+          //allow clicks to pass through
+          zIndex: "2147483647",
+          //on top of absolutely everything
+          transition: "opacity 0.6s ease-in-out"
+        });
+        if (document.documentElement) {
+          document.documentElement.appendChild(overlay);
+        } else {
+          window.addEventListener("DOMContentLoaded", () => {
+            document.documentElement.appendChild(overlay);
+          });
+        }
+        function isVideoPlaying() {
+          return [...document.querySelectorAll(".html5-video-player video")].some((video) => !video.paused && !video.ended);
+        }
+        function undim() {
+          if (isDimmed) {
+            overlay.style.opacity = "0";
+            isDimmed = false;
+          }
+        }
+        function dim() {
+          const config = configManager.get();
+          if (!config.screensaver_enabled) return;
+          if (isVideoPlaying()) {
+            resetTimer();
+            return;
+          }
+          const dimPercent = Math.max(0, Math.min(100, Number(config.screensaver_dim_percentage) || 75));
+          overlay.style.opacity = String(dimPercent / 100);
+          isDimmed = true;
+        }
+        function resetTimer() {
+          undim();
+          if (idleTimer) {
+            clearTimeout(idleTimer);
+            idleTimer = null;
+          }
+          const config = configManager.get();
+          if (!config.screensaver_enabled) return;
+          const timeoutMinutes = Number(config.screensaver_timeout) || 5;
+          idleTimer = setTimeout(dim, timeoutMinutes * 60 * 1e3);
+        }
+        const userEvents = ["mousemove", "mousedown", "wheel", "touchstart", "pointerdown"];
+        for (const eventName of userEvents) {
+          window.addEventListener(eventName, resetTimer, { capture: true, passive: true });
+        }
+        window.addEventListener("keydown", (e) => {
+          if (isDimmed || e.keyCode === wakeKey) {
+            wakeKey = e.keyCode;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }
+          resetTimer();
+        }, true);
+        window.addEventListener("keyup", (e) => {
+          if (e.keyCode !== wakeKey) return;
+          wakeKey = null;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }, true);
+        window.addEventListener("blur", () => wakeKey = null);
+        window.addEventListener("play", () => {
+          undim();
+          if (idleTimer) {
+            clearTimeout(idleTimer);
+            idleTimer = null;
+          }
+        }, true);
+        window.addEventListener("playing", () => {
+          undim();
+          if (idleTimer) {
+            clearTimeout(idleTimer);
+            idleTimer = null;
+          }
+        }, true);
+        window.addEventListener("pause", resetTimer, true);
+        window.addEventListener("ended", resetTimer, true);
+        ipcRenderer.on("config-update", () => {
+          resetTimer();
+        });
+        resetTimer();
+      };
+    }
+  });
+
   // tv/vacuumtube/preload/modules/settings/render.js
   var require_render = __commonJS({
     "tv/vacuumtube/preload/modules/settings/render.js"(exports, module) {
@@ -4049,6 +4187,21 @@ ${headersText}\r
             }
             row.onChange?.(!on);
           });
+        },
+        choice(row, context) {
+          const strings = context.locale[row.key];
+          const value = context.config[row.key];
+          return focusable(`row:${rowId(row)}`, "vt-row vt-row-link", [
+            info(row.title ?? strings?.title, row.description ?? strings?.description),
+            el("span", { className: "vt-row-value", textContent: row.format ? row.format(value) : String(value ?? "") }),
+            el("span", { className: "vt-chevron", textContent: "\u203A" })
+          ], () => context.openChoice(row));
+        },
+        option(row) {
+          return focusable(`row:${rowId(row)}`, "vt-row", [
+            info(row.title, row.description),
+            row.selected ? el("span", { className: "vt-check", textContent: "\u2713" }) : null
+          ], () => row.select());
         },
         link(row, context) {
           return focusable(`row:${rowId(row)}`, "vt-row vt-row-link", [
@@ -4113,7 +4266,7 @@ ${headersText}\r
         ]);
       }
       function countFocusable(rows) {
-        return visibleRows(rows).filter((row) => ["toggle", "link", "button"].includes(row.type)).length;
+        return visibleRows(rows).filter((row) => ["toggle", "choice", "link", "button"].includes(row.type)).length;
       }
       function translateLink(context) {
         const label = context.locale.generic.translate.replace("{language}", context.translation.name);
@@ -4905,6 +5058,10 @@ ${headersText}\r
       function countOn(config, keys) {
         return keys.filter((key) => config[key]).length;
       }
+      function formatUnit(unit, unitDisplay = "long") {
+        const format = new Intl.NumberFormat(window.ytcfg.data_.HL, { style: "unit", unit, unitDisplay });
+        return (value) => format.format(value);
+      }
       module.exports = (locale) => [
         {
           id: "general",
@@ -4920,7 +5077,11 @@ ${headersText}\r
             {
               id: "behavior",
               rows: [
-                { type: "toggle", key: "pause_on_blur" }
+                { type: "toggle", key: "pause_on_blur" },
+                { type: "toggle", key: "default_guest_mode" },
+                { type: "toggle", key: "screensaver_enabled" },
+                { type: "choice", key: "screensaver_timeout", options: [1, 2, 5, 10, 15, 30], format: formatUnit("minute"), dependsOn: "screensaver_enabled" },
+                { type: "choice", key: "screensaver_dim_percentage", options: [50, 75, 90, 100], format: formatUnit("percent", "short"), dependsOn: "screensaver_enabled" }
               ]
             },
             {
@@ -4998,7 +5159,8 @@ ${headersText}\r
             {
               id: "input",
               rows: [
-                { type: "toggle", key: "controller_support" }
+                { type: "toggle", key: "controller_support" },
+                { type: "toggle", key: "touch_overlay" }
               ]
             },
             {
@@ -5058,7 +5220,7 @@ ${headersText}\r
         open: false,
         category: 0,
         page: null
-        //{ id, fromHeader, returnFocus } while a page is open
+        //{ page, fromHeader, returnFocus, parent } while a page is open, parent is the page it was opened from
       };
       var renderCount = 0;
       var renderedView = null;
@@ -5077,50 +5239,74 @@ ${headersText}\r
           locale,
           pages,
           openPage,
+          openChoice,
           goBack,
           translation: localeProvider.getTranslation(),
           openTranslation: () => shell.openExternal("https://github.com/shy1132/VacuumTube/blob/main/locale/README.md")
         };
         let view;
         if (state.page) {
-          const page = pages[state.page.id];
+          const page = state.page.page;
           const sections = page.sections ? await page.sections(config, locale) : [{ rows: await page.rows(config, locale) }];
           if (renderId !== renderCount) return;
-          const parent = state.page.fromHeader ? locale.generic.title : locale.categories[currentCategory().id]?.title;
-          view = renderPage(page, sections, parent, context);
+          view = renderPage(page, sections, parentTitle(), context);
         } else {
           view = renderCategory(currentCategory(), context);
         }
         overlay.list().replaceChildren(view);
         overlay.markSelectedTab(categoryTabIndex());
-        const viewId = `${currentCategory().id}/${state.page?.id}`;
+        const viewId = `${currentCategory().id}/${state.page?.page.id}`;
         if (viewId !== renderedView) {
           renderedView = viewId;
           scroll.reset();
         }
         focus.restore();
       }
+      function parentTitle() {
+        const parent = state.page.parent?.page;
+        if (parent) return typeof parent.title === "function" ? parent.title(locale) : parent.title;
+        return state.page.fromHeader ? locale.generic.title : locale.categories[currentCategory().id]?.title;
+      }
       function openCategory(index) {
         state.category = index;
         state.page = null;
         return render();
       }
-      async function openPage(id, { fromHeader = false } = {}) {
-        const page = pages[id];
-        state.page = { id, fromHeader, returnFocus: focus.id() };
-        focus.want();
+      async function openPage(id, { fromHeader = false, focusId = null } = {}) {
+        const page = typeof id === "string" ? pages[id] : id;
+        state.page = { page, fromHeader: fromHeader || !!state.page?.fromHeader, returnFocus: focus.id(), parent: state.page };
+        focus.want(focusId);
         await render();
         if (page.onOpen) {
-          const refresh = () => state.open && state.page?.id === id ? render() : Promise.resolve();
+          const refresh = () => state.open && state.page?.page === page ? render() : Promise.resolve();
           await page.onOpen({ refresh });
           await render();
         }
       }
+      function openChoice(row) {
+        const strings = locale[row.key];
+        const format = row.format || String;
+        return openPage({
+          id: `choice:${row.key}`,
+          title: row.title ?? strings?.title,
+          description: row.description ?? strings?.description,
+          rows: (config) => row.options.map((value) => ({
+            type: "option",
+            id: `option:${value}`,
+            title: format(value),
+            selected: config[row.key] === value,
+            select: () => {
+              configManager.set({ [row.key]: value });
+              goBack();
+            }
+          }))
+        }, { focusId: `row:option:${configManager.get()[row.key]}` });
+      }
       function goBack() {
         if (!state.page) return close();
-        const returnFocus = state.page.returnFocus;
-        state.page = null;
-        render().then(() => focus.restore(returnFocus));
+        focus.want(state.page.returnFocus);
+        state.page = state.page.parent;
+        return render();
       }
       async function activate(node = focus.current()) {
         if (!node?.vtActivate) return;
@@ -5162,7 +5348,7 @@ ${headersText}\r
         await functions.waitForCondition(() => !!document.body);
         locale = localeProvider.getLocale().settings;
         categories = schema(locale).filter((category) => !category.hide);
-        await css.inject("settings", fs.readFileSync(path.join(__dirname, "style.css"), "utf-8"));
+        css.inject("settings", fs.readFileSync(path.join(__dirname, "style.css"), "utf-8"));
         document.body.appendChild(overlay.create(categories, locale, {
           //activating a tab moves focus into the settings, arrow keys across the tabs do not
           openCategory: async (index) => {
@@ -5268,7 +5454,7 @@ ${headersText}\r
           if (!key || !isWatching() || !shortcuts.isShortcutKey(e))
             return;
           const speedStep = 0.25;
-          if (key === "s" || key === "S") {
+          if (key === "p" || key === "P") {
             setPlaybackRate(0);
           } else if (key === "a" || key === "A") {
             setPlaybackRate(-speedStep);
@@ -5754,6 +5940,7 @@ ytlr-welcome-immersive-value-prop
         require_controller_support(),
         require_css2(),
         require_dearrow(),
+        require_default_guest_mode(),
         require_disable_direct_sign_in(),
         require_encryption_notice(),
         require_fix_exit(),
@@ -5774,6 +5961,7 @@ ytlr-welcome-immersive-value-prop
         require_remaining_time(),
         require_remove_super_resolution(),
         require_return_youtube_dislike(),
+        require_screensaver(),
         require_settings(),
         require_speed_control(),
         require_sponsorblock2(),
