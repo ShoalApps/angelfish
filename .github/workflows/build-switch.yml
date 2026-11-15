@@ -22,7 +22,7 @@ jobs:
         run: bash switch/prepare.sh "$RUNNER_TEMP/angelfish-switch"
 
       - name: Cache Switch libraries
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: .cache/portlibs-switch
           key: ${{ runner.os }}-angelfish-switch-portlibs-${{ hashFiles('switch/prepare.sh', 'switch/angelfish.patch') }}
