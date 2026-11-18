@@ -1,4 +1,4 @@
-/* Angelfish TV mode. Includes VacuumTube 2.1.0 (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */
+/* Angelfish TV mode. Includes VacuumTube 2.1.1 (https://github.com/shy1132/VacuumTube), MIT License, Copyright (c) 2025-2026 shy. */
 (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __commonJS = (cb, mod) => function __require() {
@@ -536,7 +536,7 @@
       }
       var about = () => ({
         status: "idle",
-        currentVersion: "2.1.0",
+        currentVersion: "2.1.1",
         latestVersion: "",
         platform: "android",
         arch: "arm64",
@@ -745,9 +745,8 @@
       }
       module.exports = {
         resolveCommand: (command) => {
-          if (!globalResolveCommand) {
-            functions.waitForCondition(() => globalResolveCommand).then(() => globalResolveCommand(command));
-          }
+          if (globalResolveCommand) return globalResolveCommand(command);
+          functions.waitForCondition(() => globalResolveCommand).then(() => globalResolveCommand(command));
         },
         addInputModifier,
         addOutputModifier
@@ -2759,7 +2758,7 @@
   // vt:vt:package
   var require_vt_package = __commonJS({
     "vt:vt:package"(exports, module) {
-      module.exports = { "version": "2.1.0" };
+      module.exports = { "version": "2.1.1" };
     }
   });
 
@@ -3285,13 +3284,22 @@ ${headersText}\r
         }, true);
         let captions = false;
         let captionSettings = { useDefaultTrack: true };
+        function handleSelectSubtitlesTrackCommand(command) {
+          if (Object.keys(command.selectSubtitlesTrackCommand).length === 0) {
+            captions = false;
+          } else {
+            captions = true;
+            captionSettings = command.selectSubtitlesTrackCommand;
+          }
+        }
         rcMod.addInputModifier((c) => {
           if (c.selectSubtitlesTrackCommand) {
-            if (Object.keys(c.selectSubtitlesTrackCommand).length === 0) {
-              captions = false;
-            } else {
-              captions = true;
-              captionSettings = c.selectSubtitlesTrackCommand;
+            handleSelectSubtitlesTrackCommand(c);
+          } else if (c.commandExecutorCommand) {
+            for (let command of c.commandExecutorCommand.commands) {
+              if (command.selectSubtitlesTrackCommand) {
+                handleSelectSubtitlesTrackCommand(command);
+              }
             }
           }
           return c;
@@ -3321,7 +3329,7 @@ ${headersText}\r
         }
         document.addEventListener("keydown", (e) => {
           if (!document.body.classList.contains("WEB_PAGE_TYPE_WATCH") && !document.body.classList.contains("WEB_PAGE_TYPE_SHORTS")) return;
-          if (!e.shiftKey && shortcuts.isShortcutKey(e) && e.key?.toLowerCase() === "c") {
+          if (!e.ctrlKey && !e.shiftKey && shortcuts.isShortcutKey(e) && e.key?.toLowerCase() === "c") {
             e.stopImmediatePropagation();
             e.stopPropagation();
             toggleCaptions();
