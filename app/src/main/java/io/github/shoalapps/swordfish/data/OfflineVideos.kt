@@ -356,7 +356,9 @@ class VideoDownloadWorker(context: Context, params: WorkerParameters) : Coroutin
         }
     }
 
-    companion object { private val engineMutex = Mutex() }
+    companion object {
+        private val engineMutex = Mutex()
+    }
 
     private fun foreground(video: VideoItem): ForegroundInfo {
         val nm = applicationContext.getSystemService(NotificationManager::class.java)

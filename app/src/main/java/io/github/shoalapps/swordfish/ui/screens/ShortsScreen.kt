@@ -499,7 +499,7 @@ fun ShortsScreen(onChannel: (String) -> Unit, onExit: () -> Unit, vm: ShortsView
         val limit = vm.limitReached
         when {
             limit != null -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) { LimitReached(limit, onExit) }
-            vm.loading -> LoadingIndicator(Modifier.align(Alignment.Center).size(64.dp), color = Color.White)
+            vm.loading -> io.github.shoalapps.common.expressive.ShoalLoadingIndicator(Modifier.align(Alignment.Center).size(64.dp), color = Color.White)
             vm.error != null -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
                 ErrorState(vm.error!!, vm::load, Modifier.align(Alignment.Center))
             }
@@ -748,7 +748,7 @@ private fun ShortPage(
                             channelName, color = Color.White, style = overlayText(16.sp, FontWeight.Bold), maxLines = 1,
                             modifier = Modifier.clickable(enabled = channelUrl != null) { channelUrl?.let(onChannel) },
                         )
-                        Text(info?.name ?: item.title, color = Color.White, style = overlayText(14.sp), maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp))
+                        Text(io.github.shoalapps.swordfish.ui.components.rememberTitle(info?.name?.let { item.copy(title = it) } ?: item, null), color = Color.White, style = overlayText(14.sp), maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 6.dp))
                     }
                     "reels" -> {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -759,10 +759,10 @@ private fun ShortPage(
                             )
                             OverlayPill(if (subscribed) "Following" else "Follow", outlined = true, onClick = onSubscribe)
                         }
-                        Text(info?.name ?: item.title, color = Color.White, style = overlayText(14.sp), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 10.dp))
+                        Text(io.github.shoalapps.swordfish.ui.components.rememberTitle(info?.name?.let { item.copy(title = it) } ?: item, null), color = Color.White, style = overlayText(14.sp), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 10.dp))
                     }
                     else -> {
-                        Text(info?.name ?: item.title, color = Color.White, style = overlayText(15.sp, FontWeight.Medium), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(io.github.shoalapps.swordfish.ui.components.rememberTitle(info?.name?.let { item.copy(title = it) } ?: item, null), color = Color.White, style = overlayText(15.sp, FontWeight.Medium), maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 10.dp)) {
                             Avatar(avatar, 32.dp, Modifier.clickable(enabled = channelUrl != null) { channelUrl?.let(onChannel) })
                             Text(

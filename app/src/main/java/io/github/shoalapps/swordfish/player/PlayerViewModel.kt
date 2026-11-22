@@ -201,7 +201,7 @@ class PlayerViewModel : ViewModel() {
                 queueNotice("Skipped ${item.title.ifBlank { "video" }}: not saved for offline playback.")
                 continue
             }
-            open(item, expandSheet = false, fromQueue = true)
+            this@PlayerViewModel.open(item, expandSheet = false, fromQueue = true)
             return
         }
         if (skippedOffline) {
@@ -395,7 +395,7 @@ class PlayerViewModel : ViewModel() {
                 if (!manual && player.playbackState != Player.STATE_ENDED && !(endedAtOutro && !player.playWhenReady)) return@launch
                 if (store.queue.value.isNotEmpty()) { next(); return@launch }
                 prefetched = c.url to i
-                open(c, expandSheet = false)
+                this@PlayerViewModel.open(c, expandSheet = false)
                 return@launch
             }
         }
@@ -425,6 +425,12 @@ class PlayerViewModel : ViewModel() {
             return
         }
         saveWatchPosition()
+        if (!goingBack) current?.takeIf { it.id != item.id }?.let { played ->
+            watchedBefore.remove(played)
+            watchedBefore.add(played)
+            if (watchedBefore.size > 50) watchedBefore.removeAt(0)
+        }
+        goingBack = false
         resumeNotice = null
         resumeOnLoad = true
         pendingStartMs = startMs.coerceAtLeast(0)
@@ -447,7 +453,7 @@ class PlayerViewModel : ViewModel() {
             }
             return
         }
-        open(
+        this@PlayerViewModel.open(
             VideoItem(
                 url = "https://www.youtube.com/watch?v=$id",
                 id = id,
@@ -596,11 +602,26 @@ class PlayerViewModel : ViewModel() {
                 )
                 store.addHistory(video)
                 val startMs = initialPosition(video)
+                // In your language if it can be: a dub first, else captions (see LanguagePlan).
+                val langPrefs = io.github.shoalapps.swordfish.data.Languages.prefs()
+                captionTracks = Captions.withTranslation(Captions.tracks(i), langPrefs.mine)
+                LanguagePlan.audio(audioTracks, langPrefs)?.let { audioTrackId = it }
                 if (AppGraph.offline.local(video.id) != null) playLocal(video.id, startMs, true)
                 else play(i, startMs)
                 skipFailed = queuedPlayback && error != null
                 pendingStartMs = 0
-                captionTracks = Captions.tracks(i)
+                if (store.settings.value.captionsOn) turnOnCaptions(remember = false)
+                else if (langPrefs.captionsWhenNoDub && captionTracks.isNotEmpty()) {
+                    val tracksNow = audioTracks; val chosen = audioTrackId; val captionsNow = captionTracks
+                    viewModelScope.launch {
+                        // The title's language helps only when nothing else says what's spoken.
+                        val titleLang = if (LanguagePlan.originalLanguage(tracksNow, captionsNow) == null && store.settings.value.translateTitles)
+                            io.github.shoalapps.swordfish.data.TitleTranslator.translate(i.name, langPrefs.mine)?.from else null
+                        if (info === i && captionTrack == null && LanguagePlan.wantsCaptions(tracksNow, chosen, captionsNow, langPrefs, titleLang)) {
+                            turnOnCaptions(remember = false)
+                        }
+                    }
+                }
                 chapters = Chapters.of(i)
             } catch (e: CancellationException) {
                 throw e
@@ -783,12 +804,54 @@ class PlayerViewModel : ViewModel() {
         player.playWhenReady = keepPlaying
     }
 
-    fun selectCaptions(track: CaptionTrack?) {
+    /** Picks a track for you, or turns captions off: the CC button. */
+    fun toggleCaptions() {
+        if (captionTrack != null) selectCaptions(null) else turnOnCaptions(remember = true)
+    }
+
+    private fun turnOnCaptions(remember: Boolean) {
+        val languages = buildList {
+            add(io.github.shoalapps.swordfish.data.Languages.mine())
+            androidx.core.os.LocaleListCompat.getAdjustedDefault().let { l -> for (k in 0 until l.size()) l[k]?.toLanguageTag()?.let(::add) }
+        }
+        Captions.preferred(captionTracks, languages, store.settings.value.captionLanguage)
+            ?.let { selectCaptions(it, remember) }
+    }
+
+    private var captionJob: Job? = null
+
+    /** [remember]: you chose this, so it carries on to the next video. */
+    fun selectCaptions(track: CaptionTrack?, remember: Boolean = true) {
+        captionJob?.cancel()
         captionTrack = track
         cues = emptyList()
         captionText = null
+        if (remember) store.updateSettings {
+            it.copy(captionsOn = track != null, captionLanguage = track?.takeIf { t -> !t.auto }?.lang ?: track?.lang ?: it.captionLanguage)
+        }
         if (track == null) return
-        viewModelScope.launch { cues = runCatching { Captions.load(track) }.getOrDefault(emptyList()) }
+        captionJob = viewModelScope.launch {
+            suspend fun fetch(t: CaptionTrack) = try { Captions.load(t) } catch (e: CancellationException) { throw e } catch (e: Exception) {
+                android.util.Log.w("Captions", "${t.label}: $e"); null
+            }
+            var loaded = fetch(track)
+            if (loaded == null && track.translated) {
+                // YouTube refused to translate: fetch the original and translate it here instead.
+                val source = fetch(Captions.untranslated(track))
+                if (captionTrack != track) return@launch
+                if (!source.isNullOrEmpty()) {
+                    cues = source
+                    Captions.translate(source, track.lang) { partial -> if (captionTrack == track) cues = partial }
+                    return@launch
+                }
+            }
+            if (captionTrack != track) return@launch
+            when {
+                loaded == null -> { captionTrack = null; android.widget.Toast.makeText(AppGraph.app, "Couldn't load ${track.label} captions", android.widget.Toast.LENGTH_SHORT).show() }
+                loaded.isEmpty() -> { captionTrack = null; android.widget.Toast.makeText(AppGraph.app, "${track.label} captions are empty", android.widget.Toast.LENGTH_SHORT).show() }
+                else -> { cues = loaded; captionText = loaded.lastOrNull { positionMs in it.startMs until it.endMs }?.text }
+            }
+        }
     }
 
     fun setSleepTimer(minutes: Int) {
@@ -830,6 +893,58 @@ class PlayerViewModel : ViewModel() {
     }
 
     fun seekBy(ms: Long) = seekTo((player.currentPosition + ms).coerceAtLeast(0))
+
+    // ---- YouTube's player controls ----
+
+    /** What you watched before this, this session, for the Previous button. */
+    private val watchedBefore = androidx.compose.runtime.mutableStateListOf<VideoItem>()
+    private var goingBack = false
+
+    /** Previous does something: there's a video to go back to, or this one is a few seconds in. */
+    val hasPrevious: Boolean get() = watchedBefore.isNotEmpty() || positionMs > 3_000
+
+    /** Next does something: the queue has more, or autoplay has a related video ready. */
+    val hasNext: Boolean get() = store.queue.value.size > 1 || (store.settings.value.autoplayNext && related.isNotEmpty())
+
+    /** Like YouTube: a few seconds in, back to the start; otherwise the video you watched before. */
+    fun previous() {
+        if (positionMs > 3_000 || watchedBefore.isEmpty()) { seekTo(0); return }
+        val item = watchedBefore.removeAt(watchedBefore.lastIndex)
+        goingBack = true
+        this@PlayerViewModel.open(item, expandSheet = false)
+    }
+
+    /** The controls are over the video, so captions move up out of their way. */
+    var controlsShown by mutableStateOf(false)
+
+    /** Held down on the video: 2× until you let go, without touching your chosen speed. */
+    var holdingFast by mutableStateOf(false)
+        private set
+
+    fun holdFast(on: Boolean) {
+        if (on == holdingFast) return
+        holdingFast = on
+        player.setPlaybackSpeed(if (on) 2f else speed)
+        if (on && !player.isPlaying) player.play()
+    }
+
+    /** Pinched out in full screen: the video fills the screen, its edges cropped. */
+    var zoomToFill by mutableStateOf(false)
+
+    /** The video area's width over its height, to work out how far zooming to fill must scale. */
+    var containerAspect by mutableFloatStateOf(0f)
+
+    /** One frame of the video's storyboard, to show above your finger while you scrub. */
+    data class PreviewFrame(val url: String, val left: Int, val top: Int, val width: Int, val height: Int, val sheetWidth: Int, val sheetHeight: Int)
+
+    /** The storyboard frame at [ms]: the sharpest set that's still small (about 160 px wide). */
+    fun previewAt(ms: Long): PreviewFrame? {
+        val sets = info?.previewFrames.orEmpty().filter { it.urls.isNotEmpty() && it.frameWidth > 0 }
+        val set = sets.filter { it.frameWidth <= 200 }.maxByOrNull { it.frameWidth } ?: sets.minByOrNull { it.frameWidth } ?: return null
+        val b = runCatching { set.getFrameBoundsAt(ms) }.getOrNull() ?: return null
+        val url = set.urls.getOrNull(b[0]) ?: return null
+        return PreviewFrame(url, b[1], b[2], b[3] - b[1], b[4] - b[2], set.framesPerPageX * set.frameWidth, set.framesPerPageY * set.frameHeight)
+    }
     fun seekTo(ms: Long) { endHandled = false; completedVideo = false; player.seekTo(ms) }
 
     fun showSheet(target: Float) {

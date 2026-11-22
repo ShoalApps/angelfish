@@ -2,6 +2,29 @@
 
 package io.github.shoalapps.swordfish.ui.player
 
+import androidx.compose.material.icons.rounded.BookmarkBorder
+import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.DownloadDone
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.MoreHoriz
+import androidx.compose.material.icons.rounded.Headphones
+import androidx.compose.material.icons.rounded.WatchLater
+import io.github.shoalapps.common.expressive.pufferPop
+import androidx.compose.material.icons.rounded.SkipPrevious
+import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.FastForward
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -610,11 +633,22 @@ private fun MiniInfo(vm: PlayerViewModel, modifier: Modifier) {
 /** Draws video onto a TextureView so it animates smoothly with the sheet. */
 @Composable
 fun VideoSurface(vm: PlayerViewModel, modifier: Modifier = Modifier) {
-    Box(modifier.background(Color.Black).testTag("video-surface"), contentAlignment = Alignment.Center) {
+    Box(
+        modifier.background(Color.Black).testTag("video-surface").clipToBounds()
+            .onSizeChanged { if (it.height > 0) vm.containerAspect = it.width.toFloat() / it.height },
+        contentAlignment = Alignment.Center,
+    ) {
         AndroidView(
             factory = { ctx -> TextureView(ctx).also { vm.player.setVideoTextureView(it) } },
             onRelease = { vm.player.clearVideoTextureView(it) },
-            modifier = Modifier.fillMaxSize().wrapContentSize().aspectRatio(vm.aspect),
+            modifier = Modifier.fillMaxSize().wrapContentSize().aspectRatio(vm.aspect).then(
+                // Zoomed to fill: scaled up until no black bars are left, its edges cropped.
+                if (vm.zoomToFill) Modifier.graphicsLayer {
+                    val parent = vm.containerAspect.takeIf { it > 0f } ?: vm.aspect
+                    val k = if (parent > vm.aspect) parent / vm.aspect else vm.aspect / parent
+                    scaleX = k; scaleY = k
+                } else Modifier,
+            ),
         )
         // Show the thumbnail until the first video frame arrives, like the official app.
         androidx.compose.animation.AnimatedVisibility(!vm.firstFrame, enter = fadeIn(), exit = fadeOut()) {
@@ -648,6 +682,9 @@ fun VideoSurface(vm: PlayerViewModel, modifier: Modifier = Modifier) {
         }
         // Captions, YouTube style: white text on a dark box near the bottom.
         val caption = vm.captionText
+        val captionLift by androidx.compose.animation.core.animateDpAsState(
+            when { !vm.controlsShown -> 24.dp; vm.fullscreen -> 112.dp; else -> 72.dp }, label = "captionLift",
+        )
         if (caption != null && vm.captionTrack != null) {
             Text(
                 caption,
@@ -657,7 +694,7 @@ fun VideoSurface(vm: PlayerViewModel, modifier: Modifier = Modifier) {
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(start = 24.dp, end = 24.dp, bottom = 36.dp)
+                    .padding(start = 24.dp, end = 24.dp, bottom = captionLift)
                     .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
                     .padding(horizontal = 8.dp, vertical = 2.dp),
             )
@@ -692,6 +729,13 @@ private fun FullscreenEffect(fullscreen: Boolean, vm: PlayerViewModel) {
 
 // ---------------- Controls ----------------
 
+/**
+ * The player's controls, laid out and behaving like YouTube's: previous, play and next in the
+ * middle; captions, autoplay and settings along the top; time, chapter and full screen above the
+ * seek bar. Double-tap a side to skip (keep tapping to skip more), hold for 2×, pinch to fill the
+ * screen, swipe down to leave full screen. Material 3 Expressive in look, unless the Official look
+ * plugin is on.
+ */
 @Composable
 fun PlayerControls(
     vm: PlayerViewModel,
@@ -710,19 +754,25 @@ fun PlayerControls(
     }
     var visible by remember { mutableStateOf(true) }
     var poke by remember { mutableIntStateOf(0) }
-    var seekHint by remember { mutableStateOf<String?>(null) }
     var showOptions by remember { mutableStateOf(false) }
     var scrubMs by remember { mutableStateOf<Long?>(null) }
+    // Double-tap seeking: which side (true = back), how far so far, and a nonce to restart the timeout.
+    var streakBack by remember { mutableStateOf<Boolean?>(null) }
+    var streakSeconds by remember { mutableIntStateOf(0) }
+    var streakNonce by remember { mutableIntStateOf(0) }
+    var zoomHint by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(visible, vm.isPlaying, poke) {
-        if (visible && vm.isPlaying) {
+    LaunchedEffect(visible) { vm.controlsShown = visible }
+    LaunchedEffect(visible, vm.isPlaying, poke, scrubMs) {
+        if (visible && vm.isPlaying && scrubMs == null) {
             delay(3000)
             visible = false
         }
     }
-    LaunchedEffect(seekHint) {
-        if (seekHint != null) { delay(700); seekHint = null }
+    LaunchedEffect(streakNonce) {
+        if (streakBack != null) { delay(800); streakBack = null; streakSeconds = 0 }
     }
+    LaunchedEffect(zoomHint) { if (zoomHint != null) { delay(1100); zoomHint = null } }
     val settings by AppGraph.store.settings.collectAsState()
     val seekSec = settings.doubleTapSeconds
     val context = LocalContext.current
@@ -730,9 +780,15 @@ fun PlayerControls(
     val audio = remember { context.getSystemService(android.content.Context.AUDIO_SERVICE) as android.media.AudioManager }
     var swipeHint by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(swipeHint) { if (swipeHint != null) { delay(900); swipeHint = null } }
-    // Give the screen its normal brightness back when leaving full screen.
+    val official = io.github.shoalapps.swordfish.ui.theme.officialLook
+    // Over video the bar needs a light tone: the light theme's primary is a dark one that vanishes on dark frames.
+    val playedColor = if (official) io.github.shoalapps.swordfish.ui.theme.YouTubeRed
+        else MaterialTheme.colorScheme.let { if (it.surface.luminance() > 0.5f) it.inversePrimary else it.primary }
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    // Give the screen its normal brightness back, and the video its shape, when leaving full screen.
     DisposableEffect(fullscreen) {
         onDispose {
+            vm.zoomToFill = false
             activity?.window?.let { w ->
                 val lp = w.attributes
                 lp.screenBrightness = android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
@@ -741,50 +797,126 @@ fun PlayerControls(
         }
     }
 
+    fun skip(back: Boolean) {
+        if (streakBack != back) { streakBack = back; streakSeconds = 0 }
+        streakSeconds += seekSec
+        vm.seekBy(if (back) -seekSec * 1000L else seekSec * 1000L)
+        streakNonce++
+    }
+
     Box(
         modifier
             .fillMaxSize()
-            .pointerInputTaps(
-                onTap = { visible = !visible; poke++ },
-                onDoubleTap = { left ->
-                    vm.seekBy(if (left) -seekSec * 1000L else seekSec * 1000L)
-                    seekHint = if (left) "« ${seekSec}s" else "${seekSec}s »"
-                },
-            )
+            .pointerInput(seekSec) {
+                detectTapGestures(
+                    onTap = { o ->
+                        // Mid-streak, single taps keep skipping, like the official app.
+                        if (streakBack != null) skip(o.x < size.width / 2f)
+                        else { visible = !visible; poke++ }
+                    },
+                    onDoubleTap = { o ->
+                        visible = false
+                        skip(o.x < size.width / 2f)
+                    },
+                    onLongPress = {
+                        haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        visible = false
+                        vm.holdFast(true)
+                    },
+                    onPress = {
+                        tryAwaitRelease()
+                        vm.holdFast(false)
+                    },
+                )
+            }
             .then(
-                if (fullscreen && settings.swipeGestures) Modifier.pointerInput(Unit) {
-                    var left = true
-                    detectVerticalDragGestures(
-                        onDragStart = { left = it.x < size.width / 2f },
-                    ) { change, dy ->
-                        change.consume()
-                        val delta = -dy / size.height
-                        if (left && activity != null) {
-                            val lp = activity.window.attributes
-                            val cur = if (lp.screenBrightness < 0) 0.5f else lp.screenBrightness
-                            lp.screenBrightness = (cur + delta).coerceIn(0.01f, 1f)
-                            activity.window.attributes = lp
-                            swipeHint = "Brightness ${(lp.screenBrightness * 100).toInt()}%"
-                        } else {
-                            val max = audio.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
-                            val acc = (audioAcc + delta * max * 1.5f)
-                            val steps = acc.toInt()
-                            audioAcc = acc - steps
-                            if (steps != 0) {
-                                val now = (audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) + steps).coerceIn(0, max)
-                                audio.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, now, 0)
-                            }
-                            val v = audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC)
-                            swipeHint = "Volume ${v * 100 / max.coerceAtLeast(1)}%"
+                if (fullscreen) Modifier
+                    .pointerInput(Unit) {
+                        // Pinch out to fill the screen, in to fit it.
+                        awaitEachGesture {
+                            awaitFirstDown(requireUnconsumed = false)
+                            var zoom = 1f
+                            var decided = false
+                            do {
+                                val event = awaitPointerEvent()
+                                if (event.changes.count { it.pressed } >= 2 && !decided) {
+                                    zoom *= event.calculateZoom()
+                                    if (zoom > 1.15f || zoom < 0.87f) {
+                                        decided = true
+                                        val fill = zoom > 1f
+                                        if (fill != vm.zoomToFill) {
+                                            vm.zoomToFill = fill
+                                            zoomHint = if (fill) "Zoomed to fill" else "Original"
+                                        }
+                                    }
+                                    event.changes.forEach { it.consume() }
+                                }
+                            } while (event.changes.any { it.pressed })
                         }
                     }
-                } else Modifier,
+                    .pointerInput(settings.swipeGestures) {
+                        // The edges: brightness on the left, volume on the right. The middle: swipe down to leave.
+                        var zone = 0
+                        var pulled = 0f
+                        detectVerticalDragGestures(
+                            onDragStart = {
+                                pulled = 0f
+                                zone = when {
+                                    settings.swipeGestures && it.x < size.width * 0.3f -> -1
+                                    settings.swipeGestures && it.x > size.width * 0.7f -> 1
+                                    else -> 0
+                                }
+                            },
+                            onDragEnd = { if (zone == 0 && pulled > 72.dp.toPx()) vm.fullscreen = false },
+                        ) { change, dy ->
+                            change.consume()
+                            pulled += dy
+                            val delta = -dy / size.height
+                            if (zone == -1 && activity != null) {
+                                val lp = activity.window.attributes
+                                val cur = if (lp.screenBrightness < 0) 0.5f else lp.screenBrightness
+                                lp.screenBrightness = (cur + delta).coerceIn(0.01f, 1f)
+                                activity.window.attributes = lp
+                                swipeHint = "Brightness ${(lp.screenBrightness * 100).toInt()}%"
+                            } else if (zone == 1) {
+                                val max = audio.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
+                                val acc = (audioAcc + delta * max * 1.5f)
+                                val steps = acc.toInt()
+                                audioAcc = acc - steps
+                                if (steps != 0) {
+                                    val now = (audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) + steps).coerceIn(0, max)
+                                    audio.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, now, 0)
+                                }
+                                val v = audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC)
+                                swipeHint = "Volume ${v * 100 / max.coerceAtLeast(1)}%"
+                            }
+                        }
+                    }
+                else Modifier,
             ),
     ) {
+        // Skipping: a ripple on that side, with how far you've gone.
+        val back = streakBack
+        AnimatedVisibility(
+            back != null,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.fillMaxHeight().fillMaxWidth(0.4f).align(if (back == false) Alignment.CenterEnd else Alignment.CenterStart),
+        ) {
+            val shape = if (back == false) RoundedCornerShape(topStartPercent = 100, bottomStartPercent = 100)
+            else RoundedCornerShape(topEndPercent = 100, bottomEndPercent = 100)
+            Box(Modifier.fillMaxSize().clip(shape).background(Color.White.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    SkipChevrons(back = back != false, nonce = streakNonce)
+                    Text("$streakSeconds seconds", color = Color.White, style = MaterialTheme.typography.labelLarge)
+                }
+            }
+        }
+
         AnimatedVisibility(visible, enter = fadeIn(), exit = fadeOut()) {
             Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.42f))) {
-                // Top row
-                Row(
+                // Top row, hidden while you scrub.
+                if (scrubMs == null) Row(
                     Modifier.fillMaxWidth().align(Alignment.TopStart).padding(4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -795,66 +927,104 @@ fun PlayerControls(
                             tint = Color.White,
                         )
                     }
-                    Spacer(Modifier.weight(1f))
+                    if (fullscreen) {
+                        Column(Modifier.weight(1f).padding(horizontal = 4.dp)) {
+                            Text(vm.current?.let { io.github.shoalapps.swordfish.ui.components.rememberTitle(it, null) }.orEmpty(), localise = false, color = Color.White, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            vm.current?.channelName?.takeIf { it.isNotBlank() }?.let {
+                                Text(it, localise = false, color = Color.White.copy(alpha = 0.75f), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                        }
+                    } else Spacer(Modifier.weight(1f))
+                    // Autoplay, a switch with a play or pause on its thumb, like the official one.
+                    androidx.compose.material3.Switch(
+                        checked = settings.autoplayNext,
+                        onCheckedChange = { vm.toggleAutoplay(); poke++ },
+                        thumbContent = {
+                            Icon(if (settings.autoplayNext) Icons.Rounded.PlayArrow else Icons.Rounded.Pause, null, Modifier.size(14.dp))
+                        },
+                        colors = androidx.compose.material3.SwitchDefaults.colors(
+                            checkedTrackColor = Color.White.copy(alpha = 0.5f),
+                            checkedThumbColor = Color.White,
+                            checkedIconColor = Color.Black,
+                            uncheckedTrackColor = Color.White.copy(alpha = 0.2f),
+                            uncheckedThumbColor = Color.White.copy(alpha = 0.85f),
+                            uncheckedIconColor = Color.Black,
+                            uncheckedBorderColor = Color.Transparent,
+                        ),
+                        modifier = Modifier.graphicsLayer { scaleX = 0.8f; scaleY = 0.8f }.semantics { contentDescription = "Autoplay" },
+                    )
+                    IconButton(onClick = {
+                        vm.toggleCaptions()
+                        poke++
+                    }, enabled = vm.captionTracks.isNotEmpty()) {
+                        Box(contentAlignment = Alignment.BottomCenter) {
+                            Icon(
+                                if (vm.captionTrack != null) Icons.Rounded.ClosedCaption else Icons.Outlined.ClosedCaption,
+                                if (vm.captionTrack != null) "Captions on" else "Captions off",
+                                tint = if (vm.captionTracks.isEmpty()) Color.White.copy(alpha = 0.4f) else Color.White,
+                            )
+                            // On: a short bar underneath, as the icon alone is hard to read over video.
+                            if (vm.captionTrack != null) Box(
+                                Modifier.offset(y = 6.dp).size(width = 18.dp, height = 2.5.dp)
+                                    .background(playedColor, RoundedCornerShape(2.dp)),
+                            )
+                        }
+                    }
                     IconButton(onClick = { showOptions = true; poke++ }) {
-                        Icon(Icons.Rounded.Tune, "Quality and speed", tint = Color.White)
+                        Icon(Icons.Rounded.Settings, "Settings", tint = Color.White)
                     }
                 }
 
-                // Centre row
-                Row(
+                // Centre row: previous, play, next. Out of the way while you scrub.
+                if (scrubMs == null) Row(
                     Modifier.align(Alignment.Center),
-                    horizontalArrangement = Arrangement.spacedBy(28.dp),
+                    horizontalArrangement = Arrangement.spacedBy(if (fullscreen) 56.dp else 32.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(onClick = { vm.seekBy(-10_000); poke++ }) {
-                        Icon(Icons.Rounded.Replay10, "Back 10 seconds", tint = Color.White, modifier = Modifier.size(32.dp))
-                    }
-                    PlayPauseButton(vm.isPlaying, vm.buffering) { vm.togglePlay(); poke++ }
-                    IconButton(onClick = { vm.seekBy(10_000); poke++ }) {
-                        Icon(Icons.Rounded.Forward10, "Forward 10 seconds", tint = Color.White, modifier = Modifier.size(32.dp))
-                    }
+                    CentreButton(Icons.Rounded.SkipPrevious, "Previous", enabled = vm.hasPrevious, official = official) { vm.previous(); poke++ }
+                    PlayPauseButton(vm.isPlaying, vm.buffering, official) { vm.togglePlay(); poke++ }
+                    CentreButton(Icons.Rounded.SkipNext, "Next", enabled = vm.hasNext, official = official) { vm.next(); poke++ }
                 }
 
-                // Bottom row
+                // Bottom: time and chapter, full screen, then the seek bar.
                 Column(Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(horizontal = 12.dp)) {
                     // While dragging, the time and chapter follow your finger, before you let go.
                     val shownMs = scrubMs ?: vm.positionMs
                     val shownChapter = if (scrubMs != null) vm.chapters.lastOrNull { it.startMs <= scrubMs!! } else vm.chapters.getOrNull(vm.chapterIndex)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            "${formatDuration(shownMs / 1000)} / ${formatDuration(vm.durationMs / 1000)}" +
-                                (shownChapter?.title?.takeIf { it.isNotBlank() }?.let { "  •  $it" } ?: ""),
+                            formatDuration(shownMs / 1000),
+                            localise = false,
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                        )
+                        Text(
+                            " / ${formatDuration(vm.durationMs / 1000)}",
+                            localise = false,
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 12.sp,
+                        )
+                        Text(
+                            shownChapter?.title?.takeIf { it.isNotBlank() }?.let { "  ·  $it  ›" } ?: "",
+                            localise = false,
                             color = Color.White,
                             fontSize = 12.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f),
                         )
-                        IconButton(onClick = {
-                            vm.selectCaptions(if (vm.captionTrack == null) vm.captionTracks.firstOrNull() else null)
-                            poke++
-                        }, enabled = vm.captionTracks.isNotEmpty()) {
-                            Icon(
-                                if (vm.captionTrack != null) Icons.Rounded.ClosedCaption else Icons.Outlined.ClosedCaption,
-                                "Captions",
-                                tint = if (vm.captionTracks.isEmpty()) Color.White.copy(alpha = 0.4f) else Color.White,
-                            )
-                        }
                         IconButton(onClick = { vm.fullscreen = !fullscreen; poke++ }) {
                             Icon(
                                 if (fullscreen) Icons.Rounded.FullscreenExit else Icons.Rounded.Fullscreen,
-                                "Fullscreen",
+                                if (fullscreen) "Exit full screen" else "Full screen",
                                 tint = Color.White,
                             )
                         }
                     }
                     SeekBar(
-                        positionMs = vm.positionMs,
-                        durationMs = vm.durationMs,
-                        bufferedMs = vm.bufferedMs,
-                        segments = vm.segments,
-                        chapters = vm.chapters,
+                        vm = vm,
+                        playedColor = playedColor,
                         onSeek = { vm.seekTo(it); poke++ },
                         onDragging = { poke++ },
                         onScrub = { scrubMs = it },
@@ -863,37 +1033,33 @@ fun PlayerControls(
             }
         }
 
+        // Controls hidden: a thin line along the bottom still shows how far you are, like the official app.
+        if (!visible && !fullscreen && vm.durationMs > 0) {
+            Canvas(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(2.dp)) {
+                drawRect(Color.White.copy(alpha = 0.3f))
+                drawRect(playedColor, size = Size(size.width * (vm.positionMs.toFloat() / vm.durationMs).coerceIn(0f, 1f), size.height))
+            }
+        }
+
         if (vm.buffering && !visible) {
             Box(
                 Modifier.align(Alignment.Center).size(64.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color.Black.copy(alpha = 0.45f)),
                 contentAlignment = Alignment.Center,
             ) {
-                LoadingIndicator(Modifier.size(48.dp), color = Color.White)
+                io.github.shoalapps.common.expressive.ShoalLoadingIndicator(Modifier.size(48.dp), color = Color.White)
             }
         }
 
-        // Swipe (brightness / volume) hint
-        AnimatedVisibility(
-            swipeHint != null,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 32.dp),
-        ) {
-            Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.6f)) {
-                Text(swipeHint.orEmpty(), color = Color.White, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+        // Held down: 2× until you let go.
+        Pill(vm.holdingFast, Modifier.align(Alignment.TopCenter).padding(top = 16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("2× ", color = Color.White, fontWeight = FontWeight.Bold)
+                Icon(Icons.Rounded.FastForward, null, tint = Color.White, modifier = Modifier.size(18.dp))
             }
         }
-
-        // Double-tap hint
-        AnimatedVisibility(
-            seekHint != null,
-            enter = fadeIn() + scaleIn(initialScale = 0.7f),
-            exit = fadeOut(),
-            modifier = Modifier.align(Alignment.Center),
-        ) {
-            Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.6f)) {
-                Text(seekHint.orEmpty(), color = Color.White, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-            }
+        // Swipe (brightness / volume) and pinch hints
+        Pill(swipeHint != null || zoomHint != null, Modifier.align(Alignment.TopCenter).padding(top = 32.dp)) {
+            Text(swipeHint ?: zoomHint.orEmpty(), color = Color.White)
         }
 
         // SponsorBlock "Skipped" pill
@@ -922,19 +1088,73 @@ fun PlayerControls(
 /** Leftover fraction of a volume step between drag events. */
 private var audioAcc = 0f
 
-private fun Modifier.pointerInputTaps(onTap: () -> Unit, onDoubleTap: (left: Boolean) -> Unit): Modifier =
-    this.then(
-        Modifier.pointerInput(Unit) {
-            detectTapGestures(
-                onTap = { onTap() },
-                onDoubleTap = { offset -> onDoubleTap(offset.x < size.width / 2f) },
-            )
-        },
-    )
-
-/** Big play button whose shape morphs between circle (paused) and rounded square (playing). */
+/** A dark pill of text over the video, faded in and out. */
 @Composable
-private fun PlayPauseButton(playing: Boolean, buffering: Boolean, onClick: () -> Unit) {
+private fun Pill(shown: Boolean, modifier: Modifier, content: @Composable () -> Unit) {
+    AnimatedVisibility(shown, enter = fadeIn() + scaleIn(initialScale = 0.85f), exit = fadeOut(), modifier = modifier) {
+        Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.6f), contentColor = Color.White) {
+            Box(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) { content() }
+        }
+    }
+}
+
+/** Three chevrons lighting up in turn, pointing the way you're skipping. Each new tap restarts them. */
+@Composable
+private fun SkipChevrons(back: Boolean, nonce: Int) {
+    val t = remember { androidx.compose.animation.core.Animatable(0f) }
+    LaunchedEffect(nonce) {
+        t.snapTo(0f)
+        t.animateTo(1f, androidx.compose.animation.core.tween(600, easing = androidx.compose.animation.core.LinearEasing))
+    }
+    Row(Modifier.graphicsLayer { scaleX = if (back) -1f else 1f }) {
+        repeat(3) { i ->
+            val lit = ((t.value * 3f) - i).coerceIn(0f, 1f)
+            Icon(
+                Icons.Rounded.PlayArrow, null,
+                tint = Color.White.copy(alpha = 0.35f + 0.65f * (1f - kotlin.math.abs(lit - 0.5f) * 2f)),
+                modifier = Modifier.size(22.dp).offset(x = (-6 * i).dp),
+            )
+        }
+    }
+}
+
+/** Previous and next, either side of play: dimmed when there's nowhere to go. */
+@Composable
+private fun CentreButton(icon: ImageVector, label: String, enabled: Boolean, official: Boolean, onClick: () -> Unit) {
+    val source = remember { MutableInteractionSource() }
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        interactionSource = source,
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = if (official) Color.Black.copy(alpha = 0.3f) else Color.Transparent,
+            contentColor = Color.White,
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = Color.White.copy(alpha = 0.35f),
+        ),
+        modifier = Modifier.size(52.dp).pressScale(source, 0.85f),
+    ) { Icon(icon, label, Modifier.size(32.dp)) }
+}
+
+/**
+ * The big play button. Expressive: its shape morphs between a cookie (paused) and a rounded
+ * square (playing). Official look: a plain white icon on a dark circle, as YouTube draws it.
+ */
+@Composable
+private fun PlayPauseButton(playing: Boolean, buffering: Boolean, official: Boolean, onClick: () -> Unit) {
+    val source = remember { MutableInteractionSource() }
+    if (official) {
+        IconButton(
+            onClick = onClick,
+            interactionSource = source,
+            colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Black.copy(alpha = 0.35f), contentColor = Color.White),
+            modifier = Modifier.size(68.dp).pressScale(source, 0.9f),
+        ) {
+            if (buffering) io.github.shoalapps.common.expressive.ShoalLoadingIndicator(Modifier.size(44.dp), color = Color.White)
+            else Icon(if (playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow, if (playing) "Pause" else "Play", Modifier.size(44.dp))
+        }
+        return
+    }
     val spin = if (buffering) rememberSpin(3_000) else 0f
     val shape = rememberMorphShape(
         from = MaterialShapes.Cookie9Sided,
@@ -942,7 +1162,6 @@ private fun PlayPauseButton(playing: Boolean, buffering: Boolean, onClick: () ->
         target = if (playing) 1f else 0f,
         rotateBy = 90f,
     )
-    val source = remember { MutableInteractionSource() }
     FilledIconButton(
         onClick = onClick,
         interactionSource = source,
@@ -954,7 +1173,10 @@ private fun PlayPauseButton(playing: Boolean, buffering: Boolean, onClick: () ->
         modifier = Modifier.size(76.dp).pressScale(source, 0.88f).graphicsLayer { rotationZ = spin },
     ) {
         if (buffering) {
-            LoadingIndicator(Modifier.size(40.dp).graphicsLayer { rotationZ = -spin })
+            io.github.shoalapps.common.expressive.ShoalLoadingIndicator(
+                Modifier.size(44.dp).graphicsLayer { rotationZ = -spin },
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
         } else {
             AnimatedContent(
                 playing,
@@ -967,89 +1189,154 @@ private fun PlayPauseButton(playing: Boolean, buffering: Boolean, onClick: () ->
     }
 }
 
+/**
+ * The seek bar. Its track is drawn in the plugins' style (Wavy, Fishbar, Classic…), the Official
+ * look making the default a flat red bar. Tap to jump; drag to scrub, with the storyboard frame,
+ * time and chapter above your finger; slide up while dragging to seek precisely. A tick as you
+ * cross into a new chapter. SponsorBlock segments and chapter gaps sit on the track.
+ */
 @Composable
 private fun SeekBar(
-    positionMs: Long,
-    durationMs: Long,
-    bufferedMs: Long,
-    segments: List<SbSegment>,
-    chapters: List<io.github.shoalapps.swordfish.player.Chapter>,
+    vm: PlayerViewModel,
+    playedColor: Color,
     onSeek: (Long) -> Unit,
     onDragging: () -> Unit,
     onScrub: (Long?) -> Unit = {},
 ) {
+    val durationMs = vm.durationMs
+    val chapters = vm.chapters
+    val segments = vm.segments
     var drag by remember { mutableStateOf<Float?>(null) }
+    var precise by remember { mutableStateOf(false) }
     LaunchedEffect(drag, durationMs) { onScrub(drag?.let { (it * durationMs).toLong() }) }
-    val frac = drag ?: if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
-    val bufFrac = if (durationMs > 0) (bufferedMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
-    val thumb by animateDpAsState(if (drag != null) 9.dp else 6.dp, label = "thumb")
-    val track by animateDpAsState(if (drag != null) 6.dp else 4.dp, label = "track")
-    val primary = MaterialTheme.colorScheme.primary
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val dragChapter = drag?.let { f -> chapters.lastOrNull { it.startMs <= f * durationMs } }
+    LaunchedEffect(dragChapter) {
+        if (drag != null && dragChapter != null) haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.SegmentTick)
+    }
+    val plugins = io.github.shoalapps.common.plugins.LocalPlugins.current
+    val style = if (io.github.shoalapps.swordfish.ui.theme.officialLook && plugins.seekBar == io.github.shoalapps.common.plugins.SeekBarStyle.WAVY)
+        io.github.shoalapps.common.plugins.SeekBarStyle.CLASSIC else plugins.seekBar
 
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-    // The chapter you'd land on, above your finger, like the official player.
-    val dragFrac = drag
-    val dragChapter = dragFrac?.let { f -> chapters.lastOrNull { it.startMs <= f * durationMs } }
-    if (dragFrac != null && dragChapter != null && dragChapter.title.isNotBlank()) {
-        val bubbleWidth = 240.dp
-        val x = (maxWidth * dragFrac - bubbleWidth / 2).coerceIn(0.dp, (maxWidth - bubbleWidth).coerceAtLeast(0.dp))
-        Text(
-            dragChapter.title,
-            color = Color.White,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            modifier = Modifier
-                .offset(x = x, y = (-30).dp)
-                .width(bubbleWidth)
-                .background(Color.Black.copy(alpha = 0.75f), RoundedCornerShape(8.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-        )
-    }
-    Canvas(
-        Modifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .pointerInput(durationMs) {
-                detectHorizontalDragGestures(
-                    onDragStart = { drag = (it.x / size.width).coerceIn(0f, 1f); onDragging() },
-                    onDragEnd = { drag?.let { onSeek((it * durationMs).toLong()) }; drag = null },
-                    onDragCancel = { drag = null },
-                ) { change, _ ->
-                    drag = (change.position.x / size.width).coerceIn(0f, 1f)
-                    onDragging()
+        val dragFrac = drag
+        if (dragFrac != null && durationMs > 0) {
+            val ms = (dragFrac * durationMs).toLong()
+            val frame = remember(ms / 500) { vm.previewAt(ms) }
+            val bubbleWidth = 168.dp
+            val x = (maxWidth * dragFrac - bubbleWidth / 2).coerceIn(0.dp, (maxWidth - bubbleWidth).coerceAtLeast(0.dp))
+            Column(
+                Modifier
+                    .offset(x = x)
+                    .width(bubbleWidth)
+                    // Takes no room: it floats just above the bar, so the bar stays put while you drag.
+                    .layout { m, c ->
+                        val p = m.measure(c.copy(minHeight = 0, maxHeight = androidx.compose.ui.unit.Constraints.Infinity))
+                        layout(p.width, 0) { p.place(0, -p.height - 4.dp.roundToPx()) }
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (frame != null) StoryboardFrame(frame, Modifier.width(bubbleWidth).aspectRatio(16f / 9f))
+                Text(
+                    listOfNotNull(dragChapter?.title?.takeIf { it.isNotBlank() }, formatDuration(ms / 1000)).joinToString("\n"),
+                    localise = false,
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp).background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp)).padding(horizontal = 8.dp, vertical = 2.dp),
+                )
+                Text(
+                    if (precise) "Precise seeking" else "Slide up for precise seeking",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                )
+            }
+        }
+        val frac = drag ?: if (durationMs > 0) (vm.positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .semantics {
+                    contentDescription = "Seek bar"
+                    progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(frac, 0f..1f)
+                }
+                .pointerInput(durationMs) {
+                    // Tap or drag; slide up while dragging and the bar moves five times slower.
+                    awaitEachGesture {
+                        val down = awaitFirstDown()
+                        down.consume()
+                        var f = (down.position.x / size.width).coerceIn(0f, 1f)
+                        var lastX = down.position.x
+                        drag = f
+                        onDragging()
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            if (!change.pressed) break
+                            val dx = change.position.x - lastX
+                            lastX = change.position.x
+                            precise = down.position.y - change.position.y > 48.dp.toPx()
+                            f = (f + dx / size.width * (if (precise) 0.2f else 1f)).coerceIn(0f, 1f)
+                            drag = f
+                            onDragging()
+                            change.consume()
+                        }
+                        onSeek((f * durationMs).toLong())
+                        drag = null
+                        precise = false
+                    }
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            io.github.shoalapps.common.expressive.SeekTrack(
+                progress = { frac },
+                buffered = { if (durationMs > 0) (vm.bufferedMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f },
+                playing = vm.isPlaying,
+                thick = drag != null,
+                colors = io.github.shoalapps.common.expressive.SeekTrackDefaults.overVideo(playedColor, accent = if (playedColor == Color.White) Color(0xFFFFD54F) else playedColor),
+                style = style,
+                modifier = Modifier.fillMaxSize(),
+            )
+            Canvas(Modifier.fillMaxSize()) {
+                if (durationMs <= 0) return@Canvas
+                val h = 4.dp.toPx()
+                val y = size.height / 2f - h / 2f
+                val durSec = durationMs / 1000f
+                segments.forEach { s ->
+                    val color = SbCategories.of(s.category)?.color ?: Color.Green
+                    val x0 = (s.startSec.toFloat() / durSec).coerceIn(0f, 1f) * size.width
+                    val x1 = (s.endSec.toFloat() / durSec).coerceIn(0f, 1f) * size.width
+                    drawRect(color.copy(alpha = 0.85f), Offset(x0, y), Size((x1 - x0).coerceAtLeast(2f), h))
+                }
+                // Little gaps where chapters start, like the official seek bar.
+                chapters.drop(1).forEach { c ->
+                    val x = c.startMs.toFloat() / durationMs * size.width
+                    drawRect(Color.Black.copy(alpha = 0.6f), Offset(x - 1.5f, y), Size(3f, h))
                 }
             }
-            .pointerInput(durationMs) {
-                detectTapGestures { onSeek(((it.x / size.width).coerceIn(0f, 1f) * durationMs).toLong()) }
-            },
-    ) {
-        val h = track.toPx()
-        val y = size.height / 2f - h / 2f
-        val r = CornerRadius(h / 2f)
-        drawRoundRect(Color.White.copy(alpha = 0.25f), Offset(0f, y), Size(size.width, h), r)
-        drawRoundRect(Color.White.copy(alpha = 0.45f), Offset(0f, y), Size(size.width * bufFrac, h), r)
-        if (durationMs > 0) {
-            val durSec = durationMs / 1000f
-            segments.forEach { s ->
-                val color = SbCategories.of(s.category)?.color ?: Color.Green
-                val x0 = (s.startSec.toFloat() / durSec).coerceIn(0f, 1f) * size.width
-                val x1 = (s.endSec.toFloat() / durSec).coerceIn(0f, 1f) * size.width
-                drawRect(color, Offset(x0, y), Size((x1 - x0).coerceAtLeast(2f), h))
-            }
         }
-        drawRoundRect(primary, Offset(0f, y), Size(size.width * frac, h), r)
-        // Little gaps where chapters start, like the official seek bar.
-        if (durationMs > 0) {
-            chapters.drop(1).forEach { c ->
-                val x = c.startMs.toFloat() / durationMs * size.width
-                drawRect(Color.Black.copy(alpha = 0.6f), Offset(x - 1.5f, y), Size(3f, h))
-            }
-        }
-        drawCircle(primary, thumb.toPx(), Offset(size.width * frac, size.height / 2f))
     }
+}
+
+/** One storyboard frame, cut out of its sheet, with a thin white border. */
+@Composable
+private fun StoryboardFrame(frame: PlayerViewModel.PreviewFrame, modifier: Modifier) {
+    BoxWithConstraints(modifier.clip(RoundedCornerShape(8.dp)).background(Color.Black).border(1.5.dp, Color.White, RoundedCornerShape(8.dp))) {
+        val k = maxWidth / frame.width.toFloat()
+        AsyncImage(
+            model = frame.url,
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .wrapContentSize(Alignment.TopStart, unbounded = true)
+                .requiredSize(k * frame.sheetWidth.toFloat(), k * frame.sheetHeight.toFloat())
+                .offset(x = -k * frame.left.toFloat(), y = -k * frame.top.toFloat()),
+        )
     }
 }
 
@@ -1257,7 +1544,7 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
                         .padding(horizontal = 12.dp, vertical = 12.dp),
                 ) {
                     Text(
-                        branding?.title ?: item.title,
+                        io.github.shoalapps.swordfish.ui.components.rememberTitle(item, branding),
                         style = MaterialTheme.typography.titleLargeEmphasized.copy(fontSize = 18.sp, lineHeight = 24.sp),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
@@ -1312,28 +1599,25 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
                 }
             }
             item(key = "actions") {
-              CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    item { LikePill(vm) }
-                    item { io.github.shoalapps.swordfish.ui.components.DownloadButton(item) }
-                    item { ActionChip(Icons.Rounded.Share, "Share") { shareVideo(context, io.github.shoalapps.swordfish.data.FeedFilter.shareUrl(item.id, item.url)) } }
-                    if (AppGraph.store.signedIn) {
-                        item {
-                            ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Save") {
-                                AppGraph.saveToWatchLater(context, item.id)
-                            }
-                        }
-                    }
-                    item { io.github.shoalapps.swordfish.ui.components.SaveAudioButton(item) }
-                    item { ActionChip(Icons.Rounded.PlayArrow, "Play next") { AppGraph.store.playNext(item); toast(context, "This video is already playing") } }
-                    item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Add to queue") { AppGraph.store.addToQueue(item); toast(context, "This video is already playing") } }
-                    item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Queue") { showQueue = true } }
-                    item { ActionChip(Icons.AutoMirrored.Rounded.PlaylistAdd, "Add to playlist") { showPlaylist = true } }
-                }
+              val queue by AppGraph.store.queue.collectAsState()
+              val upNext = queue.count { it.id != item.id }
+              // Six even columns, icon over a short label: everything fits, nothing scrolls sideways.
+              Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+                  val likes = vm.info?.likeCount?.takeIf { it >= 0 } ?: vm.votes?.likes
+                  val dislikes = vm.votes?.dislikes
+                  val tile = Modifier.weight(1f)
+                  ActionTile(
+                      if (vm.rating == Rating.LIKE) Icons.Rounded.ThumbUp else Icons.Outlined.ThumbUp,
+                      likes?.let(::formatCount) ?: "Like", tile, description = "Like", checked = vm.rating == Rating.LIKE, puffer = true,
+                  ) { if (!vm.rate(Rating.LIKE)) toast(context, "Sign in to save likes to YouTube") }
+                  ActionTile(
+                      if (vm.rating == Rating.DISLIKE) Icons.Rounded.ThumbDown else Icons.Outlined.ThumbDown,
+                      dislikes?.let(::formatCount) ?: "Dislike", tile, description = "Dislike", checked = vm.rating == Rating.DISLIKE,
+                  ) { if (!vm.rate(Rating.DISLIKE)) toast(context, "Sign in to save dislikes to YouTube") }
+                  ActionTile(Icons.Rounded.Share, "Share", tile) { shareVideo(context, io.github.shoalapps.swordfish.data.FeedFilter.shareUrl(item.id, item.url)) }
+                  if (!item.isLive) DownloadTile(item, tile)
+                  ActionTile(Icons.Rounded.BookmarkBorder, "Save", tile) { showPlaylist = true }
+                  MoreActions(item, upNext, tile, onQueue = { showQueue = true })
               }
             }
             if (!settings.hideComments) item(key = "comments") {
@@ -1345,7 +1629,7 @@ private fun WatchDetails(vm: PlayerViewModel, onChannel: (String) -> Unit, modif
             vm.error != null -> Unit
             vm.loading -> item(key = "load") {
                 Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    LoadingIndicator(Modifier.size(56.dp))
+                    io.github.shoalapps.common.expressive.ShoalLoadingIndicator(Modifier.size(56.dp))
                 }
             }
         }
@@ -1377,7 +1661,7 @@ private fun QueuePanel(vm: PlayerViewModel, modifier: Modifier, onDismiss: () ->
             itemsIndexed(queue, key = { _, video -> video.id }) { index, video ->
                 Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Column(Modifier.fillMaxWidth().clickable { vm.jumpToQueue(video) }.padding(vertical = 8.dp)) {
-                        Text(video.title.ifBlank { video.id }, localise = false, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(io.github.shoalapps.swordfish.ui.components.rememberTitle(video, null).ifBlank { video.id }, localise = false, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Text(video.channelName, localise = false, style = MaterialTheme.typography.bodySmall)
                     }
                     Row {
@@ -1395,38 +1679,63 @@ private fun QueuePanel(vm: PlayerViewModel, modifier: Modifier, onDismiss: () ->
     }
 }
 
-/** Like and dislike as a Material 3 Expressive connected toggle-button group. */
+/** Download, showing how it's going: queued, a percentage, done, or failed. */
 @Composable
-private fun LikePill(vm: PlayerViewModel) {
-    val context = LocalContext.current
-    val likes = vm.info?.likeCount?.takeIf { it >= 0 } ?: vm.votes?.likes
-    val dislikes = vm.votes?.dislikes
-    Row(horizontalArrangement = Arrangement.spacedBy(androidx.compose.material3.ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        RateToggle(
-            checked = vm.rating == Rating.LIKE,
-            icon = if (vm.rating == Rating.LIKE) Icons.Rounded.ThumbUp else Icons.Outlined.ThumbUp,
-            label = likes?.let(::formatCount).orEmpty(),
-            description = "Like",
-            shapes = androidx.compose.material3.ButtonGroupDefaults.connectedLeadingButtonShapes(),
-        ) { if (!vm.rate(Rating.LIKE)) toast(context, "Sign in to save likes to YouTube") }
-        RateToggle(
-            checked = vm.rating == Rating.DISLIKE,
-            icon = if (vm.rating == Rating.DISLIKE) Icons.Rounded.ThumbDown else Icons.Outlined.ThumbDown,
-            label = dislikes?.let(::formatCount).orEmpty(),
-            description = "Dislike",
-            shapes = androidx.compose.material3.ButtonGroupDefaults.connectedTrailingButtonShapes(),
-        ) { if (!vm.rate(Rating.DISLIKE)) toast(context, "Sign in to save dislikes to YouTube") }
+private fun DownloadTile(video: io.github.shoalapps.swordfish.data.VideoItem, modifier: Modifier) {
+    val downloads by AppGraph.offline.videos.collectAsState()
+    val progress by AppGraph.offline.progress.collectAsState()
+    val entry = downloads.firstOrNull { it.video.id == video.id }
+    val done = entry?.kept == true && entry.complete && !entry.audioOnly
+    val label = when {
+        done -> "Saved"
+        entry?.error != null -> "Retry"
+        entry?.kept == true && !entry.audioOnly -> progress[video.id]?.let { "$it%" } ?: "Queued"
+        else -> "Download"
+    }
+    ActionTile(if (done) Icons.Rounded.DownloadDone else Icons.Rounded.Download, label, modifier, description = "Download", checked = done) {
+        if (!done) AppGraph.offline.keep(video)
     }
 }
 
-/** One half of the like/dislike group: the thumb pops when you tap it. */
+/** The things you reach for less: audio only, Watch later, the queue (its count shows as a badge). */
 @Composable
-private fun RateToggle(
-    checked: Boolean,
+private fun MoreActions(video: io.github.shoalapps.swordfish.data.VideoItem, upNext: Int, modifier: Modifier, onQueue: () -> Unit) {
+    val context = LocalContext.current
+    var open by remember { mutableStateOf(false) }
+    val downloads by AppGraph.offline.videos.collectAsState()
+    val entry = downloads.firstOrNull { it.video.id == video.id }
+    Box(modifier) {
+        ActionTile(Icons.Rounded.MoreHoriz, "More", Modifier.fillMaxWidth(), badge = upNext.takeIf { it > 0 }?.toString()) { open = true }
+        androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            if (!video.isLive && entry?.kept != true && entry?.audioOnly != true) androidx.compose.material3.DropdownMenuItem(
+                text = { Text("Save audio only") },
+                leadingIcon = { Icon(Icons.Rounded.Headphones, null) },
+                onClick = { open = false; AppGraph.offline.keep(video, audioOnly = true) },
+            )
+            if (AppGraph.store.signedIn) androidx.compose.material3.DropdownMenuItem(
+                text = { Text("Save to Watch later") },
+                leadingIcon = { Icon(Icons.Rounded.WatchLater, null) },
+                onClick = { open = false; AppGraph.saveToWatchLater(context, video.id) },
+            )
+            androidx.compose.material3.DropdownMenuItem(
+                text = { Text(if (upNext > 0) "Queue ($upNext up next)" else "Queue") },
+                leadingIcon = { Icon(Icons.AutoMirrored.Rounded.QueueMusic, null) },
+                onClick = { open = false; onQueue() },
+            )
+        }
+    }
+}
+
+/** One column of the action row: an icon over a short label. [checked] tints it and pops the icon. */
+@Composable
+private fun ActionTile(
     icon: ImageVector,
     label: String,
-    description: String,
-    shapes: androidx.compose.material3.ToggleButtonShapes,
+    modifier: Modifier,
+    description: String = label,
+    checked: Boolean = false,
+    puffer: Boolean = false,
+    badge: String? = null,
     onClick: () -> Unit,
 ) {
     val pop = remember { Animatable(1f) }
@@ -1436,42 +1745,32 @@ private fun RateToggle(
             pop.animateTo(1f, spring(dampingRatio = 0.35f, stiffness = 500f))
         }
     }
-    androidx.compose.material3.ToggleButton(
-        checked = checked,
-        onCheckedChange = { onClick() },
-        shapes = shapes,
-        colors = androidx.compose.material3.ToggleButtonDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-        contentPadding = PaddingValues(horizontal = 14.dp),
-        modifier = Modifier.height(36.dp),
-    ) {
-        Icon(icon, description, Modifier.size(20.dp).graphicsLayer { scaleX = pop.value; scaleY = pop.value })
-        AnimatedContent(label, label = "count") { text ->
-            if (text.isNotEmpty()) {
-                Text(text, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 6.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ActionChip(icon: ImageVector, label: String, onClick: () -> Unit) {
     val source = remember { MutableInteractionSource() }
-    val pressed by source.collectIsPressedAsState()
-    val corner by animateDpAsState(if (pressed) 10.dp else 20.dp, MaterialTheme.motionScheme.fastSpatialSpec(), label = "chip")
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(corner),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        interactionSource = source,
-        modifier = Modifier.height(36.dp).pressScale(source, 0.94f),
+    val tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+    Column(
+        modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(interactionSource = source, indication = androidx.compose.material3.ripple(), onClickLabel = description, onClick = onClick)
+            .pressScale(source, 0.92f)
+            .padding(vertical = 8.dp)
+            .semantics(mergeDescendants = true) { contentDescription = description },
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(Modifier.fillMaxHeight().padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, null, Modifier.size(20.dp))
-            Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 6.dp))
+        androidx.compose.material3.BadgedBox(badge = { if (badge != null) androidx.compose.material3.Badge { Text(badge) } }) {
+            Icon(
+                icon, null,
+                Modifier.size(22.dp)
+                    .then(if (puffer) Modifier.pufferPop(checked) else Modifier)
+                    .graphicsLayer { scaleX = pop.value; scaleY = pop.value },
+                tint = tint,
+            )
         }
+        Text(
+            label, localise = false,
+            style = MaterialTheme.typography.labelMedium, color = tint,
+            maxLines = 1, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 
@@ -1533,7 +1832,7 @@ private fun DescriptionPanel(vm: PlayerViewModel, onLink: (String) -> Unit, modi
         LazyColumn(contentPadding = PaddingValues(bottom = 32.dp)) {
             item {
                 Text(
-                    rememberBranding(item)?.title ?: item.title,
+                    io.github.shoalapps.swordfish.ui.components.rememberTitle(item, rememberBranding(item)),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -1637,7 +1936,7 @@ private fun CommentsPanel(vm: PlayerViewModel, onLink: (String) -> Unit, modifie
                             )
                         }
                         if (vm.repliesLoading[c.id] == true) {
-                            LoadingIndicator(Modifier.padding(start = 60.dp).size(28.dp))
+                            io.github.shoalapps.common.expressive.ShoalLoadingIndicator(Modifier.padding(start = 60.dp).size(28.dp))
                         }
                         androidx.compose.animation.AnimatedVisibility(open) {
                             Column(Modifier.padding(start = 40.dp)) {
@@ -1703,7 +2002,7 @@ private fun CommentsPanel(vm: PlayerViewModel, onLink: (String) -> Unit, modifie
                                 }
                             },
                         ) {
-                            if (sending) LoadingIndicator(Modifier.size(24.dp)) else Icon(Icons.AutoMirrored.Rounded.Send, "Post")
+                            if (sending) io.github.shoalapps.common.expressive.ShoalLoadingIndicator(Modifier.size(24.dp)) else Icon(Icons.AutoMirrored.Rounded.Send, "Post")
                         }
                     }
                 }

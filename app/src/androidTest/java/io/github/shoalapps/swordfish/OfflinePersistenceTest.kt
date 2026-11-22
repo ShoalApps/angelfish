@@ -16,7 +16,9 @@ class OfflinePersistenceTest {
     @Test fun offlineActionsSurviveReopeningAndStayWithTheirChannel() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val folder = File(context.cacheDir, "outbox-test-" + System.nanoTime()).apply { mkdirs() }
-        val isolated = object : ContextWrapper(context) { override fun getFilesDir() = folder }
+        val isolated = object : ContextWrapper(context) {
+            override fun getFilesDir() = folder
+        }
         val settings = AppGraph.store.settings.value
         val cookie = AppGraph.store.cookie.value
         val page = AppGraph.store.pageId.value

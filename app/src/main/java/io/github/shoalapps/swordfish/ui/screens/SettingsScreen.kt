@@ -2,6 +2,7 @@
 
 package io.github.shoalapps.swordfish.ui.screens
 
+import io.github.shoalapps.common.expressive.pluginSettings
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -112,6 +113,7 @@ fun SettingsScreen(
     onSwitchChannel: () -> Unit,
     onDeveloper: () -> Unit,
     onAbout: () -> Unit,
+    onPlugins: () -> Unit = {},
 ) {
     val store = AppGraph.store
     val s by store.settings.collectAsState()
@@ -120,6 +122,11 @@ fun SettingsScreen(
     val signedIn = cookie?.contains("SAPISID") == true
     var choice by remember { mutableStateOf<Choice?>(null) }
     var clearPositions by remember { mutableStateOf(false) }
+    var pickVideoLanguage by remember { mutableStateOf(false) }
+    if (pickVideoLanguage) VideoLanguageDialog(s.videoLanguage, onDismiss = { pickVideoLanguage = false }) { tag ->
+        pickVideoLanguage = false
+        store.updateSettings { it.copy(videoLanguage = tag) }
+    }
     val update: ((Settings) -> Settings) -> Unit = { store.updateSettings(it) }
 
     SettingsScaffold("Settings", onBack) {
@@ -147,11 +154,23 @@ fun SettingsScreen(
 
         item(key = "app-language") { io.github.shoalapps.swordfish.AppLanguage.SettingsRow() }
 
+        group("Videos in your language") {
+            val mine = io.github.shoalapps.swordfish.data.Languages.name(io.github.shoalapps.swordfish.data.Languages.mine())
+            row { sh ->
+                Link("Video language", if (s.videoLanguage.isBlank()) "$mine (same as the app)" else mine, sh) { pickVideoLanguage = true }
+            }
+            row { sh -> Toggle("Translate titles", "Shows video titles in $mine. Titles are sent to Google Translate", s.translateTitles, sh) { v -> update { it.copy(translateTitles = v) } } }
+            row { sh -> Toggle("Play dubs", "Uses a dubbed audio track in $mine when the video has one", s.preferDubs, sh) { v -> update { it.copy(preferDubs = v) } } }
+            if (s.preferDubs) row { sh -> Toggle("Include automatic dubs", "YouTube's AI dubs, when no person has dubbed it", s.allowAutoDubs, sh) { v -> update { it.copy(allowAutoDubs = v) } } }
+            row { sh -> Toggle("Captions when there's no dub", "Turns on captions in $mine, translated if needed, for videos in other languages", s.captionsWhenNoDub, sh) { v -> update { it.copy(captionsWhenNoDub = v) } } }
+        }
+
         group("Appearance") {
             row { sh -> Segmented("Theme", listOf("Auto", "Light", "Dark"), s.theme, sh) { i -> update { it.copy(theme = i) } } }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 row { sh -> Toggle("Dynamic colour", "Match colours to your wallpaper", s.dynamicColor, sh) { v -> update { it.copy(dynamicColor = v) } } }
             }
+            row { sh -> Link("Plugins", "Fish seek bars, colour themes, YouTube's own look and silly extras", sh, onClick = onPlugins) }
         }
 
         group("Feed") {
@@ -614,6 +633,25 @@ fun MorphingAvatar(url: String, size: Dp) {
     }
 }
 
+// ---------------- Plugins ----------------
+
+/** Shoal's plugins page: shared with every Shoal app when Shoal is installed. */
+@Composable
+fun PluginsScreen(onBack: () -> Unit) {
+    val plugins by io.github.shoalapps.common.plugins.ShoalPlugins.state.collectAsState()
+    val fromShoal by io.github.shoalapps.common.plugins.ShoalPlugins.fromShoal.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    SettingsScaffold("Plugins", onBack) {
+        pluginSettings(
+            plugins = plugins,
+            fromShoal = fromShoal,
+            onChange = { io.github.shoalapps.common.plugins.ShoalPlugins.update(it) },
+            official = "Like YouTube's own app: its colours, red seek bar and flat controls",
+            onOpenShoal = { io.github.shoalapps.common.plugins.ShoalPlugins.openInShoal(context) },
+        )
+    }
+}
+
 // ---------------- Shared pieces ----------------
 
 @Composable
@@ -708,6 +746,36 @@ private fun ChoiceDialog(c: Choice, onDismiss: () -> Unit) {
                             c.onPick(value)
                             onDismiss()
                         },
+                    )
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } },
+    )
+}
+
+/** Picks the language videos should reach you in; the first choice follows the app. */
+@Composable
+private fun VideoLanguageDialog(current: String, onDismiss: () -> Unit, onPick: (String) -> Unit) {
+    val L = io.github.shoalapps.swordfish.data.Languages
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Video language") },
+        text = {
+            androidx.compose.foundation.lazy.LazyColumn(Modifier.heightIn(max = 420.dp)) {
+                item {
+                    androidx.compose.material3.ListItem(
+                        headlineContent = { Text("Same as the app") },
+                        leadingContent = { androidx.compose.material3.RadioButton(current.isBlank(), null) },
+                        modifier = Modifier.clickable { onPick("") },
+                    )
+                }
+                items(L.choices.size) { i ->
+                    val tag = L.choices[i]
+                    androidx.compose.material3.ListItem(
+                        headlineContent = { Text(L.name(tag), localise = false) },
+                        leadingContent = { androidx.compose.material3.RadioButton(current == tag, null) },
+                        modifier = Modifier.clickable { onPick(tag) },
                     )
                 }
             }

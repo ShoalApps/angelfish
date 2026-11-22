@@ -128,7 +128,7 @@ private fun UpdatePrompt(modifier: Modifier) {
             ) {
                 androidx.compose.foundation.layout.Column(Modifier.padding(16.dp).widthIn(max = 480.dp)) {
                     Text("Downloading update… ${(p * 100).toInt()}%", style = MaterialTheme.typography.bodyMedium)
-                    androidx.compose.material3.LinearWavyProgressIndicator(
+                    io.github.shoalapps.common.expressive.ShoalLinearProgress(
                         progress = { p },
                         modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                         color = MaterialTheme.colorScheme.inversePrimary,
@@ -343,8 +343,10 @@ fun AppRoot(vm: PlayerViewModel, inPip: Boolean, pendingRoute: String? = null, o
                             onSwitchChannel = { nav.navigate("channels") },
                             onDeveloper = { nav.navigate("developer") },
                             onAbout = { nav.navigate("about") },
+                            onPlugins = { nav.navigate("plugins") },
                         )
                     }
+                    composable("plugins") { io.github.shoalapps.swordfish.ui.screens.PluginsScreen(onBack = { nav.popBackStack() }) }
                     composable("developer") { DeveloperSettingsScreen(onBack = { nav.popBackStack() }) }
                     composable("about") { AboutScreen(onBack = { nav.popBackStack() }) }
                     composable("login") {

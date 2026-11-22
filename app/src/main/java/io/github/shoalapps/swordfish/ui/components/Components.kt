@@ -203,6 +203,22 @@ fun Modifier.staggeredReveal(index: Int): Modifier {
 }
 
 /** DeArrow title + thumbnail for a video, if enabled. */
+/**
+ * The title to show: DeArrow's if it has one, in your language when "Translate titles" is on.
+ * Shows the original straight away and swaps in the translation when it arrives.
+ */
+@Composable
+fun rememberTitle(item: VideoItem, branding: Branding?): String {
+    val source = branding?.title ?: item.title
+    val on = AppGraph.store.settings.collectAsState().value.translateTitles
+    if (!on || source.isBlank()) return source
+    val to = remember { io.github.shoalapps.swordfish.data.Languages.mine() }
+    val t by produceState(io.github.shoalapps.swordfish.data.TitleTranslator.cached(source, to)?.text ?: source, source, to) {
+        io.github.shoalapps.swordfish.data.TitleTranslator.translate(source, to)?.let { value = it.text }
+    }
+    return t
+}
+
 @Composable
 fun rememberBranding(item: VideoItem): Branding? {
     val enabled = AppGraph.store.settings.collectAsState().value.deArrow
@@ -313,18 +329,18 @@ fun VideoMenu(item: VideoItem, onChannel: ((String) -> Unit)?) {
     var showPlaylist by remember { mutableStateOf(false) }
     if (showPlaylist) AddToPlaylistDialog(item) { showPlaylist = false }
     val context = LocalContext.current
-    var open by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { open = true }, modifier = Modifier.size(36.dp)) {
+        IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(36.dp)) {
             Icon(Icons.Rounded.MoreVert, "More", Modifier.size(20.dp))
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }, shape = RoundedCornerShape(16.dp)) {
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }, shape = RoundedCornerShape(16.dp)) {
             if (AppGraph.store.signedIn) {
                 DropdownMenuItem(
                     text = { Text("Save to Watch later") },
                     leadingIcon = { Icon(Icons.AutoMirrored.Rounded.PlaylistAdd, null) },
                     onClick = {
-                        open = false
+                        menuOpen = false
                         AppGraph.saveToWatchLater(context, item.id)
                     },
                 )
@@ -332,25 +348,25 @@ fun VideoMenu(item: VideoItem, onChannel: ((String) -> Unit)?) {
             DropdownMenuItem(
                 text = { Text("Share") },
                 leadingIcon = { Icon(Icons.Rounded.Share, null) },
-                onClick = { open = false; shareVideo(context, io.github.shoalapps.swordfish.data.FeedFilter.shareUrl(item.id, item.url)) },
+                onClick = { menuOpen = false; shareVideo(context, io.github.shoalapps.swordfish.data.FeedFilter.shareUrl(item.id, item.url)) },
             )
             DropdownMenuItem(
                 text = { Text("Play next") },
-                onClick = { open = false; toast(context, if (AppGraph.store.playNext(item)) "Playing next" else "Already playing or next") },
+                onClick = { menuOpen = false; toast(context, if (AppGraph.store.playNext(item)) "Playing next" else "Already playing or next") },
             )
             DropdownMenuItem(
                 text = { Text("Add to queue") },
-                onClick = { open = false; toast(context, if (AppGraph.store.addToQueue(item)) "Added to queue" else "Already playing or queued") },
+                onClick = { menuOpen = false; toast(context, if (AppGraph.store.addToQueue(item)) "Added to queue" else "Already playing or queued") },
             )
             DropdownMenuItem(
                 text = { Text("Add to playlist") },
-                onClick = { open = false; showPlaylist = true },
+                onClick = { menuOpen = false; showPlaylist = true },
             )
             if (onChannel != null && item.channelUrl != null) {
                 DropdownMenuItem(
                     text = { Text("Go to channel") },
                     leadingIcon = { Icon(Icons.Rounded.AccountCircle, null) },
-                    onClick = { open = false; onChannel(item.channelUrl) },
+                    onClick = { menuOpen = false; onChannel(item.channelUrl) },
                 )
             }
         }
@@ -395,7 +411,7 @@ fun VideoCard(
             )
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
                 AnimatedContent(
-                    targetState = branding?.title ?: item.title,
+                    targetState = rememberTitle(item, branding),
                     transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(120)) },
                     label = "title",
                 ) { title ->
@@ -445,7 +461,7 @@ fun VideoRow(item: VideoItem, onClick: () -> Unit, modifier: Modifier = Modifier
         )
         Column(Modifier.padding(start = 12.dp).weight(1f)) {
             Text(
-                text = branding?.title ?: item.title,
+                text = rememberTitle(item, branding),
                 style = if (large) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
@@ -481,7 +497,7 @@ fun ShelfCard(item: VideoItem, onClick: () -> Unit) {
     ) {
         Thumbnail(item, branding, Modifier.fillMaxWidth().onGloballyPositioned { bounds = it.boundsInRoot() }, corner = 10.dp)
         Text(
-            branding?.title ?: item.title,
+            rememberTitle(item, branding),
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
@@ -599,7 +615,7 @@ fun SubscribeButton(subscribed: Boolean, onClick: () -> Unit) {
 @Composable
 fun CenterLoading(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
-        LoadingIndicator(Modifier.size(56.dp))
+        io.github.shoalapps.common.expressive.ShoalLoadingIndicator(Modifier.size(56.dp))
     }
 }
 
@@ -627,17 +643,21 @@ fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifi
 
 @Composable
 fun EmptyState(icon: ImageVector, title: String, body: String, action: (@Composable () -> Unit)? = null) {
-    Column(
-        Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 64.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        ShapeIcon(icon, 96.dp)
-        Text(title, style = MaterialTheme.typography.titleLarge)
-        Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (action != null) {
-            Spacer(Modifier.height(8.dp))
-            action()
+    Box(Modifier.fillMaxWidth()) {
+        // With the Aquarium plugin, fish swim behind it.
+        io.github.shoalapps.common.expressive.Aquarium(Modifier.matchParentSize())
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 64.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ShapeIcon(icon, 96.dp)
+            Text(title, style = MaterialTheme.typography.titleLarge, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            if (action != null) {
+                Spacer(Modifier.height(8.dp))
+                action()
+            }
         }
     }
 }

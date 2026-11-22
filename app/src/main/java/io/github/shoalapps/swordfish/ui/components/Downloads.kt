@@ -61,7 +61,7 @@ fun Downloads(onVideo: (VideoItem) -> Unit) {
                         modifier = Modifier.width(120.dp).aspectRatio(16f / 9).clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh).clickable(enabled = entry.complete) { onVideo(entry.video) },
                     )
-                    Text(entry.video.title.ifBlank { entry.video.id }, localise = false, style = MaterialTheme.typography.titleSmall, maxLines = 3, modifier = Modifier.weight(1f))
+                    Text(rememberTitle(entry.video, null).ifBlank { entry.video.id }, localise = false, style = MaterialTheme.typography.titleSmall, maxLines = 3, modifier = Modifier.weight(1f))
                 }
                 Text(when {
                     entry.error != null -> DownloadErrors.message(entry.error)
@@ -69,7 +69,7 @@ fun Downloads(onVideo: (VideoItem) -> Unit) {
                     progress.containsKey(entry.video.id) -> "Downloading ${progress[entry.video.id]}%"
                     else -> "Queued - waiting for an allowed connection"
                 }, style = MaterialTheme.typography.bodySmall)
-                progress[entry.video.id]?.let { percent -> androidx.compose.material3.LinearWavyProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth()) }
+                progress[entry.video.id]?.let { percent -> io.github.shoalapps.common.expressive.ShoalLinearProgress(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth()) }
                 Row {
                     if (entry.complete) TextButton(onClick = { onVideo(entry.video) }) { Text("Play") }
                     if (!entry.kept || entry.error != null) TextButton(onClick = { AppGraph.offline.keep(entry.video) }) { Text(if (entry.error != null) "Retry" else "Keep") }

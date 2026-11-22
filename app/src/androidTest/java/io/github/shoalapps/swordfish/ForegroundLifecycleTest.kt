@@ -47,5 +47,7 @@ class ForegroundLifecycleTest {
             }
         }
     }
-    companion object { private const val TAG = "foreground-lifecycle-regression" }
+    companion object {
+        private const val TAG = "foreground-lifecycle-regression"
+    }
 }

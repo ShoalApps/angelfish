@@ -97,6 +97,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         AppGraph.pullManagerAccounts()
+        io.github.shoalapps.common.plugins.ShoalPlugins.refresh()
         io.github.shoalapps.swordfish.data.NetworkPolicy.changed()
         AppGraph.scope.launch { AppGraph.offline.reconcile() }
     }

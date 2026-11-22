@@ -291,7 +291,7 @@ fun HomeScreen(
             onRefresh = vm::refresh,
             state = ptr,
             indicator = {
-                PullToRefreshDefaults.LoadingIndicator(state = ptr, isRefreshing = vm.refreshing, modifier = Modifier.align(Alignment.TopCenter))
+                io.github.shoalapps.common.expressive.ShoalPullToRefreshIndicator(state = ptr, isRefreshing = vm.refreshing, modifier = Modifier.align(Alignment.TopCenter))
             },
             modifier = Modifier.fillMaxSize().padding(top = pad.calculateTopPadding()),
         ) {
@@ -555,7 +555,7 @@ fun SubscriptionsScreen(
             onRefresh = { vm.load(true) },
             state = ptr,
             indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
+                io.github.shoalapps.common.expressive.ShoalPullToRefreshIndicator(
                     state = ptr,
                     isRefreshing = vm.refreshing,
                     modifier = Modifier.align(Alignment.TopCenter),
@@ -913,7 +913,7 @@ internal fun ContinueWatchingRow(
                             progress = { (entry.positionMs.toFloat() / entry.durationMs).coerceIn(0f, 1f) },
                             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                         )
-                        Text(video.title, localise = false, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        Text(io.github.shoalapps.swordfish.ui.components.rememberTitle(video, null), localise = false, maxLines = 2, overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 6.dp))
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {

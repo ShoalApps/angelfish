@@ -70,6 +70,15 @@ data class Settings(
     val doubleTapSeconds: Int = 10,
     val swipeGestures: Boolean = true,
     val loopVideo: Boolean = false,
+    // Captions stay on from one video to the next, in the language you last picked.
+    val captionsOn: Boolean = false,
+    val captionLanguage: String? = null,
+    // Language: "" follows the app language, which follows the system unless you pick one.
+    val videoLanguage: String = "",
+    val translateTitles: Boolean = true,
+    val preferDubs: Boolean = true,
+    val allowAutoDubs: Boolean = true,
+    val captionsWhenNoDub: Boolean = true,
     // Layout
     val compactFeed: Boolean = false,
     val hideRelated: Boolean = false,

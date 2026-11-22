@@ -142,7 +142,15 @@ data class Playable(
     val qualities: List<Int>,
 )
 
-data class AudioChoice(val id: String, val label: String, val language: String?, val original: Boolean = false)
+/** [auto]: YouTube's machine dub. NewPipe calls both kinds DUBBED, so it's read from the name or id. */
+data class AudioChoice(
+    val id: String,
+    val label: String,
+    val language: String?,
+    val original: Boolean = false,
+    val dubbed: Boolean = false,
+    val auto: Boolean = false,
+)
 
 object StreamPicker {
     private val resolutionHeight = Regex("""^(\d{3,4})p""")
@@ -169,12 +177,18 @@ object StreamPicker {
             val name = stream.audioTrackName?.takeIf { it.isNotBlank() }
                 ?: stream.audioLocale?.getDisplayName(java.util.Locale.getDefault())?.takeIf { it.isNotBlank() }
                 ?: if (original) "Original" else "Audio"
-            AudioChoice(audioId(stream), name + when (stream.audioTrackType) {
-                AudioTrackType.ORIGINAL -> " (original)"
-                AudioTrackType.DESCRIPTIVE -> " (audio description)"
-                else -> ""
-            }, stream.audioLocale?.toLanguageTag(), original)
+            // YouTube's own names often say it already: "English (US) original".
+            val note = when (stream.audioTrackType) {
+                AudioTrackType.ORIGINAL -> "original"
+                AudioTrackType.DUBBED -> "dubbed"
+                AudioTrackType.DESCRIPTIVE -> "audio description"
+                else -> null
+            }?.takeUnless { name.contains(it.substringBefore(' '), ignoreCase = true) }
+            val dubbed = stream.audioTrackType == AudioTrackType.DUBBED
+            val auto = dubbed && listOf(name, stream.audioTrackId.orEmpty()).any { it.contains("auto", ignoreCase = true) }
+            AudioChoice(audioId(stream), if (note != null) "$name ($note)" else name, stream.audioLocale?.toLanguageTag(), original, dubbed, auto)
         }
+        .sortedWith(compareByDescending<AudioChoice> { it.original }.thenBy { it.label })
 
     fun pick(info: StreamInfo, maxHeight: Int, audioTrackId: String? = null): Playable {
         val isLive = info.streamType == StreamType.LIVE_STREAM || info.streamType == StreamType.AUDIO_LIVE_STREAM

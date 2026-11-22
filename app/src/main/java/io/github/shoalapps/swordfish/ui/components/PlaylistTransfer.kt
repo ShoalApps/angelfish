@@ -83,10 +83,8 @@ fun rememberPlaylistTransfer(): PlaylistTransferActions {
     }
     return PlaylistTransferActions(busy, export = { ids ->
         exportIds = ArrayList(ids)
-        try { exportPicker.launch("angelfish-playlists.json") }
-        catch (_: Exception) { message = "Could not open the file picker. Please try again." }
+        try { exportPicker.launch("angelfish-playlists.json") } catch (_: Exception) { message = "Could not open the file picker. Please try again." }
     }, import = {
-        try { importPicker.launch(arrayOf("application/json", "text/*", "application/octet-stream")) }
-        catch (_: Exception) { message = "Could not open the file picker. Please try again." }
+        try { importPicker.launch(arrayOf("application/json", "text/*", "application/octet-stream")) } catch (_: Exception) { message = "Could not open the file picker. Please try again." }
     })
 }

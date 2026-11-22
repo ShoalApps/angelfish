@@ -84,7 +84,6 @@ class SubscriptionWorker(context: Context, params: WorkerParameters) : Coroutine
                     .putString("day", today).putInt("count", count).apply()
             }
             return Result.success()
-        } catch (e: CancellationException) { throw e }
-        catch (_: Exception) { return Result.retry() }
+        } catch (e: CancellationException) { throw e } catch (_: Exception) { return Result.retry() }
     }
 }

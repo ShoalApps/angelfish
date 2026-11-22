@@ -39,6 +39,7 @@ class TubeApp : Application(), SingletonImageLoader.Factory {
         DataMover.run(this)
         CrashReporter.install(this)
         AppGraph.init(this)
+        io.github.shoalapps.common.plugins.ShoalPlugins.init(this)
     }
 
     /** Big memory + disk caches so thumbnails never reload when you scroll back up. */
